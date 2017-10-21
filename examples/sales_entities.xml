@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<entities script="../src/cqrs_entities.gsl" package="com.apuex.sales" dbSchema="sales">
+  <entity name="product" aggregationRoot="true">
+    <field name="product_id" type="string" length="64" optional="false"/>
+    <field name="product_name" type="string" length="64" optional="true"/>
+    <field name="product_unit" type="string" length="64" optional="true"/>
+    <field name="unit_price" type="double" optional="true"/>
+    <primaryKey name="product_pk">
+      <field name="product_id"/>
+    </primaryKey>
+  </entity>
+  <entity name="order" aggregationRoot="true">
+    <field name="order_id" type="string" length="64" optional="false"/>
+    <field name="order_items" type="array" valueType="order_item"/>
+    <primaryKey name="order_pk">
+      <field name="order_id"/>
+    </primaryKey>
+  </entity>
+  <entity name="order_item" aggregationTo="order">
+    <field name="item_name" joinKeyName="order_product_fk" refFieldName="product_name"/>
+    <field name="unit_price" joinKeyName="order_product_fk" refFieldName="unit_price"/>
+    <field name="order_quantity" type="double" optional="false"/>
+    <foreignKey name="order_item_fk" refEntityName="order">
+      <field name="order_id" refFieldName="order_id"/>
+    </foreignKey>
+    <foreignKey name="order_product_fk" refEntityName="product">
+      <field name="product_id" refFieldName="product_id"/>
+    </foreignKey>
+    <primaryKey name="order_item_pk">
+      <field name="order_id"/>
+      <field name="product_id"/>
+    </primaryKey>
+  </entity>
+</entities>

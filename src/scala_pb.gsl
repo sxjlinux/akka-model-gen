@@ -1,0 +1,84 @@
+.template 1
+.pkgdir = string.replace(entities.package, ".|/")
+.directory.create(pkgdir)
+.output "$(pkgdir)/messages.proto"
+/*************************************************** 
+ * This file is 100% ***GENERATED***, DO NOT EDIT! *
+ ***************************************************/
+syntax = "proto2";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+import "scalapb/scalapb.proto";
+option (scalapb.options) = {
+  flat_package: true
+};
+
+package $(entities.package);
+
+
+.for entity
+message $(entity.name:Pascal)Vo {
+  option (scalapb.message).extends = "$(entities.package).ValueObject";
+.fieldNo = 1
+.for field
+  $(pb_output_field(field, fieldNo))
+.fieldNo = fieldNo + 1
+.endfor  
+};
+
+.aggregation = ""
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.  pk = extract_pk(entity)
+.  aggregation = entity.name
+.  for field
+.    theField = field
+.    if field.type = "array" | field.type = "map"
+message Add$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(entities.package).$(aggregation:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+message Remove$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(entities.package).$(aggregation:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+.     elsif !defined(pk->field(name = theField.name))
+message Modify$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(entities.package).$(aggregation:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+.    else
+.    endif    
+.  endfor
+.elsif defined(entity.aggregationTo)
+.  aggregation = "$(entity.aggregationTo)"
+.else
+.  abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)." 
+.endif
+message Create$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(entities.package).$(aggregation:Pascal)Command";
+  optional string userId = 1;
+.fieldNo = 2
+.if defined(entity.aggregationTo)
+.  keys = output_key(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.endif
+.for field
+  $(pb_output_field(field, fieldNo))
+.fieldNo = fieldNo + 1
+.endfor  
+};
+
+.endfor
+.endtemplate

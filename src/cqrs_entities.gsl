@@ -1,0 +1,10 @@
+.template 0
+
+include "scala_pb_functions.txt"
+include "mysql_db_schema_functions.txt"
+
+include "mysql_db_schema.gsl"
+include "scala_pb.gsl"
+
+.endtemplate
+

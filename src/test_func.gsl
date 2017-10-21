@@ -1,0 +1,16 @@
+.template 1
+
+.function format_type(t)
+  if my.t = "wangxy"
+    return "hello, $(my.t:Pascal)"
+  else
+    return "dear, $(my.t:no)"
+  endif
+.endfunction
+
+.wangdy = "wangdy"
+.wangxy = "wangxy"
+.echo format_type(wangxy)
+.echo format_type(wangdy)
+
+.endtemplate

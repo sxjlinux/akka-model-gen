@@ -1,0 +1,52 @@
+.function pb_format_type(t)
+  if my.t = "tinyint" | my.t = "int" | my.t = "bigint" | my.t = "double" | my.t = "string"
+    return "$(my.t:no)"
+  else
+    return "$(my.t:Pascal)"
+  endif
+.endfunction
+
+.function pb_output_field(field, fieldNo)
+  if field.type = "array"
+    return "repeated $(pb_format_type(field.valueType)) $(field.name:Camel) = $(fieldNo);"
+  elsif field.type = "map"
+    return "$(field.type)<$(keyType), $(valueType)> $(field.name:Camel) = $(fieldNo);"
+  else
+    if defined(field.optional) & field.optional = "false"
+      return "required $(field.type) $(field.name:Camel) = $(fieldNo);"
+    else
+      return "optional $(field.type) $(field.name:Camel) = $(fieldNo);"
+    endif
+  endif
+.endfunction
+
+.function output_key(entity, fieldNo)
+  result = ""
+  fk = entity->foreignKey(refEntityName = entity.aggregationTo)
+  theEntity = entity
+  ref = entities->entity(name = theEntity.aggregationTo)
+  if defined(fk) & defined(ref)
+    for fk.field
+      fkField = field
+      f = ref->field(name = fkField.name)
+      field.type = f.type
+      if defined(f.length)
+        field.length = f.length
+      endif
+      if !first()
+        result = result + "\n"
+      endif
+      result = result + "$(pb_output_field(field, fieldNo))"
+      fieldNo = fieldNo + 1
+    endfor
+  else
+    abort "E: no foreignKey or aggregationTo is defined on entity $(entity.name)."
+  endif
+  return result
+.endfunction
+
+.function extract_pk(entity)
+  for entity.primaryKey
+    return primaryKey
+  endfor
+.endfunction

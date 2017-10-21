@@ -1,0 +1,61 @@
+.template 1
+.pkgdir = string.replace(entities.package, ".|/")
+.directory.create(pkgdir)
+.output "$(pkgdir)/db-schema.sql"
+-----------------------------------------------------
+-- This file is 100% ***GENERATED***, DO NOT EDIT! --
+-----------------------------------------------------
+
+.for entity
+CREATE TABLE $(entity.name:c) (
+.isFirstField = 1
+.result = ""
+.for field
+.  if defined(field.optional) & field.optional = "false"
+.    nullOpt = " NOT NULL"
+.  else
+.    nullOpt = ""
+.  endif
+.  out = db_output_field(field, nullOpt)
+.  if string.length(out) > 0
+.    if !isFirstField
+.      out = ",\n  " + out
+.    endif
+.    isFirstField = 0
+.  result = result + out
+.  endif
+.endfor
+.for primaryKey
+.  out = ",\n  " + "CONSTRAINT " + primaryKey.name + " PRIMARY KEY("
+.  isFirstField = 1
+.  for field
+.    if !isFirstField
+.      out = out + ", "
+.    endif
+.    out = out + field.name
+.    isFirstField = 0 
+.  endfor
+.  out = out + ")"
+.  result = result + out
+.endfor
+.for foreignKey
+.  out = ",\n  " + "CONSTRAINT " + foreignKey.name + " FOREIGN KEY("
+.  refCols = ""
+.  isFirstField = 1
+.  for field
+.    if !isFirstField
+.      out = out + ", "
+.      refCols = refCols + ", "
+.    endif
+.    out = out + field.name
+.    refCols = refCols + field.refFieldName
+.    isFirstField = 0 
+.  endfor
+.  out = out + ") REFERENCES " + foreignKey.refEntityName + "(" + refCols + ")"
+.  result = result + out
+.endfor
+  $(result:no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+.endfor
+.endtemplate

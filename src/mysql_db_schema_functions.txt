@@ -1,0 +1,30 @@
+.function db_output_field_basic(field, nullOpt)
+  if defined(field.type) & field.type = "string"
+    return field.name + " VARCHAR(" + field.length + ")" + nullOpt
+  elsif defined(field.type) & field.type = "double"
+    return field.name + " DOUBLE" + nullOpt
+  elsif defined(field.type) & field.type = "int"
+    return field.name + " INT" + nullOpt
+  elsif defined(field.type) & field.type = "bigint"
+    return field.name + " BIGINT" + nullOpt
+  elsif defined(field.type) & field.type = "bool"
+    return field.name + " TINYINT" + nullOpt
+  else
+    return ""
+  endif
+.endfunction
+
+.function db_output_field(field, nullOpt)
+  if defined(field.joinKeyName)
+    foreignKey =  entity->foreignKey(name = field.joinKeyName)
+    theField = field
+    refField = entities->entity(name = foreignKey.refEntityName)->field(name = theField.refFieldName)
+    field.type = refField.type
+    if defined(refField.length)
+      field.length = refField.length
+    endif
+    return db_output_field_basic(field, nullOpt)
+  else
+    return db_output_field_basic(field, nullOpt)
+  endif
+.endfunction
