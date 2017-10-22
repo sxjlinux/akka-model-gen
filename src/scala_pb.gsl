@@ -22,8 +22,11 @@ message $(entity.name:Pascal)Vo {
   option (scalapb.message).extends = "$(entities.package).ValueObject";
 .fieldNo = 1
 .for field
+.  if defined(field.transient) & field.transient = "true"
+.  else
   $(pb_output_field(field, fieldNo))
-.fieldNo = fieldNo + 1
+.    fieldNo = fieldNo + 1
+.  endif
 .endfor  
 };
 
@@ -85,8 +88,11 @@ message Create$(entity.name:Pascal)Cmd {
 .  endif
 .endif
 .for field
+.  if defined(field.transient) & field.transient = "true"
+.  else
   $(pb_output_field(field, fieldNo))
-.fieldNo = fieldNo + 1
+.    fieldNo = fieldNo + 1
+.  endif
 .endfor  
 };
 

@@ -11,7 +11,9 @@ CREATE TABLE $(entity.name:c) (
 .isFirstField = 1
 .result = ""
 .for field
-.  if defined(field.optional) & field.optional = "false"
+.if defined(field.transient) & field.transient = "true"
+.else
+.  if defined(field.required) & field.required = "true"
 .    nullOpt = " NOT NULL"
 .  else
 .    nullOpt = ""
@@ -24,6 +26,7 @@ CREATE TABLE $(entity.name:c) (
 .    isFirstField = 0
 .  result = result + out
 .  endif
+.endif
 .endfor
 .for primaryKey
 .  out = ",\n  " + "CONSTRAINT " + primaryKey.name + " PRIMARY KEY("

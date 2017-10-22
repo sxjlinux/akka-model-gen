@@ -12,7 +12,7 @@
   elsif my.field.type = "map"
     return "$(my.field.type)<$(my.field.keyType), $(my.field.valueType)> $(my.field.name:Camel) = $(my.fieldNo);"
   else
-    if defined(my.field.optional) & my.field.optional = "false"
+    if defined(my.field.required) & my.field.required = "true"
       return "required $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
     else
       return "optional $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
@@ -32,7 +32,6 @@
   if defined(pk)
     for pk.field
       pkField = field
-      echo field.name
       theField = entity->field(name = pkField.name)
       if !first()
         result = result + "\n"
