@@ -7,20 +7,46 @@
 .endfunction
 
 .function pb_output_field(field, fieldNo)
-  if field.type = "array"
-    return "repeated $(pb_format_type(field.valueType)) $(field.name:Camel) = $(fieldNo);"
-  elsif field.type = "map"
-    return "$(field.type)<$(keyType), $(valueType)> $(field.name:Camel) = $(fieldNo);"
+  if my.field.type = "array"
+    return "repeated $(pb_format_type(my.field.valueType)) $(my.field.name:Camel) = $(my.fieldNo);"
+  elsif my.field.type = "map"
+    return "$(my.field.type)<$(my.field.keyType), $(my.field.valueType)> $(my.field.name:Camel) = $(my.fieldNo);"
   else
-    if defined(field.optional) & field.optional = "false"
-      return "required $(field.type) $(field.name:Camel) = $(fieldNo);"
+    if defined(my.field.optional) & my.field.optional = "false"
+      return "required $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
     else
-      return "optional $(field.type) $(field.name:Camel) = $(fieldNo);"
+      return "optional $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
     endif
   endif
 .endfunction
 
-.function output_key(entity, fieldNo)
+.function extract_pk(entity)
+  for my.entity.primaryKey
+    return primaryKey
+  endfor
+.endfunction
+
+.function pb_output_pk(entity, fieldNo)
+  result = ""
+  pk = extract_pk(entity)
+  if defined(pk)
+    for pk.field
+      pkField = field
+      echo field.name
+      theField = entity->field(name = pkField.name)
+      if !first()
+        result = result + "\n"
+      endif
+      result = result + "$(pb_output_field(theField, fieldNo))"
+      fieldNo = fieldNo + 1
+    endfor
+  else
+    abort "E: no primaryKey is defined on entity $(entity.name)."
+  endif
+  return result
+.endfunction
+
+.function pb_output_fk(entity, fieldNo)
   result = ""
   fk = entity->foreignKey(refEntityName = entity.aggregationTo)
   theEntity = entity
@@ -45,8 +71,3 @@
   return result
 .endfunction
 
-.function extract_pk(entity)
-  for entity.primaryKey
-    return primaryKey
-  endfor
-.endfunction

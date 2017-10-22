@@ -31,6 +31,16 @@ message $(entity.name:Pascal)Vo {
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .  pk = extract_pk(entity)
 .  aggregation = entity.name
+message Retrieve$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(entities.package).$(aggregation:Pascal)Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
 .  for field
 .    theField = field
 .    if field.type = "array" | field.type = "map"
@@ -69,7 +79,7 @@ message Create$(entity.name:Pascal)Cmd {
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationTo)
-.  keys = output_key(entity, fieldNo)
+.  keys = pb_output_fk(entity, fieldNo)
 .  if string.length(keys) > 0
   $(keys:no)
 .  endif
