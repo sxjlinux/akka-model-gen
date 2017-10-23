@@ -24,14 +24,14 @@
     </primaryKey>
   </entity>
   <entity name="order_item" aggregationTo="order">
-    <field name="item_name" joinKeyName="order_product_fk" refFieldName="product_name"/>
-    <field name="unit_price" joinKeyName="order_product_fk" refFieldName="unit_price"/>
+    <field name="item_name" joinKey="order_product_fk" refField="product_name"/>
+    <field name="unit_price" joinKey="order_product_fk" refField="unit_price"/>
     <field name="order_quantity" type="double" required="true"/>
-    <foreignKey name="order_item_fk" refEntityName="order">
-      <field name="order_id" refFieldName="order_id"/>
+    <foreignKey name="order_item_fk" refEntity="order">
+      <field name="order_id" refField="order_id"/>
     </foreignKey>
-    <foreignKey name="order_product_fk" refEntityName="product">
-      <field name="product_id" refFieldName="product_id"/>
+    <foreignKey name="order_product_fk" refEntity="product">
+      <field name="product_id" refField="product_id"/>
     </foreignKey>
     <primaryKey name="order_item_pk">
       <field name="order_id"/>

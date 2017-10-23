@@ -1,30 +1,88 @@
-.function db_output_field_basic(field, nullOpt)
-  if defined(field.type) & field.type = "string"
-    return field.name + " VARCHAR(" + field.length + ")" + nullOpt
-  elsif defined(field.type) & field.type = "double"
-    return field.name + " DOUBLE" + nullOpt
-  elsif defined(field.type) & field.type = "int"
-    return field.name + " INT" + nullOpt
-  elsif defined(field.type) & field.type = "bigint"
-    return field.name + " BIGINT" + nullOpt
-  elsif defined(field.type) & field.type = "bool"
-    return field.name + " TINYINT" + nullOpt
+.function db_extract_pk(entity)
+  for my.entity.primaryKey
+    return primaryKey
+  endfor
+.endfunction
+
+.function db_extract_fk_field(entity, fieldName)
+  for my.entity.foreignKey
+    for foreignKey.field
+      if field.name = my.fieldName
+        ref = entities->entity(name = foreignKey.refEntity)
+        return ref->field(name = my.fieldName)
+      endif
+    endfor
+  endfor
+  abort "E: no primaryKey field with name $(field.name) is defined on entity $(my.entity.name)."
+.endfunction
+
+.function db_exists_field(entity, fieldName)
+  for my.entity.field
+    if field.name = my.fieldName
+      return 1
+    endif
+  endfor
+  return 0
+.endfunction
+
+.function db_output_fk_pk(entity)
+  result = ""
+  pk = db_extract_pk(my.entity)
+  if defined(pk)
+    for pk.field
+      pkField = field
+      if db_exists_field(my.entity, field.name)
+      else
+        theField = db_extract_fk_field(my.entity, field.name)
+        if !first()
+          result = result + "\n"
+        endif
+        result = result + "$(db_output_field(my.entity, theField))"
+      endif
+    endfor
   else
+    abort "E: no primaryKey is defined on entity $(my.entity.name)."
+  endif
+  return result
+.endfunction
+
+.function db_output_field_basic(field)
+  if defined(my.field.required) & my.field.required = "true"
+    nullOpt = " NOT NULL"
+  else
+    nullOpt = ""
+  endif
+  if defined(my.field.type) & my.field.type = "string"
+    return my.field.name + " VARCHAR(" + my.field.length + ")" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "double"
+    return my.field.name + " DOUBLE" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "int"
+    return my.field.name + " INT" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "bigint"
+    return my.field.name + " BIGINT" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "bool"
+    return my.field.name + " TINYINT" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "array"
     return ""
+  elsif defined(my.field.type) & my.field.type = "map"
+    return ""
+  elsif defined(my.field.type)
+    abort "E: unknown type $(my.field.type) is defined on field $(my.field.name)."
+  else
+    abort "E: no type is defined on field $(my.field.name)."
   endif
 .endfunction
 
-.function db_output_field(field, nullOpt)
-  if defined(field.joinKeyName)
-    foreignKey =  entity->foreignKey(name = field.joinKeyName)
-    theField = field
-    refField = entities->entity(name = foreignKey.refEntityName)->field(name = theField.refFieldName)
-    field.type = refField.type
-    if defined(refField.length)
-      field.length = refField.length
+.function db_output_field(entity, field)
+  if defined(my.field.joinKey)
+    foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
+    theRefField = entities->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
+    my.field.type = theRefField.type
+    if defined(theRefField.length)
+      my.field.length = theRefField.length
     endif
-    return db_output_field_basic(field, nullOpt)
+    return db_output_field_basic(my.field)
   else
-    return db_output_field_basic(field, nullOpt)
+    return db_output_field_basic(my.field)
   endif
 .endfunction

@@ -1,5 +1,5 @@
 .template 1
-.pkgdir = string.replace(entities.package, ".|/")
+.pkgdir = "dbschema/src/main/dbschema/$(string.replace(entities.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/db-schema.sql"
 -----------------------------------------------------
@@ -9,16 +9,14 @@
 .for entity
 CREATE TABLE $(entity.name:c) (
 .isFirstField = 1
-.result = ""
+.result = "$(db_output_fk_pk(entity))"
+.if string.length(result) > 0
+.  isFirstField = 0
+.endif
 .for field
 .if defined(field.transient) & field.transient = "true"
 .else
-.  if defined(field.required) & field.required = "true"
-.    nullOpt = " NOT NULL"
-.  else
-.    nullOpt = ""
-.  endif
-.  out = db_output_field(field, nullOpt)
+.  out = db_output_field(entity, field)
 .  if string.length(out) > 0
 .    if !isFirstField
 .      out = ",\n  " + out
@@ -51,10 +49,10 @@ CREATE TABLE $(entity.name:c) (
 .      refCols = refCols + ", "
 .    endif
 .    out = out + field.name
-.    refCols = refCols + field.refFieldName
+.    refCols = refCols + field.refField
 .    isFirstField = 0 
 .  endfor
-.  out = out + ") REFERENCES " + foreignKey.refEntityName + "(" + refCols + ")"
+.  out = out + ") REFERENCES " + foreignKey.refEntity+ "(" + refCols + ")"
 .  result = result + out
 .endfor
   $(result:no)

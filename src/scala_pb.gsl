@@ -1,5 +1,5 @@
 .template 1
-.pkgdir = string.replace(entities.package, ".|/")
+.pkgdir = "message/src/main/protobuf/$(string.replace(entities.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/messages.proto"
 /*************************************************** 
@@ -14,7 +14,7 @@ option (scalapb.options) = {
   flat_package: true
 };
 
-package $(entities.package);
+package $(entities.package).message;
 
 
 .for entity
@@ -32,7 +32,7 @@ message $(entity.name:Pascal)Vo {
 
 .aggRoot = ""
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
-.  pk = extract_pk(entity)
+.  pk = pb_extract_pk(entity)
 .  aggRoot = entity.name
 message Retrieve$(entity.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";

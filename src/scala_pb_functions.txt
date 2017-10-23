@@ -2,15 +2,26 @@
   if my.t = "tinyint" | my.t = "int" | my.t = "bigint" | my.t = "double" | my.t = "string"
     return "$(my.t:no)"
   else
-    return "$(my.t:Pascal)"
+    return "$(my.t:Pascal)Vo"
   endif
 .endfunction
 
 .function pb_output_field(field, fieldNo)
   if my.field.type = "array"
-    return "repeated $(pb_format_type(my.field.valueType)) $(my.field.name:Camel) = $(my.fieldNo);"
+    if defined(my.field.entity)
+      valueField = entities->entity(name = my.field.entity)->field(name = my.field.valueField)
+      return "repeated $(pb_format_type(valueField.valueType)) $(valueField.name:Camel) = $(my.fieldNo);"
+    else
+      return "repeated $(pb_format_type(my.field.valueType)) $(my.field.name:Camel) = $(my.fieldNo);"
+    endif
   elsif my.field.type = "map"
-    return "$(my.field.type)<$(my.field.keyType), $(my.field.valueType)> $(my.field.name:Camel) = $(my.fieldNo);"
+    if defined(my.field.entity)
+      kField = entities->entity(name = my.field.entity)->field(name = my.field.keyField)
+      vField = entities->entity(name = my.field.entity)->field(name = my.field.valueField)
+      return "$(my.field.type)<$(pb_format_type(kField.type)), $(pb_format_type(vField.type))> $(my.field.name:Camel) = $(my.fieldNo);"
+    else
+      return "$(my.field.type)<$(pb_format_type(my.field.keyType)), $(pb_format_type(my.field.valueType))> $(my.field.name:Camel) = $(my.fieldNo);"
+    endif
   else
     if defined(my.field.required) & my.field.required = "true"
       return "required $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
@@ -20,7 +31,7 @@
   endif
 .endfunction
 
-.function extract_pk(entity)
+.function pb_extract_pk(entity)
   for my.entity.primaryKey
     return primaryKey
   endfor
@@ -28,7 +39,7 @@
 
 .function pb_output_pk(entity, fieldNo)
   result = ""
-  pk = extract_pk(entity)
+  pk = pb_extract_pk(entity)
   if defined(pk)
     for pk.field
       pkField = field
@@ -47,8 +58,8 @@
 
 .function pb_output_fk(entity, fieldNo)
   result = ""
-  fk = entity->foreignKey(refEntityName = entity.aggregationTo)
-  theEntity = entity
+  fk = entity->foreignKey(refEntity = entity.aggregationTo)
+  theEntity = my.entity
   ref = entities->entity(name = theEntity.aggregationTo)
   if defined(fk) & defined(ref)
     for fk.field
