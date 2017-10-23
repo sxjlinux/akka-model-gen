@@ -1,5 +1,5 @@
 .template 1
-.pkgdir = "message/src/main/protobuf/$(string.replace(entities.package, ".|/"))"
+.pkgdir = "message/src/main/protobuf/$(string.replace(model.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/messages.proto"
 /*************************************************** 
@@ -14,12 +14,12 @@ option (scalapb.options) = {
   flat_package: true
 };
 
-package $(entities.package).message;
+package $(model.package).message;
 
 
 .for entity
 message $(entity.name:Pascal)Vo {
-  option (scalapb.message).extends = "$(entities.package).ValueObject";
+  option (scalapb.message).extends = "$(model.package).ValueObject";
 .fieldNo = 1
 .for field
 .  if defined(field.transient) & field.transient = "true"
@@ -34,51 +34,9 @@ message $(entity.name:Pascal)Vo {
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .  pk = pb_extract_pk(entity)
 .  aggRoot = entity.name
-message Retrieve$(entity.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
-  optional string userId = 1;
-.  fieldNo = 2
-.  keys = pb_output_pk(entity, fieldNo)
-.  if string.length(keys) > 0
-  $(keys:no)
-.  endif
-};
 
-.  for field
-.    theField = field
-.    if field.type = "array" | field.type = "map"
-message Add$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
-  optional string userId = 1;
-.      fieldNo = 2
-  $(pb_output_field(field, fieldNo))
-};
-
-message Remove$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
-  optional string userId = 1;
-.      fieldNo = 2
-  $(pb_output_field(field, fieldNo))
-};
-
-.     elsif !defined(pk->field(name = theField.name))
-message Modify$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
-  optional string userId = 1;
-.      fieldNo = 2
-  $(pb_output_field(field, fieldNo))
-};
-
-.    else
-.    endif    
-.  endfor
-.elsif defined(entity.aggregationTo)
-.  aggRoot = "$(entity.aggregationTo)"
-.else
-.  abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)." 
-.endif
 message Create$(entity.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationTo)
@@ -93,12 +51,56 @@ message Create$(entity.name:Pascal)Cmd {
   $(pb_output_field(field, fieldNo))
 .    fieldNo = fieldNo + 1
 .  endif
-.endfor  
+.endfor
 };
 
+message Retrieve$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
+.  for field
+.    theField = field
+.    if field.type = "array" | field.type = "map"
+message Add$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+message Remove$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+.     elsif !defined(pk->field(name = theField.name))
+message Modify$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.      fieldNo = 2
+  $(pb_output_field(field, fieldNo))
+};
+
+.    else
+.    endif    
+.  endfor
+.elsif defined(entity.aggregationTo)
+.  aggRoot = "$(entity.aggregationTo)"
+.else
+.  abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)." 
+.endif
+.
 .for aggregation
 message Update$(aggregation.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)
@@ -116,7 +118,7 @@ message Update$(aggregation.name:Pascal)Cmd {
 };
 
 message Get$(aggregation.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(entities.package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(model.package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)

@@ -1,5 +1,5 @@
 .template 1
-.pkgdir = "dbschema/src/main/dbschema/$(string.replace(entities.package, ".|/"))"
+.pkgdir = "dbschema/src/main/dbschema/$(string.replace(model.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/db-schema.sql"
 -----------------------------------------------------

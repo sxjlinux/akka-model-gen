@@ -9,15 +9,15 @@
 .function pb_output_field(field, fieldNo)
   if my.field.type = "array"
     if defined(my.field.entity)
-      valueField = entities->entity(name = my.field.entity)->field(name = my.field.valueField)
+      valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
       return "repeated $(pb_format_type(valueField.valueType)) $(valueField.name:Camel) = $(my.fieldNo);"
     else
       return "repeated $(pb_format_type(my.field.valueType)) $(my.field.name:Camel) = $(my.fieldNo);"
     endif
   elsif my.field.type = "map"
     if defined(my.field.entity)
-      kField = entities->entity(name = my.field.entity)->field(name = my.field.keyField)
-      vField = entities->entity(name = my.field.entity)->field(name = my.field.valueField)
+      kField = model->entity(name = my.field.entity)->field(name = my.field.keyField)
+      vField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
       return "$(my.field.type)<$(pb_format_type(kField.type)), $(pb_format_type(vField.type))> $(my.field.name:Camel) = $(my.fieldNo);"
     else
       return "$(my.field.type)<$(pb_format_type(my.field.keyType)), $(pb_format_type(my.field.valueType))> $(my.field.name:Camel) = $(my.fieldNo);"
@@ -60,7 +60,7 @@
   result = ""
   fk = entity->foreignKey(refEntity = entity.aggregationTo)
   theEntity = my.entity
-  ref = entities->entity(name = theEntity.aggregationTo)
+  ref = model->entity(name = theEntity.aggregationTo)
   if defined(fk) & defined(ref)
     for fk.field
       fkField = field

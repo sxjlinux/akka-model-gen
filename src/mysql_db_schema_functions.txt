@@ -8,7 +8,7 @@
   for my.entity.foreignKey
     for foreignKey.field
       if field.name = my.fieldName
-        ref = entities->entity(name = foreignKey.refEntity)
+        ref = model->entity(name = foreignKey.refEntity)
         return ref->field(name = my.fieldName)
       endif
     endfor
@@ -76,7 +76,7 @@
 .function db_output_field(entity, field)
   if defined(my.field.joinKey)
     foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
-    theRefField = entities->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
+    theRefField = model->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
     my.field.type = theRefField.type
     if defined(theRefField.length)
       my.field.length = theRefField.length

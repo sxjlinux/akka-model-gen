@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<entities script="../src/cqrs_entities.gsl" package="com.apuex.sales" dbSchema="sales">
+<model script="../src/cqrs_entities.gsl" package="com.apuex.sales" dbSchema="sales">
   <entity name="product" aggregationRoot="true">
     <field name="product_id" type="string" length="64" required="true"/>
     <field name="product_name" type="string" length="64" required="true"/>
@@ -38,4 +38,4 @@
       <field name="product_id"/>
     </primaryKey>
   </entity>
-</entities>
+</model>
