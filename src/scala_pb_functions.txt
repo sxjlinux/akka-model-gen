@@ -7,6 +7,8 @@
     return "int64"
   elsif my.t = "double" | my.t = "string"
     return "$(my.t:no)"
+  elsif my.t = "timestamp"
+    return "google.protobuf.Timestamp"
   else
     ref = model->entity(name = my.t)
     if defined(ref.enum) & ref.enum = "true"

@@ -131,7 +131,7 @@ message Remove$(field.name:Pascal)Evt {
 };
 
 .     elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true")
-message Modify$(field.name:Pascal)Cmd {
+message Change$(field.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
