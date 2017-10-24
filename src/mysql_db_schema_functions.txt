@@ -9,7 +9,11 @@
     for foreignKey.field
       if field.name = my.fieldName
         ref = model->entity(name = foreignKey.refEntity)
-        return ref->field(name = my.fieldName)
+        if defined(ref->field(name = my.fieldName))
+          return ref->field(name = my.fieldName)
+        else
+          return db_extract_fk_field(ref, my.fieldName)
+        endif
       endif
     endfor
   endfor
@@ -35,7 +39,7 @@
       else
         theField = db_extract_fk_field(my.entity, field.name)
         if !first()
-          result = result + "\n"
+          result = result + ",\n  "
         endif
         result = result + "$(db_output_field(my.entity, theField))"
       endif
@@ -67,7 +71,7 @@
   elsif defined(my.field.type) & my.field.type = "map"
     return ""
   elsif defined(my.field.type)
-    abort "E: unknown type $(my.field.type) is defined on field $(my.field.name)."
+    return ""
   else
     abort "E: no type is defined on field $(my.field.name)."
   endif

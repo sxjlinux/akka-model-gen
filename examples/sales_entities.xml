@@ -30,7 +30,7 @@
     <foreignKey name="order_item_fk" refEntity="order">
       <field name="order_id" refField="order_id"/>
     </foreignKey>
-    <foreignKey name="order_product_fk" refEntity="product">
+    <foreignKey name="order_item_product_fk" refEntity="product">
       <field name="product_id" refField="product_id"/>
     </foreignKey>
     <primaryKey name="order_item_pk">

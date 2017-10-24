@@ -1,8 +1,19 @@
 .function pb_format_type(t)
-  if my.t = "tinyint" | my.t = "int" | my.t = "bigint" | my.t = "double" | my.t = "string"
+  if my.t = "tinyint" | my.t = "bool"
+    return "bool"
+  elsif my.t = "int"
+    return "int32"
+  elsif my.t = "bigint"
+    return "int64"
+  elsif my.t = "double" | my.t = "string"
     return "$(my.t:no)"
   else
-    return "$(my.t:Pascal)Vo"
+    ref = model->entity(name = my.t)
+    if defined(ref.enum) & ref.enum = "true"
+      return "$(my.t:Pascal)"
+    else
+      return "$(my.t:Pascal)Vo"
+    endif
   endif
 .endfunction
 
@@ -24,9 +35,9 @@
     endif
   else
     if defined(my.field.required) & my.field.required = "true"
-      return "required $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
+      return "required $(pb_format_type(my.field.type)) $(my.field.name:Camel) = $(my.fieldNo);"
     else
-      return "optional $(my.field.type) $(my.field.name:Camel) = $(my.fieldNo);"
+      return "optional $(pb_format_type(my.field.type)) $(my.field.name:Camel) = $(my.fieldNo);"
     endif
   endif
 .endfunction

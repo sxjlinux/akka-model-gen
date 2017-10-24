@@ -90,6 +90,10 @@ message Add$(field.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
@@ -97,6 +101,10 @@ message Add$(field.name:Pascal)Evt {
   option (scalapb.message).extends = "$(package).Event";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
@@ -104,6 +112,10 @@ message Remove$(field.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
@@ -111,14 +123,22 @@ message Remove$(field.name:Pascal)Evt {
   option (scalapb.message).extends = "$(package).Event";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
-.     elsif !defined(pk->field(name = theField.name))
+.     elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true")
 message Modify$(field.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
@@ -126,6 +146,10 @@ message Modify$(field.name:Pascal)Evt {
   option (scalapb.message).extends = "$(package).Event";
   optional string userId = 1;
 .      fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
   $(pb_output_field(field, fieldNo))
 };
 
@@ -135,7 +159,7 @@ message Modify$(field.name:Pascal)Evt {
 .elsif defined(entity.aggregationTo)
 .  aggRoot = "$(entity.aggregationTo)"
 .else
-.  abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)." 
+.  ###abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)."
 .endif
 .
 .for aggregation
