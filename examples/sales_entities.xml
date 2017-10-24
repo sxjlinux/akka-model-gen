@@ -24,8 +24,8 @@
     </primaryKey>
   </entity>
   <entity name="order_item" aggregationTo="order">
-    <field name="item_name" joinKey="order_product_fk" refField="product_name"/>
-    <field name="unit_price" joinKey="order_product_fk" refField="unit_price"/>
+    <field name="item_name" joinKey="order_item_product_fk" refField="product_name"/>
+    <field name="unit_price" joinKey="order_item_product_fk" refField="unit_price"/>
     <field name="order_quantity" type="double" required="true"/>
     <foreignKey name="order_item_fk" refEntity="order">
       <field name="order_id" refField="order_id"/>

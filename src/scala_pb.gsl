@@ -142,7 +142,7 @@ message Change$(field.name:Pascal)Cmd {
   $(pb_output_field(field, fieldNo))
 };
 
-message Modify$(field.name:Pascal)Evt {
+message Change$(field.name:Pascal)Evt {
   option (scalapb.message).extends = "$(package).Event";
   optional string userId = 1;
 .      fieldNo = 2
@@ -175,16 +175,19 @@ message Update$(aggregation.name:Pascal)Cmd {
 .endif
 .for field
 .  theField = field
-.  af = entity->field(name = theField.name)
+.  if defined(field.type)
+  $(pb_output_field(field, fieldNo))
+.  else
+.    af = entity->field(name = theField.name)
   $(pb_output_field(af, fieldNo))
+.  endif
 . fieldNo = fieldNo + 1
 .endfor  
 };
 
-message Update$(aggregation.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
-  optional string userId = 1;
-.fieldNo = 2
+message $(aggregation.name:Pascal)Vo{
+  option (scalapb.message).extends = "$(package).ValueObject";
+.fieldNo = 1
 .if defined(entity.aggregationRoot)
 .  keys = pb_output_pk(entity, fieldNo)
 .  if string.length(keys) > 0
@@ -193,8 +196,12 @@ message Update$(aggregation.name:Pascal)Evt {
 .endif
 .for field
 .  theField = field
-.  af = entity->field(name = theField.name)
+.  if defined(field.type)
+  $(pb_output_field(field, fieldNo))
+.  else
+.    af = entity->field(name = theField.name)
   $(pb_output_field(af, fieldNo))
+.  endif
 . fieldNo = fieldNo + 1
 .endfor
 };
