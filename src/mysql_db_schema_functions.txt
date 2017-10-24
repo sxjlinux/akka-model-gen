@@ -66,6 +66,8 @@
     return my.field.name + " BIGINT" + nullOpt
   elsif defined(my.field.type) & my.field.type = "bool"
     return my.field.name + " TINYINT" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "timestamp"
+    return my.field.name + " TIMESTAMP" + nullOpt
   elsif defined(my.field.type) & my.field.type = "array"
     return ""
   elsif defined(my.field.type) & my.field.type = "map"
