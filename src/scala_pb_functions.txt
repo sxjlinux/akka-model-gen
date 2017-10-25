@@ -70,14 +70,13 @@
   if defined(pk)
     for pk.field
       pkField = field
-      echo "$(my.entity.name)($(field.name))"
       if defined(my.entity->field(name = pkField.name))
         theField = my.entity->field(name = pkField.name)
         if !first()
           result = result + "\n"
         endif
         result = result + "$(pb_output_field(theField, my.fieldNo))"
-        my.fieldNo = my.fieldNo + 1
+        fieldNo = fieldNo + 1
       endif
     endfor
   else
