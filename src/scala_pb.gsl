@@ -229,5 +229,54 @@ message Get$(aggregation.name:Pascal)Cmd {
 };
 
 .endfor
+.
+.for message
+message $(message.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.fieldNo = 2
+.if defined(entity.aggregationRoot)
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.endif
+.for field
+.  theField = field
+.  if defined(field.type)
+  $(pb_output_field(field, fieldNo))
+.  else
+.    af = entity->field(name = theField.name)
+  $(pb_output_field(af, fieldNo))
+.  endif
+. fieldNo = fieldNo + 1
+.endfor
+};
+
+.if !(defined(transient) & transient = "true")
+message $(message.name:Pascal)Evt {
+  option (scalapb.message).extends = "$(package).Event";
+  optional string userId = 1;
+.fieldNo = 2
+.if defined(entity.aggregationRoot)
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.endif
+.for field
+.  theField = field
+.  if defined(field.type)
+  $(pb_output_field(field, fieldNo))
+.  else
+.    af = entity->field(name = theField.name)
+  $(pb_output_field(af, fieldNo))
+.  endif
+. fieldNo = fieldNo + 1
+.endfor
+};
+
+.endif
+.endfor
 .endfor
 .endtemplate

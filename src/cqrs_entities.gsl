@@ -1,5 +1,37 @@
 .template 0
 
+.function extract_pk(entity)
+  for my.entity.primaryKey
+    return primaryKey
+  endfor
+.endfunction
+
+.function extract_fk_field(entity, fieldName)
+  for my.entity.foreignKey
+    for foreignKey.field
+      fkField = field
+      if field.name = my.fieldName
+        ref = model->entity(name = foreignKey.refEntity)
+        if defined(ref->field(name = fkField.refField))
+          return ref->field(name = fkField.refField)
+        else
+          return extract_fk_field(ref, field.refField)
+        endif
+      endif
+    endfor
+  endfor
+  abort "E: no primaryKey field with name $(field.name) is defined on entity $(my.entity.name)."
+.endfunction
+
+.function exists_field(entity, fieldName)
+  for my.entity.field
+    if field.name = my.fieldName
+      return 1
+    endif
+  endfor
+  return 0
+.endfunction
+
 include "scala_pb_functions.txt"
 include "mysql_db_schema_functions.txt"
 

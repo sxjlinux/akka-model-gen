@@ -38,6 +38,12 @@
     if defined(my.field.entity)
       valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
       return "repeated $(pb_format_type(valueField.valueType)) $(valueField.name:Camel) = $(my.fieldNo);"
+    elsif my.field.valueType = "char"
+      if defined(my.field.required) & my.field.required = "true"
+        return "required bytes $(my.field.name:Camel) = $(my.fieldNo);"
+      else
+        return "optional bytes $(my.field.name:Camel) = $(my.fieldNo);"
+      endif
     else
       return "repeated $(pb_format_type(my.field.valueType)) $(my.field.name:Camel) = $(my.fieldNo);"
     endif
@@ -73,9 +79,13 @@
       if defined(my.entity->field(name = pkField.name))
         theField = my.entity->field(name = pkField.name)
         if !first()
-          result = result + "\n"
+          result = result + "\n  "
         endif
-        result = result + "$(pb_output_field(theField, my.fieldNo))"
+        result = result + "$(pb_output_field(theField, fieldNo))"
+        fieldNo = fieldNo + 1
+      else
+        theField = extract_fk_field(my.entity, field.name)
+        result = result + "$(pb_output_field(theField, fieldNo))"
         fieldNo = fieldNo + 1
       endif
     endfor
@@ -87,7 +97,7 @@
 
 .function pb_output_fk(entity, fieldNo)
   result = ""
-  fk = entity->foreignKey(refEntity = entity.aggregationTo)
+  fk = entity->foreignKey(refEntity = my.entity.aggregationTo)
   theEntity = my.entity
   ref = model->entity(name = theEntity.aggregationTo)
   if defined(fk) & defined(ref)
