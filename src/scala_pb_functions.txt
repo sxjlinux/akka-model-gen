@@ -1,3 +1,17 @@
+. function pb_find_entity_by_type(type)
+  for model.entity
+    if entity.name = my.type
+      return entity
+    else
+      for entity.aggregation
+        if aggregation.name = my.type
+          return aggregation
+        endif
+      endfor
+    endif
+  endfor
+.endfunction
+
 .function pb_format_type(t)
   if my.t = "tinyint" | my.t = "bool"
     return "bool"
@@ -10,7 +24,7 @@
   elsif my.t = "timestamp"
     return "google.protobuf.Timestamp"
   else
-    ref = model->entity(name = my.t)
+    ref = pb_find_entity_by_type(my.t)
     if defined(ref.enum) & ref.enum = "true"
       return "$(my.t:Pascal)"
     else
@@ -52,19 +66,22 @@
 
 .function pb_output_pk(entity, fieldNo)
   result = ""
-  pk = pb_extract_pk(entity)
+  pk = pb_extract_pk(my.entity)
   if defined(pk)
     for pk.field
       pkField = field
-      theField = entity->field(name = pkField.name)
-      if !first()
-        result = result + "\n"
+      echo "$(my.entity.name)($(field.name))"
+      if defined(my.entity->field(name = pkField.name))
+        theField = my.entity->field(name = pkField.name)
+        if !first()
+          result = result + "\n"
+        endif
+        result = result + "$(pb_output_field(theField, my.fieldNo))"
+        my.fieldNo = my.fieldNo + 1
       endif
-      result = result + "$(pb_output_field(theField, fieldNo))"
-      fieldNo = fieldNo + 1
     endfor
   else
-    abort "E: no primaryKey is defined on entity $(entity.name)."
+    abort "E: no primaryKey is defined on entity $(my.entity.name)."
   endif
   return result
 .endfunction
