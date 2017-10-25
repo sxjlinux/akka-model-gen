@@ -7,12 +7,14 @@
 .function db_extract_fk_field(entity, fieldName)
   for my.entity.foreignKey
     for foreignKey.field
+      fkField = field
       if field.name = my.fieldName
         ref = model->entity(name = foreignKey.refEntity)
-        if defined(ref->field(name = my.fieldName))
-          return ref->field(name = my.fieldName)
+        echo "$(my.entity.name) => $(ref.name)($(fkField.refField))"
+        if defined(ref->field(name = fkField.refField))
+          return ref->field(name = fkField.refField)
         else
-          return db_extract_fk_field(ref, my.fieldName)
+          return db_extract_fk_field(ref, field.refField)
         endif
       endif
     endfor

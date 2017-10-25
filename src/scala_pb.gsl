@@ -30,6 +30,15 @@ message $(entity.name:Pascal)Vo {
 .endfor  
 };
 
+.if defined(entity.enum) & entity.enum = "true"
+enum $(entity.name:Pascal) {
+  option (scalapb.enum_options).extends = "$(package).ValueObject";
+.  enumConf = entity->enum(name = entity.name)
+.for entity.row
+  $($(enumConf.nameField):no) = $($(enumConf.valueField));
+.endfor
+};
+.endif
 .aggRoot = ""
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .  pk = pb_extract_pk(entity)
