@@ -68,15 +68,9 @@
   endif
 .endfunction
 
-.function pb_extract_pk(entity)
-  for my.entity.primaryKey
-    return primaryKey
-  endfor
-.endfunction
-
 .function pb_output_pk(entity, fieldNo)
   result = ""
-  pk = pb_extract_pk(my.entity)
+  pk = extract_pk(my.entity)
   if defined(pk)
     for pk.field
       pkField = field
@@ -89,7 +83,11 @@
         fieldNo = fieldNo + 1
       else
         theField = extract_fk_field(my.entity, field.name)
-        result = result + "$(pb_output_field(theField, fieldNo))"
+        field.type = theField.type
+        if defined(field.length)
+          field.length = theField.length
+        endif
+        result = result + "$(pb_output_field(field, fieldNo))"
         fieldNo = fieldNo + 1
       endif
     endfor
