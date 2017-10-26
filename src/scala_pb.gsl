@@ -95,7 +95,7 @@ message Retrieve$(entity.name:Pascal)Cmd {
 
 .  for field
 .    theField = field
-.    if field.type = "array" | field.type = "map"
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 message Add$(field.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;

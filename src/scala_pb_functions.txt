@@ -23,6 +23,10 @@
     return "$(my.t:no)"
   elsif my.t = "timestamp"
     return "google.protobuf.Timestamp"
+  elsif my.t = "any"
+    return "google.protobuf.Any"
+  elsif my.t = "actor_ref"
+    return "$(my.t:Pascal)"
   else
     ref = pb_find_entity_by_type(my.t)
     if defined(ref.enum) & ref.enum = "true"
