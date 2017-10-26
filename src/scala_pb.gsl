@@ -49,14 +49,14 @@ message Create$(entity.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
-.if defined(entity.aggregationTo)
-.  keys = pb_output_fk(entity, fieldNo)
+.  keys = pb_output_pk(entity, fieldNo)
 .  if string.length(keys) > 0
   $(keys:no)
 .  endif
-.endif
+.pk = pb_extract_pk(entity)
 .for field
-.  if defined(field.transient) & field.transient = "true"
+.  theField = field
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
 .  else
   $(pb_output_field(field, fieldNo))
 .    fieldNo = fieldNo + 1
@@ -68,14 +68,12 @@ message Create$(entity.name:Pascal)Evt {
   option (scalapb.message).extends = "$(package).Event";
   optional string userId = 1;
 .fieldNo = 2
-.if defined(entity.aggregationTo)
-.  keys = pb_output_fk(entity, fieldNo)
+.  keys = pb_output_pk(entity, fieldNo)
 .  if string.length(keys) > 0
   $(keys:no)
 .  endif
-.endif
 .for field
-.  if defined(field.transient) & field.transient = "true"
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
 .  else
   $(pb_output_field(field, fieldNo))
 .    fieldNo = fieldNo + 1

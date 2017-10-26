@@ -2,7 +2,7 @@
 -- This file is 100% ***GENERATED***, DO NOT EDIT! --
 -----------------------------------------------------
 
-CREATE TABLE product (
+CREATE TABLE sales.product (
   product_id VARCHAR(64) NOT NULL,
   product_name VARCHAR(64) NOT NULL,
   product_unit VARCHAR(64) NOT NULL,
@@ -10,12 +10,12 @@ CREATE TABLE product (
   CONSTRAINT product_pk PRIMARY KEY(product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE order (
+CREATE TABLE sales.order (
   order_id VARCHAR(64) NOT NULL,
   CONSTRAINT order_pk PRIMARY KEY(order_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE order_item (
+CREATE TABLE sales.order_item (
   order_id VARCHAR(64) NOT NULL,
   product_id VARCHAR(64) NOT NULL,
   item_name VARCHAR(64),

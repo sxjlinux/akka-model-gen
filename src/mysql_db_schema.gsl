@@ -8,7 +8,7 @@
 
 .for entity
 .if !(defined(transient) & transient = "true")
-CREATE TABLE $(entity.name:c) (
+CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .isFirstField = 1
 .result = "$(db_output_fk_pk(entity))"
 .if string.length(result) > 0
