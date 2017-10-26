@@ -165,7 +165,7 @@ message RemoveOrderItemsEvt {
 
 message OrderItemVo {
   option (scalapb.message).extends = "com.apuex.sales.message.ValueObject";
-  optional string orderId = 1;optional string productId = 2;
+  required string orderId = 1;required string productId = 2;
   optional string itemName = 3;
   optional double unitPrice = 4;
   required double orderQuantity = 5;
