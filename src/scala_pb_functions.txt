@@ -70,6 +70,9 @@
 
 .function pb_output_pk(entity, fieldNo)
   result = ""
+  if !defined(extract_pk(my.entity))
+    return result
+  endif
   pk = extract_pk(my.entity)
   if defined(pk)
     for pk.field

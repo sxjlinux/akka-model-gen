@@ -27,7 +27,7 @@ enum $(entity.name:Pascal) {
 .endfor
 };
 
-.else
+.endif
 message $(entity.name:Pascal)Vo {
   option (scalapb.message).extends = "$(package).ValueObject";
 .fieldNo = 1
@@ -45,7 +45,6 @@ message $(entity.name:Pascal)Vo {
 .endfor
 };
 
-.endif
 .aggRoot = ""
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .  pk = extract_pk(entity)
