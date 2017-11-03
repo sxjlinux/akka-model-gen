@@ -1,7 +1,7 @@
 .template 1
 .pkgdir = "dbschema/src/main/dbschema/$(string.replace(model.package, ".|/"))"
 .directory.create(pkgdir)
-.output "$(pkgdir)/db-schema.sql"
+.output "$(pkgdir)/$(model.name)-$(model.dbSchema)-schema-mysql.sql"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
@@ -40,6 +40,34 @@ CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
   $(result:no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+.endif
+.endfor
+.
+.for entity
+.if !(defined(transient) & transient = "true")
+.  prelude = "INSERT INTO $(model.dbSchema:no).$(entity.name:no) ("
+.  for field
+.    if !first()
+.      prelude = prelude + ", "
+.    endif
+.    prelude = prelude + "$(field.name:no)"
+.  endfor
+.  prelude = prelude + ") values ("
+.  for row
+.    out = prelude
+.    for entity.field
+.      if !first()
+.        out = out + ", "
+.      endif
+.      if field.type = "string"
+.        out = out + "'$($(field.name))'"
+.      else
+.        out = out + "$($(field.name))"
+.      endif
+.    endfor
+.    out = out + ");"
+$(out:no)
+.  endfor
 .endif
 .endfor
 

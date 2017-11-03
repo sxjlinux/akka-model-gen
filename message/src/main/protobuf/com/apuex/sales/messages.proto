@@ -1,6 +1,6 @@
-/***************************************************
- * This file is 100% ***GENERATED***, DO NOT EDIT! *
- ***************************************************/
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
 syntax = "proto2";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
@@ -112,21 +112,24 @@ message GetProductSalesCmd {
 message OrderVo {
   option (scalapb.message).extends = "com.apuex.sales.message.ValueObject";
   required string orderId = 1;
-  repeated OrderItemVo orderItems = 2;
+  required google.protobuf.Timestamp orderTime = 2;
+  repeated OrderItemVo orderItems = 3;
 };
 
 message CreateOrderCmd {
   option (scalapb.message).extends = "com.apuex.sales.message.OrderCommand";
   optional string userId = 1;
   required string orderId = 2;
-  repeated OrderItemVo orderItems = 3;
+  required google.protobuf.Timestamp orderTime = 3;
+  repeated OrderItemVo orderItems = 4;
 };
 
 message CreateOrderEvt {
   option (scalapb.message).extends = "com.apuex.sales.message.Event";
   optional string userId = 1;
   required string orderId = 2;
-  repeated OrderItemVo orderItems = 3;
+  required google.protobuf.Timestamp orderTime = 3;
+  repeated OrderItemVo orderItems = 4;
 };
 
 message RetrieveOrderCmd {

@@ -20,7 +20,8 @@ CREATE TABLE sales.product (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE sales.order (
-  order_id VARCHAR(64) NOT NULL
+  order_id VARCHAR(64) NOT NULL,
+  order_time DATETIME NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE sales.order_item (
