@@ -79,23 +79,21 @@
       pkField = field
       if defined(my.entity->field(name = pkField.name))
         theField = my.entity->field(name = pkField.name)
-        if !first()
-          result = result + "\n  "
-        endif
-        result = result + "$(pb_output_field(theField, fieldNo))"
-        fieldNo = fieldNo + 1
       else
         theField = extract_fk_field(my.entity, field.name)
-        field.type = theField.type
-        if defined(theField.length)
-          field.length = theField.length
-        endif
-        if defined(theField.required)
-          field.required = theField.required
-        endif
-        result = result + "$(pb_output_field(field, fieldNo))"
-        fieldNo = fieldNo + 1
       endif
+      field.type = theField.type
+      if defined(theField.length)
+        field.length = theField.length
+      endif
+      if defined(theField.required)
+        field.required = theField.required
+      endif
+      if !first()
+        result = result + "\n  "
+      endif
+      result = result + "$(pb_output_field(field, fieldNo))"
+      fieldNo = fieldNo + 1
     endfor
   else
     abort "E: no primaryKey is defined on entity $(my.entity.name)."
