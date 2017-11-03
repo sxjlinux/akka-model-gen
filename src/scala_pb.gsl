@@ -2,9 +2,9 @@
 .pkgdir = "message/src/main/protobuf/$(string.replace(model.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/messages.proto"
-/*************************************************** 
- * This file is 100% ***GENERATED***, DO NOT EDIT! *
- ***************************************************/
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
 syntax = "proto2";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
