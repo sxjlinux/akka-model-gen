@@ -2,9 +2,19 @@
 .pkgdir = "dbschema/src/main/dbschema/$(string.replace(model.package, ".|/"))"
 .directory.create(pkgdir)
 .output "$(pkgdir)/db-schema.sql"
------------------------------------------------------
--- This file is 100% ***GENERATED***, DO NOT EDIT! --
------------------------------------------------------
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+
+DROP USER IF EXISTS '$(model.dbSchema:c)'@'localhost';
+DROP DATABASE IF EXISTS $(model.dbSchema:c);
+
+CREATE DATABASE $(model.dbSchema:c) DEFAULT CHARACTER SET 'UTF8' DEFAULT COLLATE utf8_unicode_ci;
+
+CREATE USER '$(model.dbSchema:c)'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO '$(model.dbSchema:c)'@'localhost' WITH GRANT OPTION;
+
+USE $(model.dbSchema:c);
 
 .for entity
 .if !(defined(transient) & transient = "true")
@@ -27,21 +37,34 @@ CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .  endif
 .endif
 .endfor
+  $(result:no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+.endif
+.endfor
+
+.for entity
+.if !(defined(transient) & transient = "true")
 .for primaryKey
-.  out = ",\n  " + "CONSTRAINT " + primaryKey.name + " PRIMARY KEY("
+.  out = "ALTER TABLE $(model.dbSchema:c).$(entity.name) ADD CONSTRAINT $(primaryKey.name) PRIMARY KEY("
 .  isFirstField = 1
 .  for field
 .    if !isFirstField
 .      out = out + ", "
 .    endif
 .    out = out + field.name
-.    isFirstField = 0 
+.    isFirstField = 0
 .  endfor
-.  out = out + ")"
-.  result = result + out
+.  out = out + ");"
+$(out:no)
 .endfor
+.endif
+.endfor
+
+.for entity
+.if !(defined(transient) & transient = "true")
 .for foreignKey
-.  out = ",\n  " + "CONSTRAINT " + foreignKey.name + " FOREIGN KEY("
+.  out = "ALTER TABLE $(model.dbSchema:c).$(entity.name) ADD CONSTRAINT $(foreignKey.name) FOREIGN KEY("
 .  refCols = ""
 .  isFirstField = 1
 .  for field
@@ -51,14 +74,12 @@ CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .    endif
 .    out = out + field.name
 .    refCols = refCols + field.refField
-.    isFirstField = 0 
+.    isFirstField = 0
 .  endfor
-.  out = out + ") REFERENCES " + foreignKey.refEntity+ "(" + refCols + ")"
-.  result = result + out
+.  out = out + ") REFERENCES $(model.dbSchema:c).$(foreignKey.refEntity)(" + refCols + ");"
+$(out:no)
 .endfor
-  $(result:no)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 .endif
 .endfor
+
 .endtemplate
