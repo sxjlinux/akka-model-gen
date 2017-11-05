@@ -19,17 +19,13 @@ USE $(model.dbSchema:c);
 .for entity
 .if !(defined(transient) & transient = "true")
 CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
-.isFirstField = 1
 .result = "$(db_output_keys(entity))"
-.if string.length(result) > 0
-.  isFirstField = 0
-.endif
 .for field
 .if defined(field.transient) & field.transient = "true"
 .else
 .  out = db_output_field(entity, field)
 .  if string.length(out) > 0
-.    if !isFirstField
+.    if string.length(result) > 0
 .      out = ",\n  " + out
 .    endif
 .    isFirstField = 0

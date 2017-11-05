@@ -1,7 +1,7 @@
 .template 0
 
 .function is_element_type(type)
-  if !defined(type)
+  if !defined(my.type)
     return 0
   endif
   if my.type = "string"
@@ -27,6 +27,35 @@
   endfor
 .endfunction
 
+.function is_pk_field(entity, fieldName)
+  for my.entity.primaryKey
+    for field
+      if field.name = my.fieldName
+        return 1
+      endif
+    endfor
+  endfor
+  return 0
+.endfunction
+
+.function has_fk(entity)
+  for my.entity.foreignKey
+    return 1
+  endfor
+  return 0
+.endfunction
+
+.function is_fk_field(entity, fieldName)
+  for my.entity.foreignKey
+    for field
+      if field.name = my.fieldName
+        return 1
+      endif
+    endfor
+  endfor
+  return 0
+.endfunction
+
 .function extract_fk_field(entity, fieldName)
   for my.entity.foreignKey
     for foreignKey.field
@@ -41,7 +70,7 @@
       endif
     endfor
   endfor
-  abort "E: no primaryKey field with name $(field.name) is defined on entity $(my.entity.name)."
+  abort "E: no foreignKey field with name $(field.name) is defined on entity $(my.entity.name)."
 .endfunction
 
 .function exists_field(entity, fieldName)

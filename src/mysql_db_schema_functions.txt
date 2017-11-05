@@ -1,11 +1,12 @@
 .function db_output_keys(entity)
-  result = ""
-  result = result + db_output_fk_pk(my.entity)
-  if string.length(result) > 0
-    result = result + "\n"
+  keys = ""
+  keys = keys + db_output_fk_pk(my.entity)
+  out = db_output_fk_only(my.entity)
+  if string.length(keys) > 0 & string.length(out) > 0
+    keys = keys + ",\n  "
   endif
-  result = result + db_output_fk_only(my.entity)
-  return result
+  keys = keys + out
+  return keys
 .endfunction
 
 .function db_output_fk_pk(entity)
@@ -14,14 +15,21 @@
   if defined(pk)
     for pk.field
       pkField = field
-      if exists_field(my.entity, field.name) & !is_element_type(field.type)
+      if exists_field(my.entity, pkField.name) & (defined(pkField.type) & is_element_type(pkField.type))
+        abort "E: Not supposed to be like that."
       else
-        theField = extract_fk_field(my.entity, field.name)
-        if !first()
-          result = result + ",\n  "
+        if has_fk(my.entity) & is_fk_field(my.entity, pkField.name)
+          theField = extract_fk_field(my.entity, pkField.name)
+        else
+          echo "skipped 1: \n $(my.entity.name) => $(pkField.name)"
+          return result
         endif
-        result = result + "$(db_output_field(my.entity, theField))"
       endif
+      if string.length(result) > 0
+        result = result + ",\n  "
+      endif
+      result = result + "$(db_output_field(my.entity, theField))"
+      echo "$(my.entity.name) => $(result)"
     endfor
   else
     abort "E: no primaryKey is defined on entity $(my.entity.name)."
@@ -33,10 +41,14 @@
   result = ""
   for my.entity.foreignKey
     for field
-      if exists_field(my.entity, field.name) & !is_element_type(field.type)
+      fkField = extract_fk_field(my.entity, field.name)
+      if exists_field(my.entity, fkField.name) & (defined(fkField.type) & is_element_type(fkField.type))
+        abort "E: Not supposed to be like that."
+      elsif is_pk_field(my.entity, field.name)
+        # echo "skipped 2: \n  $(my.entity.name) => $(field.name) $(fkField.type)"
       else
         theField = extract_fk_field(my.entity, field.name)
-        if !first()
+        if string.length(result) > 0
           result = result + ",\n  "
         endif
         result = result + "$(db_output_field(my.entity, theField))"

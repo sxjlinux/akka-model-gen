@@ -76,14 +76,9 @@
   pk = extract_pk(my.entity)
   if defined(pk)
     for pk.field
-      if string.length(result) > 0
-        result = result + "\n  "
-      endif
       pkField = field
       if defined(my.entity->field(name = pkField.name))
         theField = my.entity->field(name = pkField.name)
-        result = result + "$(pb_output_field(theField, fieldNo))"
-        fieldNo = fieldNo + 1
       else
         theField = extract_fk_field(my.entity, field.name)
       endif
@@ -106,31 +101,5 @@
   return result
 .endfunction
 
-.function pb_output_fk(entity, fieldNo)
-  result = ""
-  fk = entity->foreignKey(refEntity = my.entity.aggregationTo)
-  theEntity = my.entity
-  ref = model->entity(name = theEntity.aggregationTo)
-  if defined(fk) & defined(ref)
-    for fk.field
-      if !isFirst
-        result = result + "\n"
-      endif
-      fkField = field
-      f = ref->field(name = fkField.name)
-      field.type = f.type
-      if defined(f.length)
-        field.length = f.length
-      endif
-      if defined(f.required)
-        field.required = f.required
-      endif
-      result = result + "$(pb_output_field(field, fieldNo))"
-      fieldNo = fieldNo + 1
-    endfor
-  else
-    abort "E: no foreignKey or aggregationTo is defined on entity $(entity.name)."
-  endif
-  return result
-.endfunction
+
 
