@@ -1,5 +1,26 @@
 .template 0
 
+.function is_element_type(type)
+  if !defined(type)
+    return 0
+  endif
+  if my.type = "string"
+    return 1
+  elsif my.type = "double"
+    return 1
+  elsif my.type = "int"
+    return 1
+  elsif my.type = "bigint"
+    return 1
+  elsif my.type = "bool"
+    return 1
+  elsif my.type = "timestamp"
+    return 1
+  else
+    return 0
+  endif
+.endfunction
+
 .function extract_pk(entity)
   for my.entity.primaryKey
     return primaryKey

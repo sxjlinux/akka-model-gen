@@ -76,9 +76,14 @@
   pk = extract_pk(my.entity)
   if defined(pk)
     for pk.field
+      if string.length(result) > 0
+        result = result + "\n  "
+      endif
       pkField = field
       if defined(my.entity->field(name = pkField.name))
         theField = my.entity->field(name = pkField.name)
+        result = result + "$(pb_output_field(theField, fieldNo))"
+        fieldNo = fieldNo + 1
       else
         theField = extract_fk_field(my.entity, field.name)
       endif
@@ -108,6 +113,9 @@
   ref = model->entity(name = theEntity.aggregationTo)
   if defined(fk) & defined(ref)
     for fk.field
+      if !isFirst
+        result = result + "\n"
+      endif
       fkField = field
       f = ref->field(name = fkField.name)
       field.type = f.type
@@ -116,9 +124,6 @@
       endif
       if defined(f.required)
         field.required = f.required
-      endif
-      if !first()
-        result = result + "\n"
       endif
       result = result + "$(pb_output_field(field, fieldNo))"
       fieldNo = fieldNo + 1

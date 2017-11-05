@@ -1,10 +1,20 @@
+.function db_output_keys(entity)
+  result = ""
+  result = result + db_output_fk_pk(my.entity)
+  if string.length(result) > 0
+    result = result + "\n"
+  endif
+  result = result + db_output_fk_only(my.entity)
+  return result
+.endfunction
+
 .function db_output_fk_pk(entity)
   result = ""
   pk = extract_pk(my.entity)
   if defined(pk)
     for pk.field
       pkField = field
-      if exists_field(my.entity, field.name)
+      if exists_field(my.entity, field.name) & !is_element_type(field.type)
       else
         theField = extract_fk_field(my.entity, field.name)
         if !first()
@@ -16,6 +26,23 @@
   else
     abort "E: no primaryKey is defined on entity $(my.entity.name)."
   endif
+  return result
+.endfunction
+
+.function db_output_fk_only(entity)
+  result = ""
+  for my.entity.foreignKey
+    for field
+      if exists_field(my.entity, field.name) & !is_element_type(field.type)
+      else
+        theField = extract_fk_field(my.entity, field.name)
+        if !first()
+          result = result + ",\n  "
+        endif
+        result = result + "$(db_output_field(my.entity, theField))"
+      endif
+    endfor
+  endfor
   return result
 .endfunction
 

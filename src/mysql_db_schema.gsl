@@ -20,7 +20,7 @@ USE $(model.dbSchema:c);
 .if !(defined(transient) & transient = "true")
 CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .isFirstField = 1
-.result = "$(db_output_fk_pk(entity))"
+.result = "$(db_output_keys(entity))"
 .if string.length(result) > 0
 .  isFirstField = 0
 .endif
