@@ -37,7 +37,7 @@ message $(entity.name:Pascal)Vo {
 .  endif
 .for field
 .  theField = field
-.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
+.  if (defined(field.transient) & field.transient = "true") | defined(pk->field(name = theField.name))
 .  else
   $(pb_output_field(field, fieldNo))
 .    fieldNo = fieldNo + 1

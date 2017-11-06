@@ -92,10 +92,7 @@
   elsif defined(my.field.joinKey)
     foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
     theRefField = model->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
-    my.field.type = theRefField.type
-    if defined(theRefField.length)
-      my.field.length = theRefField.length
-    endif
+    assign_field_type(my.field, theRefField)
     return db_output_field_basic(my.field)
   else
     return db_output_field_basic(my.field)

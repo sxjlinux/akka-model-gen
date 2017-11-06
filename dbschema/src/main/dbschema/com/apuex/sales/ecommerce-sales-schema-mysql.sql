@@ -27,8 +27,8 @@ CREATE TABLE sales.order (
 CREATE TABLE sales.order_item (
   order_id VARCHAR(64) NOT NULL,
   product_id VARCHAR(64) NOT NULL,
-  item_name VARCHAR(64),
-  unit_price DOUBLE,
+  item_name VARCHAR(64) NOT NULL,
+  unit_price DOUBLE NOT NULL,
   order_quantity DOUBLE NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

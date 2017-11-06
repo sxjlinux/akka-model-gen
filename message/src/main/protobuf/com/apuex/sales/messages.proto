@@ -170,8 +170,8 @@ message OrderItemVo {
   option (scalapb.message).extends = "com.apuex.sales.message.ValueObject";
   required string orderId = 1;
   required string productId = 2;
-  optional string itemName = 3;
-  optional double unitPrice = 4;
+  required string itemName = 3;
+  required double unitPrice = 4;
   required double orderQuantity = 5;
 };
 

@@ -50,7 +50,7 @@
   if defined(my.refField.length)
     my.field.length = my.refField.length
   endif
-  if defined(my.refField.required)
+  if !defined(my.field.required) & defined(my.refField.required)
     my.field.required = my.refField.required
   endif
 .endfunction
