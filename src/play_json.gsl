@@ -1,0 +1,60 @@
+.template 1
+.class_package = "$(model.package).json"
+.pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.output "$(pkgdir)/JsonSupport.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package);
+
+import com.wincom.dcim.message._
+import play.api.libs.json._
+
+trait JsonFormat {
+.for entity
+.if defined(entity.enum) & entity.enum = "true"
+  implicit val $(entity.name:Camel)Format = EnumFormat.format($(entity.name:Pascal))
+.endif
+  implicit val $(entity.name:Camel)VoFormat = Json.format[$(entity.name:Pascal)Vo]
+
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+  implicit val create$(entity.name:Pascal)CmdFormat = Json.format[Create$(entity.name:Pascal)Cmd]
+  implicit val create$(entity.name:Pascal)EvtFormat = Json.format[Create$(entity.name:Pascal)Evt]
+  implicit val retrieve$(entity.name:Pascal)CmdFormat = Json.format[Retrieve$(entity.name:Pascal)Cmd]
+
+.  for field
+.    theField = field
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+  implicit val add$(field.name:Pascal)CmdFormat = Json.format[Add$(field.name:Pascal)Cmd]
+  implicit val add$(field.name:Pascal)EvtFormat = Json.format[Add$(field.name:Pascal)Evt]
+  implicit val remove$(field.name:Pascal)CmdFormat = Json.format[Remove$(field.name:Pascal)Cmd]
+  implicit val remove$(field.name:Pascal)EvtFormat = Json.format[Remove$(field.name:Pascal)Evt]
+
+.     elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+  implicit val change$(field.name:Pascal)CmdFormat = Json.format[Change$(field.name:Pascal)Cmd]
+  implicit val change$(field.name:Pascal)EvtFormat = Json.format[Change$(field.name:Pascal)Evt]
+
+.    else
+.    endif    
+.  endfor
+.else
+.endif
+.
+.for aggregation
+  implicit val update$(aggregation.name:Pascal)CmdFormat = Json.format[Update$(aggregation.name:Pascal)Cmd]
+  implicit val $(aggregation.name:Pascal)VoFormat = Json.format[$(aggregation.name:Pascal)Vo]
+  implicit val get$(aggregation.name:Pascal)CmdFormat = Json.format[Get$(aggregation.name:Pascal)Cmd]
+
+.endfor
+.
+.for message
+  implicit val $(message.name:Pascal)CmdFormat = Json.format[$(message.name:Pascal)Cmd]
+.if !(defined(transient) & transient = "true")
+  implicit val $(message.name:Pascal)EvtFormat = Json.format[$(message.name:Pascal)Evt]
+
+.endif
+.endfor
+.endfor
+}
+.endtemplate

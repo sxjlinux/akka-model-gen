@@ -13,14 +13,14 @@ import "scalapb/scalapb.proto";
 option (scalapb.options) = {
   flat_package: true
 };
-.package = "$(model.package).message"
-package $(package);
+.message_package = "$(model.package).message"
+package $(message_package);
 
 
 .for entity
 .if defined(entity.enum) & entity.enum = "true"
 enum $(entity.name:Pascal) {
-  option (scalapb.enum_options).extends = "$(package).ValueObject";
+  option (scalapb.enum_options).extends = "$(message_package).ValueObject";
 .  enumConf = entity->enum(name = entity.name)
 .for entity.row
   $($(enumConf.nameField):no) = $($(enumConf.valueField));
@@ -29,7 +29,7 @@ enum $(entity.name:Pascal) {
 
 .endif
 message $(entity.name:Pascal)Vo {
-  option (scalapb.message).extends = "$(package).ValueObject";
+  option (scalapb.message).extends = "$(message_package).ValueObject";
 .fieldNo = 1
 .  keys = pb_output_pk(entity, fieldNo)
 .  if string.length(keys) > 0
@@ -51,7 +51,7 @@ message $(entity.name:Pascal)Vo {
 .  aggRoot = entity.name
 .
 message Create$(entity.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -69,7 +69,7 @@ message Create$(entity.name:Pascal)Cmd {
 };
 
 message Create$(entity.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -87,7 +87,7 @@ message Create$(entity.name:Pascal)Evt {
 };
 
 message Retrieve$(entity.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .  fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -100,7 +100,7 @@ message Retrieve$(entity.name:Pascal)Cmd {
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 message Add$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -111,7 +111,7 @@ message Add$(field.name:Pascal)Cmd {
 };
 
 message Add$(field.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -122,7 +122,7 @@ message Add$(field.name:Pascal)Evt {
 };
 
 message Remove$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -133,7 +133,7 @@ message Remove$(field.name:Pascal)Cmd {
 };
 
 message Remove$(field.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -145,7 +145,7 @@ message Remove$(field.name:Pascal)Evt {
 
 .     elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 message Change$(field.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -156,7 +156,7 @@ message Change$(field.name:Pascal)Cmd {
 };
 
 message Change$(field.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .      fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
@@ -177,7 +177,7 @@ message Change$(field.name:Pascal)Evt {
 .
 .for aggregation
 message Update$(aggregation.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)
@@ -199,7 +199,7 @@ message Update$(aggregation.name:Pascal)Cmd {
 };
 
 message $(aggregation.name:Pascal)Vo{
-  option (scalapb.message).extends = "$(package).ValueObject";
+  option (scalapb.message).extends = "$(message_package).ValueObject";
 .fieldNo = 1
 .if defined(entity.aggregationRoot)
 .  keys = pb_output_pk(entity, fieldNo)
@@ -220,7 +220,7 @@ message $(aggregation.name:Pascal)Vo{
 };
 
 message Get$(aggregation.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)
@@ -235,7 +235,7 @@ message Get$(aggregation.name:Pascal)Cmd {
 .
 .for message
 message $(message.name:Pascal)Cmd {
-  option (scalapb.message).extends = "$(package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)
@@ -258,7 +258,7 @@ message $(message.name:Pascal)Cmd {
 
 .if !(defined(transient) & transient = "true")
 message $(message.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(package).Event";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .fieldNo = 2
 .if defined(entity.aggregationRoot)
@@ -282,4 +282,7 @@ message $(message.name:Pascal)Evt {
 .endif
 .endfor
 .endfor
+
 .endtemplate
+
+

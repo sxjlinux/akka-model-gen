@@ -105,6 +105,7 @@ include "mysql_db_schema_functions.txt"
 
 include "mysql_db_schema.gsl"
 include "scala_pb.gsl"
+include "play_json.gsl"
 
 .endtemplate
 
