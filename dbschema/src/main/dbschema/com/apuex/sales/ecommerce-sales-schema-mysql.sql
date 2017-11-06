@@ -27,7 +27,6 @@ CREATE TABLE sales.order (
 CREATE TABLE sales.order_item (
   order_id VARCHAR(64) NOT NULL,
   product_id VARCHAR(64) NOT NULL,
-  ,
   item_name VARCHAR(64),
   unit_price DOUBLE,
   order_quantity DOUBLE NOT NULL
