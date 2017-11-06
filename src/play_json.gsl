@@ -11,7 +11,10 @@ package $(class_package);
 import com.wincom.dcim.message._
 import play.api.libs.json._
 
-trait JsonFormat {
+trait JsonSupport {
+  implicit val byteStringFormat = ByteStringFormat.format
+  implicit val timestampFormat = TimestampFormat.format
+
 .for entity
 .if defined(entity.enum) & entity.enum = "true"
   implicit val $(entity.name:Camel)Format = EnumFormat.format($(entity.name:Pascal))
