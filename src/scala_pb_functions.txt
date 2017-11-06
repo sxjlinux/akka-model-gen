@@ -38,6 +38,11 @@
 .endfunction
 
 .function pb_output_field(field, fieldNo)
+  if defined(my.field.joinKey)
+    foreignKey =  entity->foreignKey(name = my.field.joinKey)
+    theRefField = model->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
+    assign_field_type(my.field, theRefField)
+  endif
   if my.field.type = "array"
     if defined(my.field.entity)
       valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
