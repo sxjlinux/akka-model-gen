@@ -23,7 +23,7 @@ CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .for field
 .if defined(field.transient) & field.transient = "true"
 .else
-.  out = db_output_field(entity, field)
+.  out = db_output_nonkey_field(entity, field)
 .  if string.length(out) > 0
 .    if string.length(result) > 0
 .      out = ",\n  " + out

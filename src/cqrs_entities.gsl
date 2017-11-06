@@ -45,6 +45,16 @@
   return 0
 .endfunction
 
+.function assign_field_type(field, refField)
+  my.field.type = my.refField.type
+  if defined(my.refField.length)
+    my.field.length = my.refField.length
+  endif
+  if defined(my.refField.required)
+    my.field.required = my.refField.required
+  endif
+.endfunction
+
 .function is_fk_field(entity, fieldName)
   for my.entity.foreignKey
     for field
@@ -54,6 +64,14 @@
     endfor
   endfor
   return 0
+.endfunction
+
+.function extract_pk_field(entity, fieldName)
+  for my.entity.field
+    if field.name = my.fieldName
+      return field
+    endif
+  endfor
 .endfunction
 
 .function extract_fk_field(entity, fieldName)

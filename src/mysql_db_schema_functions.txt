@@ -15,21 +15,21 @@
   if defined(pk)
     for pk.field
       pkField = field
-      if exists_field(my.entity, pkField.name) & (defined(pkField.type) & is_element_type(pkField.type))
-        abort "E: Not supposed to be like that."
+      if defined(extract_pk_field(my.entity, pkField.name))
+        theField = extract_pk_field(my.entity, pkField.name)
       else
         if has_fk(my.entity) & is_fk_field(my.entity, pkField.name)
           theField = extract_fk_field(my.entity, pkField.name)
         else
-          echo "skipped 1: \n $(my.entity.name) => $(pkField.name)"
+          abort "E: no primaryKey/foreignKey is defined on entity $(my.entity.name)."
           return result
         endif
       endif
       if string.length(result) > 0
         result = result + ",\n  "
       endif
-      result = result + "$(db_output_field(my.entity, theField))"
-      echo "$(my.entity.name) => $(result)"
+      assign_field_type(field, theField)
+      result = result + "$(db_output_field_basic(field))"
     endfor
   else
     abort "E: no primaryKey is defined on entity $(my.entity.name)."
@@ -45,13 +45,12 @@
       if exists_field(my.entity, fkField.name) & (defined(fkField.type) & is_element_type(fkField.type))
         abort "E: Not supposed to be like that."
       elsif is_pk_field(my.entity, field.name)
-        # echo "skipped 2: \n  $(my.entity.name) => $(field.name) $(fkField.type)"
       else
-        theField = extract_fk_field(my.entity, field.name)
         if string.length(result) > 0
           result = result + ",\n  "
         endif
-        result = result + "$(db_output_field(my.entity, theField))"
+        assign_field_type(field, fkField)
+        result = result + "$(db_output_field_basic(field))"
       endif
     endfor
   endfor
@@ -87,8 +86,10 @@
   endif
 .endfunction
 
-.function db_output_field(entity, field)
-  if defined(my.field.joinKey)
+.function db_output_nonkey_field(entity, field)
+  if is_fk_field(my.entity, my.field.name) | is_pk_field(my.entity, my.field.name)
+    return ""
+  elsif defined(my.field.joinKey)
     foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
     theRefField = model->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
     my.field.type = theRefField.type
