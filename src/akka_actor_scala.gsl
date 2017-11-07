@@ -2,14 +2,6 @@
 .class_package = "$(model.package).domain"
 .pkgdir = "domain/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
-/*****************************************************
- ** This file is 100% ***GENERATED***, DO NOT EDIT! **
- *****************************************************/
-package $(class_package)
-
-import $(model.package).message._
-
-
 .for entity
 .aggRoot = ""
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
@@ -24,6 +16,8 @@ package $(class_package)
 
 import $(model.package).message._
 import $(model.package).message.ResponseType._
+import com.google.protobuf.any.Any
+import com.google.protobuf.timestamp.Timestamp
 import akka.actor._
 import akka.event._
 import akka.pattern._
@@ -37,7 +31,7 @@ import scala.concurrent.duration._
 import scala.util._
 
 object $(entity.name:Pascal) {
-  def props = Props[$(entity.name:Pascal]
+  def props = Props[$(entity.name:Pascal)]
 }
 
 class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
@@ -50,58 +44,58 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case evt: Event =>
       updateState(evt)
-    case SnapshotOffer(_, s:  $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity)))) =>
+    case SnapshotOffer(_, $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity)))) =>
       $(scala_output_set_field_values(entity))
     case x: RecoveryCompleted =>
     case x => log.info("RECOVER: {} {}", this, x)
   }
 
   override def receiveCommand: Receive = {
-    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity)) =>
+    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity))) =>
       if(isValid()) {
-        sender() ! Response(ALREADY_EXISTS, None)
+        sender() ! ResponseVo(ALREADY_EXISTS, Some("$(entity.name:Pascal) already exists."))
       } else {
-        persist(Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity)) (updateState)
+        persist(Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity)))) (updateState)
       }
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       if (!isValid()) {
-        sender() ! Response(NOT_EXIST, None)
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        sender() ! $(entity.name:Pascal)Vo($(scala_output_get_field_values(entity))
+        sender() ! $(entity.name:Pascal)Vo($(scala_output_get_field_values(entity)))
       }
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Add$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Add$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       if (isValid()) {
-        persist(Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))(updateState)
+        persist(Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
       } else {
-        sender() ! Response(NOT_EXIST, None)
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
-    case Remove$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Remove$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       if (isValid()) {
-        persist(Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))(updateState)
+        persist(Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
       } else {
-        sender() ! Response(NOT_EXIST, None)
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Change$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Change$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       if (isValid()) {
-        persist(Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))(updateState)
+        persist(Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
       } else {
-        sender() ! Response(NOT_EXIST, None)
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .    else
 .    endif
 .  endfor
 .for aggregation
-    case Update$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(aggregation)))
+    case Update$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(aggregation)))
       $(scala_output_set_field_values(aggregation))
-    case Get$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)))
+    case Get$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)))
       if (isValid()) {
         sender() ! $(aggregation.name:Pascal)Vo($(scala_output_get_field_values(aggregation)))
       } else {
-        sender() ! Response(NOT_EXIST, None)
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .endfor
 .
@@ -116,12 +110,12 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_add_field_value(field))
-    case Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_remove_field_value(field))
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_set_field_value(field))
 .    else
 .    endif
@@ -135,11 +129,12 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
   }
 
   private def isValid(): Boolean = {
-    fsuName.isDefined && modelName.isDefined
+    false
   }
 }
 
 .close
+.endif
 .endfor
 
 .endtemplate

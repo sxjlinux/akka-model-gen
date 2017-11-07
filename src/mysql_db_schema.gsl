@@ -106,4 +106,5 @@ $(out:no)
 .endif
 .endfor
 
+.close
 .endtemplate

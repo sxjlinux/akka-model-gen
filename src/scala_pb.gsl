@@ -283,6 +283,7 @@ message $(message.name:Pascal)Evt {
 .endfor
 .endfor
 
+.close
 .endtemplate
 
 

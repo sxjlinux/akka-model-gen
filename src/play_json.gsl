@@ -63,4 +63,6 @@ trait JsonSupport {
 .endfor
 .endfor
 }
+
+.close
 .endtemplate

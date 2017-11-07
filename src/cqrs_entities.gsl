@@ -100,12 +100,30 @@
   return 0
 .endfunction
 
-include "scala_pb_functions.txt"
-include "mysql_db_schema_functions.txt"
+. function find_entity_by_type(type)
+  for model.entity
+    if entity.name = my.type
+      return entity
+    else
+      for entity.aggregation
+        if aggregation.name = my.type
+          return aggregation
+        endif
+      endfor
+    endif
+  endfor
+.endfunction
 
+include "mysql_db_schema_functions.txt"
 include "mysql_db_schema.gsl"
+
+include "scala_pb_functions.txt"
 include "scala_pb.gsl"
+
 include "play_json.gsl"
+
+include "akka_actor_scala_functions.txt"
+include "akka_actor_scala.gsl"
 
 .endtemplate
 

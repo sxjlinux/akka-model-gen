@@ -1,17 +1,3 @@
-. function pb_find_entity_by_type(type)
-  for model.entity
-    if entity.name = my.type
-      return entity
-    else
-      for entity.aggregation
-        if aggregation.name = my.type
-          return aggregation
-        endif
-      endfor
-    endif
-  endfor
-.endfunction
-
 .function pb_format_type(t)
   if my.t = "tinyint" | my.t = "bool"
     return "bool"
@@ -28,7 +14,7 @@
   elsif my.t = "actor_ref"
     return "$(my.t:Pascal)"
   else
-    ref = pb_find_entity_by_type(my.t)
+    ref = find_entity_by_type(my.t)
     if defined(ref.enum) & ref.enum = "true"
       return "$(my.t:Pascal)"
     else

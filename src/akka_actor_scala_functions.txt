@@ -1,0 +1,283 @@
+.function scala_output_type(field)
+  if my.field.type = "tinyint" | my.field.type = "bool"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Bool"
+    else
+      return "Option[Bool]"
+    endif
+  elsif my.field.type = "int"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Int"
+    else
+      return "Option[Int]"
+    endif
+  elsif my.field.type = "bigint"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Long"
+    else
+      return "Option[Long]"
+    endif
+  elsif my.field.type = "double" | my.field.type = "string"
+    if defined(my.field.required) & my.field.required = "true"
+      return "$(my.field.type:Pascal)"
+    else
+      return "Option[$(my.field.type:Pascal)]"
+    endif
+  elsif my.field.type = "timestamp"
+    if defined(my.field.required) & my.field.required = "true"
+      return "$(my.field.type:Pascal)"
+    else
+      return "Option[$(my.field.type:Pascal)]"
+    endif
+  elsif my.field.type = "any"
+    if defined(my.field.required) & my.field.required = "true"
+      return "$(my.field.type:Pascal)"
+    else
+      return "Option[$(my.field.type:Pascal)]"
+    endif
+  elsif my.field.type = "array"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Seq[$(my.field.valueType:Pascal)]"
+    else
+      return "Option[Seq[$(my.field.valueType:Pascal)]]"
+    endif
+  elsif my.field.type = "map"
+    if defined(my.field.entity)
+      my.ref = model->entity(name = my.field.entity)
+      my.keyType = scala_output_type(my.ref->field(name = my.field.keyField))
+      my.valueType = scala_output_type(my.ref->field(name = my.field.valueField))
+      if defined(my.field.required) & my.field.required = "true"
+        return "Map[$(my.keyType:no), $(my.valueType:no)]"
+      else
+        return "Option[Map[$(my.keyType:no), $(my.valueType:no)]]"
+      endif
+    else
+      if defined(my.field.required) & my.field.required = "true"
+        return "Map[$(my.field.keyType:Pascal), $(my.field.valueType:Pascal)]"
+      else
+        return "Option[Map[$(my.field.keyType:Pascal), $(my.field.valueType:Pascal)]]"
+      endif
+    endif
+  elsif my.field.type = "actor_ref"
+    if defined(my.field.required) & my.field.required = "true"
+      return "$(my.field.type:Pascal)"
+    else
+      return "Option[$(my.field.type:Pascal)]"
+    endif
+  else
+    ref = find_entity_by_type(my.field.type)
+    if defined(ref.enum) & ref.enum = "true"
+      if defined(my.field.required) & my.field.required = "true"
+        return "$(my.field.type:Pascal)"
+      else
+        return "Option[$(my.field.type:Pascal)]"
+      endif
+    else
+      if defined(my.field.required) & my.field.required = "true"
+        return "$(my.field.type:Pascal)Vo"
+      else
+        return "Option[$(my.field.type:Pascal)Vo]"
+      endif
+    endif
+  endif
+.endfunction
+
+.function scala_output_default(field)
+  if my.field.type = "tinyint" | my.field.type = "bool"
+    if defined(my.field.required) & my.field.required = "true"
+      return "false"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "int"
+    if defined(my.field.required) & my.field.required = "true"
+      return "0"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "bigint"
+    if defined(my.field.required) & my.field.required = "true"
+      return "0"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "double"
+    if defined(my.field.required) & my.field.required = "true"
+      return "0.0"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "string"
+    if defined(my.field.required) & my.field.required = "true"
+      return "null"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "timestamp"
+    if defined(my.field.required) & my.field.required = "true"
+      return "null"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "any"
+    if defined(my.field.required) & my.field.required = "true"
+      return "null"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "array"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Seq()"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "map"
+    if defined(my.field.required) & my.field.required = "true"
+      return "Map()"
+    else
+      return "None"
+    endif
+  elsif my.field.type = "actor_ref"
+    if defined(my.field.required) & my.field.required = "true"
+      return "null"
+    else
+      return "None"
+    endif
+  else
+    ref = find_entity_by_type(my.field.type)
+    if defined(ref.enum) & ref.enum = "true"
+      if defined(my.field.required) & my.field.required = "true"
+        return "null"
+      else
+        return "None"
+      endif
+    else
+      if defined(my.field.required) & my.field.required = "true"
+        return "null"
+      else
+        return "None"
+      endif
+    endif
+  endif
+.endfunction
+
+.function scala_output_define_fields(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      my.fieldName = field.name
+      my.field = ""
+      if defined(my.entity->field(name = my.fieldName))
+        my.field = my.entity->field(name = my.fieldName)
+      else
+        my.field = extract_fk_field(my.entity, my.fieldName)
+      endif
+      if string.length(my.result) > 0
+        my.result = my.result + "\n  "
+      endif
+      my.result = my.result + "var $(field.name:Camel): $(scala_output_type(field)) = $(scala_output_default(field)) "
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name)
+      if string.length(my.result) > 0
+        my.result = my.result + "\n  "
+      endif
+      my.result = my.result + "var $(field.name:Camel): $(scala_output_type(field)) = $(scala_output_default(field)) "
+    endif
+  endfor
+  return my.result
+.endfunction
+
+
+.function scala_output_field_name_list(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name)
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function scala_output_set_field_value(field)
+  return "this.$(field.name:Camel) = $(field.name:Camel)"
+.endfunction
+
+.function scala_output_set_field_values(entity)
+  my.result = ""
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name)
+      if string.length(my.result) > 0
+        my.result = my.result + "\n      "
+      endif
+      my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function scala_output_key_name_list(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  return my.result
+.endfunction
+
+.function scala_output_get_field_values(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name)
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function scala_output_get_field_value(field)
+  return "$(field.name)"
+.endfunction
+
+.function scala_output_field_name(field)
+  return "$(field.name)"
+.endfunction
+
+.function scala_output_add_field_value(field)
+  return ""
+.endfunction
+
+.function scala_output_remove_field_value(field)
+  return ""
+.endfunction
