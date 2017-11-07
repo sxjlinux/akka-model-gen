@@ -2,92 +2,22 @@
 .class_package = "$(model.package).json"
 .pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
-.output "$(pkgdir)/JsonSupport.scala"
+.output "$(pkgdir)/JsonSupport.scala_"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 package $(class_package)
 
-import com.google.protobuf.ByteString
-import com.google.protobuf.any._
-import com.google.protobuf.timestamp._
 import $(model.package).message._
-import $(model.package).util.DateFormat._
 import play.api.libs.json._
 
 trait JsonSupport {
-  implicit val byteStringFormat = new Format[ByteString] {
-    override def writes(o: ByteString) = JsArray(o.toByteArray.toIndexedSeq.map(x => JsNumber(BigDecimal.apply(x.intValue()))))
-
-    override def reads(json: JsValue) = {
-      json match {
-        case JsArray(value: Seq[JsValue]) =>
-          JsSuccess(ByteString.copyFrom(value.toArray.flatMap(toByte)))
-        case _ => JsError(json.toString())
-      }
-    }
-  }
-
-  def toByte(value: JsValue): Option[Byte] = {
-    try {
-      value match {
-        case JsNumber(x) => Some(x.toByte)
-        case JsString(x) => Some(x.toByte)
-        case _ => None
-      }
-    } catch {
-      case _: Exception => None
-    }
-  }
-
-  implicit val timestampFormat = new Format[Timestamp] {
-    override def writes(o: Timestamp) = JsString(formatTimestamp(o))
-
-    override def reads(json: JsValue) = {
-      try {
-        json match {
-          case JsString(str) =>
-            JsSuccess(parseTimestamp(str))
-          case _ => JsError(json.toString())
-        }
-      } catch {
-        case e: Exception => JsError(e.toString)
-      }
-    }
-  }
-
-  val eventTypeReads: Reads[String] = (JsPath \\ "event").read[String]
-  val eventTypeWrites: Writes[String] = (JsPath \\ "event").write[String]
-  implicit val anyAlarmEventFormat = new Format[Any] {
-    override def writes(o: Any) = {
-      o.typeUrl match {
-        case "RaiseAlarmEvt" =>
-          Json.toJsObject(RaiseAlarmEvt.parseFrom(o.value.newCodedInput())) += ("event", JsString(RaiseAlarmEvt.getClass.getSimpleName))
-        case "TransitAlarmEvt" =>
-          Json.toJsObject(TransitAlarmEvt.parseFrom(o.value.newCodedInput())) += ("event", JsString(TransitAlarmEvt.getClass.getSimpleName))
-        case "EndAlarmEvt" =>
-          Json.toJsObject(EndAlarmEvt.parseFrom(o.value.newCodedInput())) += ("event", JsString(EndAlarmEvt.getClass.getSimpleName))
-        case "AckAlarmEvt" =>
-          Json.toJsObject(AckAlarmEvt.parseFrom(o.value.newCodedInput())) += ("event", JsString(AckAlarmEvt.getClass.getSimpleName))
-        case "MuteAlarmEvt" =>
-          Json.toJsObject(MuteAlarmEvt.parseFrom(o.value.newCodedInput())) += ("event", JsString(MuteAlarmEvt.getClass.getSimpleName))
-        case _ => throw IllegalArgumentException
-      }
-    }
-
-    override def reads(json: JsValue) = {
-      val eventType: JsResult[String] = eventTypeReads.reads(json)
-      eventType.asOpt.get match {
-        case "RaiseAlarmEvt" => JsSuccess(Any(RaiseAlarmEvt.getClass.getSimpleName, Json.fromJson[RaiseAlarmEvt](json).get.toByteString))
-        case "TransitAlarmEvt" => JsSuccess(Any(TransitAlarmEvt.getClass.getSimpleName, Json.fromJson[TransitAlarmEvt](json).get.toByteString))
-        case "EndAlarmEvt" => JsSuccess(Any(EndAlarmEvt.getClass.getSimpleName, Json.fromJson[EndAlarmEvt](json).get.toByteString))
-        case "AckAlarmEvt" => JsSuccess(Any(AckAlarmEvt.getClass.getSimpleName, Json.fromJson[AckAlarmEvt](json).get.toByteString))
-        case "MuteAlarmEvt" => JsSuccess(Any(MuteAlarmEvt.getClass.getSimpleName, Json.fromJson[MuteAlarmEvt](json).get.toByteString))
-        case _ => JsError(json.toString())
-      }
-    }
-  }
-
+  implicit val byteStringFormat = ByteStringFormat.format
+  implicit val timestampFormat = TimestampFormat.format
+  /*
+   * Ad-hoc line, tight coupling.
+   */
+  implicit val anyAlarmEventFormat = AnyAlarmEventFormat.format
 .for entity
 .if defined(entity.enum) & entity.enum = "true"
   implicit val $(entity.name:Camel)Format = EnumFormat.format($(entity.name:Pascal))
@@ -119,15 +49,15 @@ trait JsonSupport {
 .
 .for aggregation
   implicit val update$(aggregation.name:Pascal)CmdFormat = Json.format[Update$(aggregation.name:Pascal)Cmd]
-  implicit val $(aggregation.name:Pascal)VoFormat = Json.format[$(aggregation.name:Pascal)Vo]
+  implicit val $(aggregation.name:Camel)VoFormat = Json.format[$(aggregation.name:Pascal)Vo]
   implicit val get$(aggregation.name:Pascal)CmdFormat = Json.format[Get$(aggregation.name:Pascal)Cmd]
 
 .endfor
 .
 .for message
-  implicit val $(message.name:Pascal)CmdFormat = Json.format[$(message.name:Pascal)Cmd]
+  implicit val $(message.name:Camel)CmdFormat = Json.format[$(message.name:Pascal)Cmd]
 .if !(defined(transient) & transient = "true")
-  implicit val $(message.name:Pascal)EvtFormat = Json.format[$(message.name:Pascal)Evt]
+  implicit val $(message.name:Camel)EvtFormat = Json.format[$(message.name:Pascal)Evt]
 
 .endif
 .endfor
