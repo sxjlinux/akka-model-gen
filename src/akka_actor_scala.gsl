@@ -100,7 +100,7 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 .endfor
 .
 .for message
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message)))) =>
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message))) =>
 .endfor
   }
 
@@ -123,7 +123,7 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 .
 .  for message
 .    if !(defined(transient) & transient = "true")
-    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message)))) =>
+    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message))) =>
 .    endif
 .  endfor
   }
