@@ -243,11 +243,11 @@
 .endfunction
 
 .function scala_output_get_field_value(field)
-  return "$(field.name)"
+  return "$(field.name:Camel)"
 .endfunction
 
 .function scala_output_field_name(field)
-  return "$(field.name)"
+  return "$(field.name:Camel)"
 .endfunction
 
 .function scala_output_add_field_value(field)

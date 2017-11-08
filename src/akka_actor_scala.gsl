@@ -129,7 +129,11 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
   }
 
   private def isValid(): Boolean = {
-    false
+.  if entity.name = "alarm_record"
+    alarmName.isDefined
+.  else
+    $(entity.name:Camel)Name.isDefined
+.endif
   }
 }
 
