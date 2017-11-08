@@ -57,6 +57,12 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
       } else {
         persist(Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0)))) (updateState)
       }
+    case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+      if(!isValid()) {
+        sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
+      } else {
+        persist(Update$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0)))) (updateState)
+      }
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       if (!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
@@ -106,6 +112,8 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 
   private def updateState: (Event => Unit) = {
     case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
+      $(scala_output_set_field_values(entity))
+    case Update$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
       $(scala_output_set_field_values(entity))
 .  for field
 .    theField = field

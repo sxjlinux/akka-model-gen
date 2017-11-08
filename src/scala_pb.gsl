@@ -85,6 +85,41 @@ message Create$(entity.name:Pascal)Evt {
 .  endif
 .endfor
 };
+message Update$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.for field
+.  theField = field
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
+.  else
+  $(pb_output_field(field, fieldNo))
+.    fieldNo = fieldNo + 1
+.  endif
+.endfor
+};
+
+message Update$(entity.name:Pascal)Evt {
+  option (scalapb.message).extends = "$(message_package).Event";
+  optional string userId = 1;
+.fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.for field
+.  theField = field
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
+.  else
+  $(pb_output_field(field, fieldNo))
+.    fieldNo = fieldNo + 1
+.  endif
+.endfor
+};
 
 message Retrieve$(entity.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
