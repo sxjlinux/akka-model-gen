@@ -251,9 +251,15 @@
 .endfunction
 
 .function scala_output_add_field_value(field)
-  return ""
+  return "this.$(field.name:Camel) ++= $(field.name:Camel)"
 .endfunction
 
 .function scala_output_remove_field_value(field)
+  if my.field.type = "array"
+    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => !$(field.name:Camel).contains(x))"
+  elsif my.field.type = "map"
+    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => $(field.name:Camel).contains(x._1))"
+  else
+  endif
   return ""
 .endfunction
