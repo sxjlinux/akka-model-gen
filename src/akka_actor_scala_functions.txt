@@ -1,84 +1,46 @@
+.function scala_get_type(typeName)
+  if my.typeName = "tinyint" | my.typeName = "bool"
+    return "Boolean"
+  elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double" | my.typeName = "string" | my.typeName = "timestamp" | my.typeName = "any" | my.typeName = "actor_ref"
+    return "$(my.typeName:Pascal)"
+  elsif my.typeName = "bigint"
+    return "Long"
+  elsif my.typeName = "array"
+    return "Seq"
+  elsif my.typeName = "map"
+    return "Map"
+  else
+    ref = find_entity_by_type(my.typeName)
+    if defined(ref.enum) & ref.enum = "true"
+      return "$(my.typeName:Pascal)"
+    else
+      return "$(my.typeName:Pascal)Vo"
+    endif
+  endif
+.endfunction
+
 .function scala_output_type(field)
-  if my.field.type = "tinyint" | my.field.type = "bool"
-    if defined(my.field.required) & my.field.required = "true"
-      return "Bool"
-    else
-      return "Option[Bool]"
-    endif
-  elsif my.field.type = "int"
-    if defined(my.field.required) & my.field.required = "true"
-      return "Int"
-    else
-      return "Option[Int]"
-    endif
-  elsif my.field.type = "bigint"
-    if defined(my.field.required) & my.field.required = "true"
-      return "Long"
-    else
-      return "Option[Long]"
-    endif
-  elsif my.field.type = "double" | my.field.type = "string"
-    if defined(my.field.required) & my.field.required = "true"
-      return "$(my.field.type:Pascal)"
-    else
-      return "Option[$(my.field.type:Pascal)]"
-    endif
-  elsif my.field.type = "timestamp"
-    if defined(my.field.required) & my.field.required = "true"
-      return "$(my.field.type:Pascal)"
-    else
-      return "Option[$(my.field.type:Pascal)]"
-    endif
-  elsif my.field.type = "any"
-    if defined(my.field.required) & my.field.required = "true"
-      return "$(my.field.type:Pascal)"
-    else
-      return "Option[$(my.field.type:Pascal)]"
-    endif
-  elsif my.field.type = "array"
-    if defined(my.field.required) & my.field.required = "true"
-      return "Seq[$(my.field.valueType:Pascal)]"
-    else
-      return "Option[Seq[$(my.field.valueType:Pascal)]]"
-    endif
+  if my.field.type = "array"
+    my.valueType = scala_get_type(my.field.valueType)
+    return "Seq[$(my.valueType:Pascal)]"
   elsif my.field.type = "map"
     if defined(my.field.entity)
       my.ref = model->entity(name = my.field.entity)
-      my.keyType = scala_output_type(my.ref->field(name = my.field.keyField))
-      my.valueType = scala_output_type(my.ref->field(name = my.field.valueField))
-      if defined(my.field.required) & my.field.required = "true"
-        return "Map[$(my.keyType:no), $(my.valueType:no)]"
-      else
-        return "Option[Map[$(my.keyType:no), $(my.valueType:no)]]"
-      endif
+      my.keyField = my.ref->field(name = my.field.keyField)
+      my.valueField = my.ref->field(name = my.field.valueField)
+      my.keyType = scala_get_type(my.keyField.type)
+      my.valueType = scala_get_type(my.valueField.type)
+      return "Map[$(my.keyType:no), $(my.valueType:no)]"
     else
-      if defined(my.field.required) & my.field.required = "true"
-        return "Map[$(my.field.keyType:Pascal), $(my.field.valueType:Pascal)]"
-      else
-        return "Option[Map[$(my.field.keyType:Pascal), $(my.field.valueType:Pascal)]]"
-      endif
+      my.keyType = scala_get_type(my.field.keyType)
+      my.valueType = scala_get_type(my.field.valueType)
+      return "Map[$(my.keyType:no), $(my.valueType:no)]"
     endif
-  elsif my.field.type = "actor_ref"
-    if defined(my.field.required) & my.field.required = "true"
-      return "$(my.field.type:Pascal)"
-    else
-      return "Option[$(my.field.type:Pascal)]"
-    endif
+  endif
+  if defined(my.field.required) & my.field.required = "true"
+    return "$(scala_get_type(my.field.type):no)"
   else
-    ref = find_entity_by_type(my.field.type)
-    if defined(ref.enum) & ref.enum = "true"
-      if defined(my.field.required) & my.field.required = "true"
-        return "$(my.field.type:Pascal)"
-      else
-        return "Option[$(my.field.type:Pascal)]"
-      endif
-    else
-      if defined(my.field.required) & my.field.required = "true"
-        return "$(my.field.type:Pascal)Vo"
-      else
-        return "Option[$(my.field.type:Pascal)Vo]"
-      endif
-    endif
+    return "Option[$(scala_get_type(my.field.type):no)]"
   endif
 .endfunction
 
@@ -191,7 +153,7 @@
 .endfunction
 
 
-.function scala_output_field_name_list(entity)
+.function scala_output_field_name_list(entity, include_transient)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
@@ -203,11 +165,18 @@
     endfor
   endif
   for my.entity.field
-    if !is_pk_field(my.entity, field.name)
+    if(my.include_transient)
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
       my.result = my.result + "$(field.name:Camel)"
+    else
+      if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | transient = "false")
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "$(field.name:Camel)"
+      endif
     endif
   endfor
   return my.result
@@ -244,7 +213,7 @@
   return my.result
 .endfunction
 
-.function scala_output_get_field_values(entity)
+.function scala_output_get_field_values(entity, include_transient)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
@@ -256,11 +225,18 @@
     endfor
   endif
   for my.entity.field
-    if !is_pk_field(my.entity, field.name)
+    if(my.include_transient)
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
       my.result = my.result + "$(field.name:Camel)"
+    else
+      if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | transient = "false")
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "$(field.name:Camel)"
+      endif
     endif
   endfor
   return my.result

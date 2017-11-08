@@ -44,24 +44,24 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case evt: Event =>
       updateState(evt)
-    case SnapshotOffer(_, $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity)))) =>
+    case SnapshotOffer(_, $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0)))) =>
       $(scala_output_set_field_values(entity))
     case x: RecoveryCompleted =>
     case x => log.info("RECOVER: {} {}", this, x)
   }
 
   override def receiveCommand: Receive = {
-    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity))) =>
+    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
       if(isValid()) {
         sender() ! ResponseVo(ALREADY_EXISTS, Some("$(entity.name:Pascal) already exists."))
       } else {
-        persist(Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity)))) (updateState)
+        persist(Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0)))) (updateState)
       }
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       if (!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        sender() ! $(entity.name:Pascal)Vo($(scala_output_get_field_values(entity)))
+        sender() ! $(entity.name:Pascal)Vo($(scala_output_get_field_values(entity, 0)))
       }
 .  for field
 .    theField = field
@@ -89,23 +89,23 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 .    endif
 .  endfor
 .for aggregation
-    case Update$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(aggregation)))
+    case Update$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(aggregation, 1))) =>
       $(scala_output_set_field_values(aggregation))
-    case Get$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)))
+    case Get$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       if (isValid()) {
-        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_get_field_values(aggregation)))
+        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_key_name_list(entity)), $(scala_output_get_field_values(aggregation, 0)))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .endfor
 .
 .for message
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message))) =>
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message, 1))) =>
 .endfor
   }
 
   private def updateState: (Event => Unit) = {
-    case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity))) =>
+    case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
       $(scala_output_set_field_values(entity))
 .  for field
 .    theField = field
@@ -123,7 +123,7 @@ class $(entity.name:Pascal) extends PersistentActor with ActorLogging {
 .
 .  for message
 .    if !(defined(transient) & transient = "true")
-    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message))) =>
+    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message, 1))) =>
 .    endif
 .  endfor
   }
