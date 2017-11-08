@@ -124,6 +124,7 @@ include "play_json.gsl"
 
 include "akka_actor_scala_functions.txt"
 include "akka_actor_scala.gsl"
+include "akka_shard_actor_scala.gsl"
 
 .endtemplate
 

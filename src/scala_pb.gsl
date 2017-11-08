@@ -85,6 +85,7 @@ message Create$(entity.name:Pascal)Evt {
 .  endif
 .endfor
 };
+
 message Update$(entity.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;

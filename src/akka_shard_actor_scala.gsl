@@ -1,0 +1,58 @@
+.template 1
+.class_package = "$(model.package).shard"
+.pkgdir = "cluster/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.for entity
+.aggRoot = ""
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.  pk = extract_pk(entity)
+.  aggRoot = entity.name
+.
+.output "$(pkgdir)/$(entity.name:Pascal)Shard.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import akka.actor._
+import akka.cluster.sharding._
+import $(model.package).config._
+import $(model.package).domain._
+import $(model.package).message._
+
+import scala.math.Numeric.IntIsIntegral._
+
+object $(entity.name:Pascal)Shard {
+  def props = Props[$(entity.name:Pascal)]
+  def name($(entity.name:Camel)Id: String): String = $(entity.name:Camel)Id.toString
+
+  val shardName: String = "driver-shards"
+  var defaultNumberOfShards = 100
+
+  val extractEntityId: ShardRegion.ExtractEntityId = {
+    case cmd: Command =>
+      (cmd.entityId.toString, cmd)
+  }
+
+  val extractShardId: ShardRegion.ExtractShardId = {
+    case cmd: Command =>
+      (abs(cmd.entityId.hashCode) % defaultNumberOfShards).toString
+  }
+}
+
+class $(entity.name:Pascal)Shard extends $(entity.name:Pascal) {
+  val settings = Settings(context.system)
+  context.setReceiveTimeout(settings.actor.passivateTimeout)
+
+  override def unhandled(message: Any): Unit = message match {
+    case x => log.info("unhandled COMMAND: {} {}", this, x)
+  }
+}
+
+.close
+.endif
+.endfor
+
+.endtemplate
+
+
