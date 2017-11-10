@@ -1,0 +1,44 @@
+.function dao_output_result_parser(entity)
+  return "???"
+.endfunction
+
+.function dao_output_create_or_update_sql(entity)
+  return "???"
+.endfunction
+
+.function dao_output_add_sql(entity, field)
+  return "???"
+.endfunction
+
+.function dao_output_remove_sql(entity, field)
+  return "???"
+.endfunction
+
+.function dao_output_change_sql(entity, message)
+  return "???"
+.endfunction
+
+.function dao_output_message_sql(entity, message)
+  return "???"
+.endfunction
+
+.function dao_output_create_or_update_method(entity)
+  return "???"
+.endfunction
+
+.function dao_output_add_method(entity, field)
+  return "???"
+.endfunction
+
+.function dao_output_remove_method(entity, field)
+  return "???"
+.endfunction
+
+.function dao_output_change_method(entity, message)
+  return "???"
+.endfunction
+
+.function dao_output_message_method(entity, message)
+  return "???"
+.endfunction
+
