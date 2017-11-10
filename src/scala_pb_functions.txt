@@ -33,8 +33,8 @@
   endif
   if my.field.type = "array"
     if defined(my.field.entity)
-      valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
-      return "repeated $(pb_format_type(valueField.valueType)) $(valueField.name:Camel) = $(my.fieldNo);"
+      my.valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
+      return "repeated $(pb_format_type(my.valueField.type)) $(my.field.name:Camel) = $(my.fieldNo);"
     elsif my.field.valueType = "char"
       if defined(my.field.required) & my.field.required = "true"
         return "required bytes $(my.field.name:Camel) = $(my.fieldNo);"

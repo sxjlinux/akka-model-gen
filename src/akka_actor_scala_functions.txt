@@ -21,8 +21,14 @@
 
 .function scala_output_type(field)
   if my.field.type = "array"
-    my.valueType = scala_get_type(my.field.valueType)
-    return "Seq[$(my.valueType:Pascal)]"
+    if defined(my.field.entity) & defined(my.field.valueField)
+      my.valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
+      my.valueType = scala_get_type(my.valueField.type)
+      return "Seq[$(my.valueType:Pascal)]"
+    else
+      my.valueType = scala_get_type(my.field.valueType)
+      return "Seq[$(my.valueType:Pascal)]"
+    endif
   elsif my.field.type = "map"
     if defined(my.field.entity)
       my.ref = model->entity(name = my.field.entity)
