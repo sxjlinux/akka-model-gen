@@ -1,23 +1,29 @@
 .function dao_output_depended_daos(entity, first)
   my.result = ""
   for my.entity.field
-    if !is_element_type(type) & !(defined(transient) & transient = "true")
+    if !(type = my.entity.name) & !is_element_type(type) & !(defined(transient) & transient = "true")
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
       if type = "array"
-        my.result = my.result + "$(field.name:Camel)DAO: $(field.valueType:Pascal)DAO"
+        if defined(field.entity) & defined(field.valueField)
+          my.result = my.result + "$(field.entity:Camel)DAO: $(field.entity:Pascal)DAO"
+        else
+          my.result = my.result + "$(field.valueType:Camel)DAO: $(field.valueType:Pascal)DAO"
+        endif
       elsif type = "map"
-        my.result = my.result + "$(field.name:Camel)DAO: $(field.entity:Pascal)DAO"
+        my.result = my.result + "$(field.entity:Camel)DAO: $(field.entity:Pascal)DAO"
       else
-        my.result = my.result + "$(field.name:Camel)DAO: $(field.type:Pascal)DAO"
+        my.result = my.result + "$(field.type:Camel)DAO: $(field.type:Pascal)DAO"
       endif
     endif
   endfor
   if my.first
     return my.result
-  else
+  elsif string.length(my.result) > 0
     return ", "+ my.result
+  else
+    return my.result
   endif
 .endfunction
 
@@ -119,11 +125,14 @@
           my.result = my.result + "Some($(field.type:Pascal).fromValue($(field.name:Camel)))"
         endif
       elsif field.type = "array"
-        my.result = my.result + "[[array]]"
+        if defined(field.entity) & defined(field.valueField)
+          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)By$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.entity)))($(scala_output_key_name_list(entity)))"
+        else
+          my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.valueType)))($(scala_output_key_name_list(entity)))"
+        endif
       elsif field.type = "map"
         my.result = my.result + "[[map]]"
       else
-        echo "(entity, type) => ($(entity.name), $(field.type))"
         my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.type)))($(scala_output_key_name_list(entity)))"
       endif
     endif
