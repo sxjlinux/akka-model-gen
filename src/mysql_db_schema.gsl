@@ -55,7 +55,7 @@ CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .      if !first()
 .        out = out + ", "
 .      endif
-.      if field.type = "string"
+.      if field.type = "string" | field.type = "text"
 .        out = out + "'$($(field.name))'"
 .      else
 .        out = out + "$($(field.name))"

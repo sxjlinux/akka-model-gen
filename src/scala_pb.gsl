@@ -179,8 +179,22 @@ message Remove$(field.name:Pascal)Evt {
   $(pb_output_field(field, fieldNo))
 };
 
-.     elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+.     elsif !defined(pk->field(name = theField.name))  & (defined(field.aggregation) & field.aggregation = "true")
+message Get$(field.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
+.if (defined(field.transient) & field.transient="true")
+message Update$(field.name:Pascal)Cmd {
+.else
 message Change$(field.name:Pascal)Cmd {
+.endif
   option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
 .      fieldNo = 2
@@ -191,6 +205,7 @@ message Change$(field.name:Pascal)Cmd {
   $(pb_output_field(field, fieldNo))
 };
 
+.if !(defined(field.transient) & field.transient="true")
 message Change$(field.name:Pascal)Evt {
   option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
@@ -202,6 +217,8 @@ message Change$(field.name:Pascal)Evt {
   $(pb_output_field(field, fieldNo))
 };
 
+.endif
+.
 .    else
 .    endif    
 .  endfor

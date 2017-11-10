@@ -1,10 +1,24 @@
 .template 0
 
+.function is_enum_type(type)
+  if !is_element_type(my.type)
+    if defined(model->entity(name = my.type))
+      my.entity = model->entity(name = my.type)
+      if defined(my.entity.enum) & my.entity.enum = "true"
+        return 1
+      endif
+    endif
+  endif
+  return 0
+.endfunction
+
 .function is_element_type(type)
   if !defined(my.type)
     return 0
   endif
-  if my.type = "string"
+  if my.type = "text"
+    return 1
+  elsif my.type = "string"
     return 1
   elsif my.type = "double"
     return 1

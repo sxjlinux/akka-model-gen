@@ -1,5 +1,160 @@
+.function dao_output_depended_daos(entity, first)
+  my.result = ""
+  for my.entity.field
+    if !is_element_type(type) & !(defined(transient) & transient = "true")
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      if type = "array"
+        my.result = my.result + "$(field.name:Camel)DAO: $(field.valueType:Pascal)DAO"
+      elsif type = "map"
+        my.result = my.result + "$(field.name:Camel)DAO: $(field.entity:Pascal)DAO"
+      else
+        my.result = my.result + "$(field.name:Camel)DAO: $(field.type:Pascal)DAO"
+      endif
+    endif
+  endfor
+  if my.first
+    return my.result
+  else
+    return ", "+ my.result
+  endif
+.endfunction
+
 .function dao_output_result_parser(entity)
-  return "???"
+  my.result = "{\n"
+  my.result = my.result + "    $(dao_output_parser_gets(my.entity))"
+  my.result = my.result + " map {\n"
+  my.result = my.result + "      case $(dao_output_parser_case_pattern(my.entity)) =>\n"
+  my.result = my.result + "        $(my.entity.name:Pascal)Vo($(dao_output_parser_construct_pattern(my.entity)))\n"
+  my.result = my.result + "    }\n  }\n"
+  return my.result
+.endfunction
+
+.function dao_output_parser_gets(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      my.fieldName = field.name
+      my.field = ""
+      if defined(my.entity->field(name = my.fieldName))
+        my.field = my.entity->field(name = my.fieldName)
+      else
+        my.field = extract_fk_field(my.entity, my.fieldName)
+      endif
+      if string.length(my.result) > 0
+        my.result = my.result + " ~\n    "
+      endif
+      my.result = my.result + "get[$(scala_get_type(my.field.type))](\"$(field.name:c)\")"
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
+      if string.length(my.result) > 0
+        my.result = my.result + " ~\n    "
+      endif
+      if is_element_type(field.type)
+        my.result = my.result + "get[$(scala_get_type(field.type))](\"$(field.name:c)\")"
+      else
+        my.result = my.result + "get[Int](\"$(field.name:c)\")"
+      endif
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_parser_case_pattern(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + " ~ "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | !(transient = "true"))
+      if is_element_type(field.type) | is_enum_type(field.type)
+        if string.length(my.result) > 0
+          my.result = my.result + " ~ "
+        endif
+        my.result = my.result + "$(field.name:Camel)"
+      else
+      endif
+    endif
+  endfor
+  return my.result
+.endfunction
+
+
+.function dao_output_parser_construct_pattern(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | !(transient = "true"))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      if is_element_type(field.type)
+        if defined(field.required) & required = "true"
+          my.result = my.result + "$(field.name:Camel)"
+        else
+          my.result = my.result + "Some($(field.name:Camel))"
+        endif
+      elsif is_enum_type(field.type)
+        if defined(field.required) & required = "true"
+          my.result = my.result + "$(field.type:Pascal).fromValue($(field.name:Camel))"
+        else
+          my.result = my.result + "Some($(field.type:Pascal).fromValue($(field.name:Camel)))"
+        endif
+      elsif field.type = "array"
+        my.result = my.result + "[[array]]"
+      elsif field.type = "map"
+        my.result = my.result + "[[map]]"
+      else
+        echo "(entity, type) => ($(entity.name), $(field.type))"
+        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.type)))($(scala_output_key_name_list(entity)))"
+      endif
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_pk_as_var_name(type)
+  my.result = ""
+  my.pk = extract_pk(entity)
+  for my.pk.field
+    if string.length(my.result) > 0
+      my.result = my.result + "_"
+    endif
+    my.result = my.result + field.name
+  endfor
+  return "$(my.result:Pascal)"
+.endfunction
+
+.function find_pk_or_aggregated_pk(type)
+  for model.entity
+    if entity.name = my.type
+      return extract_pk(entity)
+    else
+      for entity.aggregation
+        if aggregation.name = my.type
+          return extract_pk(entity)
+        endif
+      endfor
+    endif
+  endfor
 .endfunction
 
 .function dao_output_create_or_update_sql(entity)

@@ -69,7 +69,7 @@
     return my.field.name + " DOUBLE" + nullOpt
   elsif defined(my.field.type) & my.field.type = "int"
     return my.field.name + " INT" + nullOpt
-  elsif defined(my.field.type) & my.field.type = "bigint"
+  elsif defined(my.field.type) & my.field.type = "long"
     return my.field.name + " BIGINT" + nullOpt
   elsif defined(my.field.type) & my.field.type = "bool"
     return my.field.name + " TINYINT" + nullOpt

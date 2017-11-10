@@ -1,10 +1,10 @@
 .function scala_get_type(typeName)
-  if my.typeName = "tinyint" | my.typeName = "bool"
+  if my.typeName = "bool"
     return "Boolean"
   elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double" | my.typeName = "string" | my.typeName = "timestamp" | my.typeName = "any" | my.typeName = "actor_ref"
     return "$(my.typeName:Pascal)"
-  elsif my.typeName = "bigint"
-    return "Long"
+  elsif my.typeName = "text"
+    return "String"
   elsif my.typeName = "array"
     return "Seq"
   elsif my.typeName = "map"
