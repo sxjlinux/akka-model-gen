@@ -33,7 +33,7 @@
   my.result = my.result + " map {\n"
   my.result = my.result + "      case $(dao_output_parser_case_pattern(my.entity)) =>\n"
   my.result = my.result + "        $(my.entity.name:Pascal)Vo($(dao_output_parser_construct_pattern(my.entity)))\n"
-  my.result = my.result + "    }\n  }\n"
+  my.result = my.result + "    }\n  }"
   return my.result
 .endfunction
 
@@ -126,30 +126,51 @@
         endif
       elsif field.type = "array"
         if defined(field.entity) & defined(field.valueField)
-          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)By$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.entity)))($(scala_output_key_name_list(entity)))"
+          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
         else
-          my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.valueType)))($(scala_output_key_name_list(entity)))"
+          my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
         endif
       elsif field.type = "map"
-        my.result = my.result + "[[map]]"
+        my.result = my.result + "$(field.entity:Camel)DAO.select$(field.name:Pascal)By$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
       else
-        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_pk_as_var_name(find_pk_or_aggregated_pk(field.type)))($(scala_output_key_name_list(entity)))"
+        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
       endif
     endif
   endfor
   return my.result
 .endfunction
 
-.function dao_output_pk_as_var_name(type)
+.function dao_output_key_as_var_name(key)
   my.result = ""
-  my.pk = extract_pk(entity)
-  for my.pk.field
+  for my.key.field
     if string.length(my.result) > 0
       my.result = my.result + "_"
     endif
     my.result = my.result + field.name
   endfor
   return "$(my.result:Pascal)"
+.endfunction
+
+.function dao_output_key_as_param_def(entity, key)
+  my.result = ""
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    if is_pk_field(my.entity, field.name)
+      if defined(extract_pk_field(my.entity, field.name))
+        my.pk_field = extract_pk_field(my.entity, field.name)
+      else
+        my.pk_field = extract_fk_field(my.entity, field.name)
+      endif
+      my.result = my.result + "$(field.name:Camel): $(scala_get_type(my.pk_field.type))"
+    elsif is_fk_field(my.entity, field.name)
+      my.fk_field = extract_fk_field(my.entity, field.name)
+      my.result = my.result + "$(field.name:Camel): $(scala_get_type(my.fk_field.type))"
+    else
+    endif
+  endfor
+  return my.result
 .endfunction
 
 .function find_pk_or_aggregated_pk(type)
@@ -164,6 +185,14 @@
       endfor
     endif
   endfor
+.endfunction
+
+.function dao_output_select_by_pk(entity)
+  return "???"
+.endfunction
+
+.function dao_output_select_by_fk(entity, key)
+  return "???"
 .endfunction
 
 .function dao_output_create_or_update_sql(entity)
