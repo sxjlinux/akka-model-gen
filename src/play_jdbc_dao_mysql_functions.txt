@@ -187,12 +187,61 @@
   endfor
 .endfunction
 
-.function dao_output_select_by_pk(entity)
-  return "???"
+.function dao_output_select_columns(entity)
+  my.result = ""
+  my.pk = extract_pk(my.entity)
+  for my.pk.field
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.result = my.result + "$(field.name:c)"
+  endfor
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:c)"
+    endif
+  endfor
+  return my.result
 .endfunction
 
-.function dao_output_select_by_fk(entity, key)
-  return "???"
+.function dao_output_where_by_key(key)
+  my.result = ""
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + "AND "
+    endif
+    my.result = my.result + "$(field.name:c) = {$(field.name:Camel)}"
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_select_by_key_sql(entity, key)
+  my.result = "SELECT $(dao_output_select_columns(my.entity))\n    "
+  my.result = my.result + "FROM $(my.entity.name)\n    "
+  my.result = my.result + "WHERE $(dao_output_where_by_key(my.key))"
+  return "SQL(\"\"\"\n    $(my.result:no)\n  \"\"\")"
+.endfunction
+
+.function dao_output_key_as_param(key)
+  my.result = ""
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.result = my.result + "\"$(field.name:Camel)\" -> $(field.name:Camel)"
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_select_by_key_single(entity, key)
+  return "$(dao_output_select_by_key_sql(my.entity, my.key)).on($(dao_output_key_as_param(my.key))).as(parser.single)"
+.endfunction
+
+.function dao_output_select_by_key(entity, key)
+  return "$(dao_output_select_by_key_sql(my.entity, my.key)).on($(dao_output_key_as_param(my.key))).as(parser.*)"
 .endfunction
 
 .function dao_output_create_or_update_sql(entity)

@@ -26,19 +26,16 @@ class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database
   def createOrUpdate = $(dao_output_create_or_update_method(entity))
 
 .  for primaryKey
-  val selectBy$(dao_output_key_as_var_name(primaryKey))Sql = $(dao_output_select_by_pk(entity))
-  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))) = ???
+  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))) = $(dao_output_select_by_key_single(entity, primaryKey))
 .  endfor
 
 .  for foreignKey
-  val selectBy$(dao_output_key_as_var_name(foreignKey))Sql = $(dao_output_select_by_fk(entity, foreignKey))
-  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))) = ???
+  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))) = $(dao_output_select_by_key(entity, foreignKey))
 .  endfor
 
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-  val add$(field.name:Pascal)Sql:SqlQuery = $(dao_output_add_sql(entity, field))
   def add$(field.name:Pascal) = $(dao_output_add_method(entity, field))
 
   val remove$(field.name:Pascal)Sql:SqlQuery = $(dao_output_remove_sql(entity, field))
