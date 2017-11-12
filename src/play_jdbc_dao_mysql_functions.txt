@@ -187,7 +187,7 @@
   endfor
 .endfunction
 
-.function dao_output_select_columns(entity)
+.function dao_output_entity_columns(entity)
   my.result = ""
   my.pk = extract_pk(my.entity)
   for my.pk.field
@@ -207,6 +207,39 @@
   return my.result
 .endfunction
 
+.function dao_output_entity_insert_placeholders(entity)
+  my.result = ""
+  my.pk = extract_pk(my.entity)
+  for my.pk.field
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.result = my.result + "{$(field.name:Camel)}"
+  endfor
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "{$(field.name:Camel)}"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_entity_update_placeholders(entity)
+  my.result = ""
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:c)={$(field.name:Camel)}"
+    endif
+  endfor
+  return my.result
+.endfunction
+
 .function dao_output_where_by_key(key)
   my.result = ""
   for my.key.field
@@ -219,8 +252,8 @@
 .endfunction
 
 .function dao_output_select_by_key_sql(entity, key)
-  my.result = "SELECT $(dao_output_select_columns(my.entity))\n    "
-  my.result = my.result + "FROM $(my.entity.name)\n    "
+  my.result = "SELECT $(dao_output_entity_columns(my.entity))\n    "
+  my.result = my.result + "FROM $(model.dbSchema:c).$(my.entity.name)\n    "
   my.result = my.result + "WHERE $(dao_output_where_by_key(my.key))"
   return "SQL(\"\"\"\n    $(my.result:no)\n  \"\"\")"
 .endfunction
@@ -245,7 +278,10 @@
 .endfunction
 
 .function dao_output_create_or_update_sql(entity)
-  return "???"
+  my.result = "INSERT INTO $(model.dbSchema:c).$(my.entity.name)($(dao_output_entity_columns(my.entity)))"
+  my.result = my.result + "\n    VALUES ($(dao_output_entity_insert_placeholders(my.entity)))"
+  my.result = my.result + "\n    ON DUPLICATE KEY UPDATE $(dao_output_entity_update_placeholders(my.entity))"
+  return "SQL(\"\"\"\n    $(my.result:no)\n  \"\"\")"
 .endfunction
 
 .function dao_output_add_sql(entity, field)
