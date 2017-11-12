@@ -22,39 +22,38 @@ import anorm._
 class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database: Database$(dao_output_depended_daos(entity, 0))) {
   val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
 
-  def createOrUpdate($(entity.name:Camel): $(scala_get_type(entity.name))): Int = $(dao_output_create_or_update_method(entity))
+  def createOrUpdate($(entity.name:Camel): $(entity.name:Pascal)Vo): Int = $(dao_output_create_or_update_method(entity))
 
 .  primaryKey = extract_pk(entity)
-  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(scala_get_type(entity.name)) = $(dao_output_select_by_key_single(entity, primaryKey))
-
+  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
+.
 .  for foreignKey
-  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(scala_get_type(entity.name))] = $(dao_output_select_by_key(entity, foreignKey))
+  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
 .  endfor
-
+.
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+
   def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_add_method(entity, field))
 
   val remove$(field.name:Pascal)Sql:SqlQuery = $(dao_output_remove_sql(entity, field))
   def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_remove_method(entity, field))
-
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_change_method(entity, primaryKey, field))
 
+  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_change_method(entity, primaryKey, field))
 .    else
 .    endif
 .  endfor
 .
 .  for message
 .    if !(defined(transient) & transient = "true")
+
   val $(message.name:Pascal)Sql:SqlQuery = $(dao_output_message_sql(entity, message))
   def $(message.name:Pascal): Int = $(dao_output_message_method(entity, field))
-
 .    endif
 .  endfor
 }
-
 .close
 .endif
 .endfor

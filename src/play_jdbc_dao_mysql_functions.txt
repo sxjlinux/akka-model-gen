@@ -192,14 +192,14 @@
   my.pk = extract_pk(my.entity)
   for my.pk.field
     if string.length(my.result) > 0
-      my.result = my.result + ", "
+      my.result = my.result + ",\n        "
     endif
     my.result = my.result + "$(field.name:c)"
   endfor
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n        "
       endif
       my.result = my.result + "$(field.name:c)"
     endif
@@ -212,14 +212,14 @@
   my.pk = extract_pk(my.entity)
   for my.pk.field
     if string.length(my.result) > 0
-      my.result = my.result + ", "
+      my.result = my.result + ",\n        "
     endif
     my.result = my.result + "{$(field.name:Camel)}"
   endfor
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n        "
       endif
       my.result = my.result + "{$(field.name:Camel)}"
     endif
@@ -232,7 +232,7 @@
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n        "
       endif
       my.result = my.result + "$(field.name:c)={$(field.name:Camel)}"
     endif
@@ -244,7 +244,7 @@
   my.result = ""
   for my.key.field
     if string.length(my.result) > 0
-      my.result = my.result + "AND "
+      my.result = my.result + "\n        AND "
     endif
     my.result = my.result + "$(field.name:c) = {$(field.name:Camel)}"
   endfor
@@ -252,7 +252,8 @@
 .endfunction
 
 .function dao_output_select_by_key_sql(entity, key)
-  my.result = "SELECT $(dao_output_entity_columns(my.entity))"
+  my.result = "SELECT"
+  my.result = my.result + "\n        $(dao_output_entity_columns(my.entity))"
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
@@ -262,7 +263,7 @@
   my.result = ""
   for my.key.field
     if string.length(my.result) > 0
-      my.result = my.result + ", "
+      my.result = my.result + ",\n      "
     endif
     my.result = my.result + "\"$(field.name:Camel)\" -> $(field.name:Camel)"
   endfor
@@ -278,14 +279,14 @@
   my.pk = extract_pk(my.entity)
   for my.pk.field
     if string.length(my.result) > 0
-      my.result = my.result + ", "
+      my.result = my.result + ",\n      "
     endif
     my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
   endfor
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n      "
       endif
       my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
     endif
@@ -295,27 +296,39 @@
 
 .function dao_output_select_by_key_single(entity, key)
   my.result = "database.withTransaction { implicit c =>"
-  my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on($(dao_output_key_as_param(my.key))).as(parser.single)"
+  my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + "\n    ).as(parser.single)"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
 
 .function dao_output_select_by_key(entity, key)
   my.result = "database.withTransaction { implicit c =>"
-  my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on($(dao_output_key_as_param(my.key))).as(parser.*)"
+  my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + "\n    ).as(parser.*)"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
 
 .function dao_output_create_or_update_sql(entity)
-  my.result = "INSERT INTO $(model.dbSchema:c).$(my.entity.name)($(dao_output_entity_columns(my.entity)))"
-  my.result = my.result + "\n      VALUES ($(dao_output_entity_insert_placeholders(my.entity)))"
-  my.result = my.result + "\n      ON DUPLICATE KEY UPDATE $(dao_output_entity_update_placeholders(my.entity))"
+  my.result = "INSERT INTO $(model.dbSchema:c).$(my.entity.name)("
+  my.result = my.result + "\n        $(dao_output_entity_columns(my.entity))"
+  my.result = my.result + "\n      ) VALUES ("
+  my.result = my.result + "\n        $(dao_output_entity_insert_placeholders(my.entity))"
+  my.result = my.result + "\n      ) ON DUPLICATE KEY UPDATE"
+  my.result = my.result + "\n        $(dao_output_entity_update_placeholders(my.entity))"
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_create_or_update_method(entity)
-  return "$(dao_output_create_or_update_sql(my.entity)).on($(dao_output_entity_as_param(my.entity))).executeUpdate()"
+  my.result = "database.withTransaction { implicit c =>"
+  my.result = my.result + "\n    $(dao_output_create_or_update_sql(my.entity)).on("
+  my.result = my.result + "\n      $(dao_output_entity_as_param(my.entity))"
+  my.result = my.result + "\n    ).executeUpdate()"
+  my.result = my.result + "\n  }"
+  return my.result
 .endfunction
 
 .function dao_output_add_sql(entity, field)
@@ -328,14 +341,18 @@
 
 .function dao_output_change_sql(entity, key, field)
   my.result = "UPDATE $(model.dbSchema:c).$(my.entity.name)"
-  my.result = my.result + "\n      SET $(field.name:c) = {$(field.name:Camel)}"
-  my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
+  my.result = my.result + "\n        SET $(field.name:c) = {$(field.name:Camel)}"
+  my.result = my.result + "\n      WHERE"
+  my.result = my.result + "\n        $(dao_output_where_by_key(my.key))"
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_change_method(entity, key, field)
   my.result = "database.withTransaction { implicit c =>"
-  my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on($(dao_output_key_as_param(my.key)), $(dao_output_field_as_param(my.field))).executeUpdate()"
+  my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on("
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + ",\n      $(dao_output_field_as_param(my.field))"
+  my.result = my.result + "\n    ).executeUpdate()"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
