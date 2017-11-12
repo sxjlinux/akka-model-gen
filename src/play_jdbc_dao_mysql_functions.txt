@@ -271,7 +271,11 @@
 .endfunction
 
 .function dao_output_field_as_param(field)
-  return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel)"
+  if is_enum_type(my.field.name)
+    return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel).map(x => x.value)"
+  else
+    return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel)"
+  endif
 .endfunction
 
 .function dao_output_entity_as_param(entity)
@@ -288,7 +292,11 @@
       if string.length(my.result) > 0
         my.result = my.result + ",\n      "
       endif
-      my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
+      if is_enum_type(field.name)
+        my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel).map(x => x.value)"
+      else
+        my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
+      endif
     endif
   endfor
   return my.result
