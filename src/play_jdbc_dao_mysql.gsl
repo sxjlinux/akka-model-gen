@@ -40,8 +40,7 @@ class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database
   def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_remove_method(entity, field))
 
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-  val change$(field.name:Pascal)Sql:SqlQuery = $(dao_output_change_sql(entity, field))
-  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_change_method(entity, field))
+  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_change_method(entity, primaryKey, field))
 
 .    else
 .    endif

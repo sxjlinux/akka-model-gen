@@ -269,6 +269,10 @@
   return my.result
 .endfunction
 
+.function dao_output_field_as_param(field)
+  return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel)"
+.endfunction
+
 .function dao_output_entity_as_param(entity)
   my.result = ""
   my.pk = extract_pk(my.entity)
@@ -322,12 +326,18 @@
   return "???"
 .endfunction
 
-.function dao_output_change_sql(entity, field)
-  my.key = extract_pk(my.entity)
+.function dao_output_change_sql(entity, key, field)
   my.result = "UPDATE $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      SET $(field.name:c) = {$(field.name:Camel)}"
   my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+.endfunction
+
+.function dao_output_change_method(entity, key, field)
+  my.result = "database.withTransaction { implicit c =>"
+  my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on($(dao_output_key_as_param(my.key)), $(dao_output_field_as_param(my.field))).executeUpdate()"
+  my.result = my.result + "\n  }"
+  return my.result
 .endfunction
 
 .function dao_output_message_sql(entity, message)
@@ -339,10 +349,6 @@
 .endfunction
 
 .function dao_output_remove_method(entity, field)
-  return "???"
-.endfunction
-
-.function dao_output_change_method(entity, message)
   return "???"
 .endfunction
 
