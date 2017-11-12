@@ -11,6 +11,8 @@
 package $(class_package)
 
 import $(model.package).message._
+import $(model.package).util.DateFormat._
+import $(model.package).util.EnumConvert._
 import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
 import javax.inject._
@@ -20,15 +22,15 @@ import anorm._
 
 @Singleton
 class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database: Database$(dao_output_depended_daos(entity, 0))) {
-  val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
-
-  def createOrUpdate($(entity.name:Camel): $(entity.name:Pascal)Vo): Int = $(dao_output_create_or_update_method(entity))
-
+. # val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
+.
+  def createOrUpdate($(dao_output_entity_as_param_def(entity))): Int = $(dao_output_create_or_update_method(entity))
+.
 .  primaryKey = extract_pk(entity)
-  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
+. #  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 .
 .  for foreignKey
-  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
+. #  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
 .  endfor
 .
 .  for field

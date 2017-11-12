@@ -1,7 +1,7 @@
 .function dao_output_depended_daos(entity, first)
   my.result = ""
   for my.entity.field
-    if !(type = my.entity.name) & !is_element_type(type) & !(defined(transient) & transient = "true")
+    if !(type = my.entity.name) & !(type = "any" | (defined(valueType) & valueType = "any")) & !is_element_type(type) & !(defined(transient) & transient = "true")
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
@@ -163,11 +163,30 @@
       else
         my.pk_field = extract_fk_field(my.entity, field.name)
       endif
-      my.result = my.result + "$(field.name:Camel): $(scala_get_type(my.pk_field.type))"
+      assign_field_type(field, my.pk_field)
+      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
     elsif is_fk_field(my.entity, field.name)
       my.fk_field = extract_fk_field(my.entity, field.name)
-      my.result = my.result + "$(field.name:Camel): $(scala_get_type(my.fk_field.type))"
+      assign_field_type(field, my.fk_field)
+      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
     else
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_entity_as_param_def(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    my.result = my.result + dao_output_key_as_param_def(my.entity, my.pk)
+  endif
+  for my.entity.field
+    if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
+      if string.length(my.result) > 0
+        my.result = my.result + ",\n      "
+      endif
+      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
     endif
   endfor
   return my.result
@@ -259,20 +278,27 @@
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
-.function dao_output_key_as_param(key)
+.function dao_output_key_as_param(entity, key)
   my.result = ""
   for my.key.field
     if string.length(my.result) > 0
       my.result = my.result + ",\n      "
     endif
-    my.result = my.result + "\"$(field.name:Camel)\" -> $(field.name:Camel)"
+    my.field_name = field.name
+    if !defined(my.entity->field(name = my.field_name))
+      my.ref_field = extract_fk_field(my.entity, my.field_name)
+      assign_field_type(field, my.ref_field)
+    endif
+    my.result = my.result + dao_output_field_as_param(field)
   endfor
   return my.result
 .endfunction
 
 .function dao_output_field_as_param(field)
-  if is_enum_type(my.field.name)
-    return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel).map(x => x.value)"
+  if is_enum_type(my.field.type)
+    return "\"$(my.field.name:Camel)\" -> toValue($(my.field.name:Camel))"
+  elsif my.field.type = "timestamp"
+    return "\"$(my.field.name:Camel)\" -> toDate($(my.field.name:Camel))"
   else
     return "\"$(my.field.name:Camel)\" -> $(my.field.name:Camel)"
   endif
@@ -280,23 +306,16 @@
 
 .function dao_output_entity_as_param(entity)
   my.result = ""
-  my.pk = extract_pk(my.entity)
-  for my.pk.field
-    if string.length(my.result) > 0
-      my.result = my.result + ",\n      "
-    endif
-    my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
-  endfor
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    my.result = my.result + dao_output_key_as_param(my.entity, my.pk)
+  endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
         my.result = my.result + ",\n      "
       endif
-      if is_enum_type(field.name)
-        my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel).map(x => x.value)"
-      else
-        my.result = my.result + "\"$(field.name:Camel)\" -> $(entity.name:Camel).$(field.name:Camel)"
-      endif
+      my.result = my.result + "$(dao_output_field_as_param(field))"
     endif
   endfor
   return my.result
@@ -305,7 +324,7 @@
 .function dao_output_select_by_key_single(entity, key)
   my.result = "database.withTransaction { implicit c =>"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
-  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + "\n    ).as(parser.single)"
   my.result = my.result + "\n  }"
   return my.result
@@ -314,7 +333,7 @@
 .function dao_output_select_by_key(entity, key)
   my.result = "database.withTransaction { implicit c =>"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
-  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + "\n    ).as(parser.*)"
   my.result = my.result + "\n  }"
   return my.result
@@ -358,7 +377,7 @@
 .function dao_output_change_method(entity, key, field)
   my.result = "database.withTransaction { implicit c =>"
   my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on("
-  my.result = my.result + "\n      $(dao_output_key_as_param(my.key))"
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + ",\n      $(dao_output_field_as_param(my.field))"
   my.result = my.result + "\n    ).executeUpdate()"
   my.result = my.result + "\n  }"
