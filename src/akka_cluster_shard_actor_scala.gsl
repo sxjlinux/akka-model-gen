@@ -44,6 +44,14 @@ class $(entity.name:Pascal)Shard extends $(entity.name:Pascal) {
   val settings = Settings(context.system)
   context.setReceiveTimeout(settings.actor.passivateTimeout)
 
+  ClusterSharding(context.system).start(
+    $(entity.name:Pascal)Shard.shardName,
+    $(entity.name:Pascal)Shard.props,
+    ClusterShardingSettings(context.system),
+    $(entity.name:Pascal)Shard.extractEntityId,
+    $(entity.name:Pascal)Shard.extractShardId
+  )
+
   override def unhandled(message: Any): Unit = message match {
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
@@ -52,7 +60,21 @@ class $(entity.name:Pascal)Shard extends $(entity.name:Pascal) {
 .close
 .endif
 .endfor
+.output "$(pkgdir)/Module.scala"
+package $(class_package)
 
+import com.google.inject.AbstractModule
+import play.api.libs.concurrent.AkkaGuiceSupport
+
+class Module extends AbstractModule with AkkaGuiceSupport {
+  override def configure() = {
+.for entity
+  .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+    bindActor[$(entity.name:Pascal)Shard]("music-actor")
+  .endif
+.endfor
+  }
+}
 .endtemplate
 
 
