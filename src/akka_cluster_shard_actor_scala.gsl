@@ -8,7 +8,7 @@
 .  pk = extract_pk(entity)
 .  aggRoot = entity.name
 .
-.output "$(pkgdir)/$(entity.name:Pascal)Shard.scala"
+.output "$(pkgdir)/Sharding$(entity.name:Pascal)s.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
@@ -17,42 +17,33 @@ package $(class_package)
 import akka.actor._
 import akka.cluster.sharding._
 import $(model.package).config._
-import $(model.package).domain._
 import $(model.package).message._
+import $(model.package).message.Sharding$(entity.name:Pascal)
 
-import scala.math.Numeric.IntIsIntegral._
-
-object $(entity.name:Pascal)Shard {
-  def props = Props[$(entity.name:Pascal)]
-  def name($(entity.name:Camel)Id: String): String = $(entity.name:Camel)Id.toString
-
-  val shardName: String = "$(entity.name:Pascal)Shard"
-  var defaultNumberOfShards = 100
-
-  val extractEntityId: ShardRegion.ExtractEntityId = {
-    case cmd: Command =>
-      (cmd.entityId.toString, cmd)
-  }
-
-  val extractShardId: ShardRegion.ExtractShardId = {
-    case cmd: Command =>
-      (abs(cmd.entityId.hashCode) % defaultNumberOfShards).toString
-  }
+object Sharding$(entity.name:Pascal)s {
+  def props = Props[Sharding$(entity.name:Pascal)s]
+  def name: String = "Sharding$(entity.name:Pascal)s"
 }
 
-class $(entity.name:Pascal)Shard extends $(entity.name:Pascal) {
+class Sharding$(entity.name:Pascal)s extends Actor with ActorLogging {
   val settings = Settings(context.system)
-  context.setReceiveTimeout(settings.actor.passivateTimeout)
+  Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
+
+  def $(entity.name:Camel)Shard(): ActorRef = {
+    ClusterSharding(context.system).shardRegion(Sharding$(entity.name:Pascal).shardName)
+  }
 
   ClusterSharding(context.system).start(
-    $(entity.name:Pascal)Shard.shardName,
-    $(entity.name:Pascal)Shard.props,
+    Sharding$(entity.name:Pascal).shardName,
+    Sharding$(entity.name:Pascal).props,
     ClusterShardingSettings(context.system),
-    $(entity.name:Pascal)Shard.extractEntityId,
-    $(entity.name:Pascal)Shard.extractShardId
+    Sharding$(entity.name:Pascal).extractEntityId,
+    Sharding$(entity.name:Pascal).extractShardId
   )
 
-  override def unhandled(message: Any): Unit = message match {
+  override def receive: Receive = {
+    case cmd: Command =>
+      $(entity.name:Camel)Shard() forward cmd
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
 }
@@ -69,9 +60,9 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
 .for entity
-  .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
-    bindActor[$(entity.name:Pascal)Shard]("music-actor")
-  .endif
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+    bindActor[Sharding$(entity.name:Pascal)s]("Sharding$(entity.name:Pascal)s")
+.endif
 .endfor
   }
 }
