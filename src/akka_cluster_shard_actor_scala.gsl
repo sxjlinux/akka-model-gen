@@ -19,7 +19,6 @@ import akka.cluster.sharding._
 import $(model.package).config._
 import $(model.package).dao._
 import $(model.package).message._
-import $(model.package).message.Sharding$(entity.name:Pascal)
 import javax.inject._
 
 object Sharding$(entity.name:Pascal)s {
