@@ -1,4 +1,4 @@
-.function dao_output_depended_daos(entity, first)
+.function dao_output_depended_dao_defs(entity, first)
   my.result = ""
   for my.entity.field
     if !(type = my.entity.name) & !(type = "any" | (defined(valueType) & valueType = "any")) & !is_element_type(type) & !(defined(transient) & transient = "true")
@@ -15,6 +15,35 @@
         my.result = my.result + "$(field.entity:Camel)DAO: $(field.entity:Pascal)DAO"
       else
         my.result = my.result + "$(field.type:Camel)DAO: $(field.type:Pascal)DAO"
+      endif
+    endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction
+
+.function dao_output_depended_daos(entity, first)
+  my.result = ""
+  for my.entity.field
+    if !(type = my.entity.name) & !(type = "any" | (defined(valueType) & valueType = "any")) & !is_element_type(type) & !(defined(transient) & transient = "true")
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      if type = "array"
+        if defined(field.entity) & defined(field.valueField)
+          my.result = my.result + "$(field.entity:Camel)DAO"
+        else
+          my.result = my.result + "$(field.valueType:Camel)DAO"
+        endif
+      elsif type = "map"
+        my.result = my.result + "$(field.entity:Camel)DAO"
+      else
+        my.result = my.result + "$(field.type:Camel)DAO"
       endif
     endif
   endfor

@@ -17,15 +17,17 @@ package $(class_package)
 import akka.actor._
 import akka.cluster.sharding._
 import $(model.package).config._
+import $(model.package).dao._
 import $(model.package).message._
 import $(model.package).message.Sharding$(entity.name:Pascal)
+import javax.inject._
 
 object Sharding$(entity.name:Pascal)s {
   def props = Props[Sharding$(entity.name:Pascal)s]
   def name: String = "Sharding$(entity.name:Pascal)s"
 }
 
-class Sharding$(entity.name:Pascal)s extends Actor with ActorLogging {
+class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(entity, 1))) extends Actor with ActorLogging {
   val settings = Settings(context.system)
   Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
 

@@ -18,9 +18,11 @@ import akka.actor._
 import akka.cluster.sharding.ShardRegion.Passivate
 import akka.cluster.sharding._
 import $(model.package).config._
+import $(model.package).dao._
 import $(model.package).domain._
 import $(model.package).message._
 
+import javax.inject._
 import scala.math.Numeric.IntIsIntegral._
 
 object Sharding$(entity.name:Pascal) {
@@ -41,7 +43,8 @@ object Sharding$(entity.name:Pascal) {
   }
 }
 
-class Sharding$(entity.name:Pascal) extends $(entity.name:Pascal) {
+class Sharding$(entity.name:Pascal)($(dao_output_depended_dao_defs(entity, 1)))
+  extends $(entity.name:Pascal)($(dao_output_depended_daos(entity, 1))) {
   val settings = Settings(context.system)
   context.setReceiveTimeout(settings.actor.passivateTimeout)
 
