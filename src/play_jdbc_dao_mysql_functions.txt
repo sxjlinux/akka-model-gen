@@ -1,7 +1,13 @@
 .function dao_output_depended_dao_defs(entity, first)
   my.result = ""
   for my.entity.field
-    if !(type = my.entity.name) & !(type = "any" | (defined(valueType) & valueType = "any")) & !is_element_type(type) & !(defined(transient) & transient = "true")
+    if !(field.type = my.entity.name) \
+      & !(defined(field.entity) & field.entity = my.entity.name) \
+      & !(field.type = "any") \
+      & !(defined(field.valueType) & field.valueType = my.entity.name) \
+      & !(defined(field.valueType) & field.valueType = "any") \
+      & !is_element_type(field.type) \
+      & !(defined(field.transient) & field.transient = "true")
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
@@ -30,7 +36,13 @@
 .function dao_output_depended_daos(entity, first)
   my.result = ""
   for my.entity.field
-    if !(type = my.entity.name) & !(type = "any" | (defined(valueType) & valueType = "any")) & !is_element_type(type) & !(defined(transient) & transient = "true")
+    if !(field.type = my.entity.name) \
+      & !(defined(field.entity) & field.entity = my.entity.name) \
+      & !(field.type = "any") \
+      & !(defined(field.valueType) & field.valueType = my.entity.name) \
+      & !(defined(field.valueType) & field.valueType = "any") \
+      & !is_element_type(field.type) \
+      & !(defined(field.transient) & field.transient = "true")
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
