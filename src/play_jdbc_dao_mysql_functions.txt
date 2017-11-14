@@ -400,6 +400,14 @@
 .endfunction
 
 .function dao_output_add_sql(entity, field)
+  if my.field.type = "array"
+    if defined(my.field.entity)
+    elsif defined(my.field.valueType)
+    else
+    endif
+  elsif my.field.type = "map" & defined(my.field.valueType)
+  else
+  endif
   return "???"
 .endfunction
 
