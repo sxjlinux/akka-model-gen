@@ -54,6 +54,9 @@ class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(e
 .endif
 .endfor
 .output "$(pkgdir)/Module.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
 package $(class_package)
 
 import com.google.inject.AbstractModule
