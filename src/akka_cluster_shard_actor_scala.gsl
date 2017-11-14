@@ -26,7 +26,8 @@ object Sharding$(entity.name:Pascal)s {
   def name: String = "Sharding$(entity.name:Pascal)s"
 }
 
-class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(entity, 1))) extends Actor with ActorLogging {
+class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(entity, 1)))
+  extends Actor with ActorLogging {
   val settings = Settings(context.system)
   Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
 
@@ -36,7 +37,7 @@ class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(e
 
   ClusterSharding(context.system).start(
     Sharding$(entity.name:Pascal).shardName,
-    Sharding$(entity.name:Pascal).props,
+    Sharding$(entity.name:Pascal).props($(dao_output_depended_daos(entity, 1))),
     ClusterShardingSettings(context.system),
     Sharding$(entity.name:Pascal).extractEntityId,
     Sharding$(entity.name:Pascal).extractShardId

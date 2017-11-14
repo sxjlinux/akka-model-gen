@@ -26,7 +26,7 @@ import javax.inject._
 import scala.math.Numeric.IntIsIntegral._
 
 object Sharding$(entity.name:Pascal) {
-  def props = Props[Sharding$(entity.name:Pascal)]
+  def props($(dao_output_depended_dao_defs(entity, 1))) = Props(new Sharding$(entity.name:Pascal)($(dao_output_depended_daos(entity, 1))))
   def name($(entity.name:Camel)Id: String): String = $(entity.name:Camel)Id.toString
 
   val shardName: String = "Sharding$(entity.name:Pascal)"
