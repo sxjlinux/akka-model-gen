@@ -406,6 +406,22 @@
   return my.result
 .endfunction
 
+.function dao_output_delete_by_key_sql(entity, key)
+  my.result = "DELETE"
+  my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
+  my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
+  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+.endfunction
+
+.function dao_output_delete_by_key(entity, key)
+  my.result = "database.withTransaction { implicit c =>"
+  my.result = my.result + "\n    $(dao_output_delete_by_key_sql(my.entity, my.key)).on("
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
+  my.result = my.result + "\n    ).executeUpdate()"
+  my.result = my.result + "\n  }"
+  return my.result
+.endfunction
+
 .function dao_output_create_or_update_sql(entity)
   my.result = "INSERT INTO $(model.dbSchema:c).$(my.entity.name)("
   my.result = my.result + "\n        $(dao_output_entity_columns(my.entity))"
