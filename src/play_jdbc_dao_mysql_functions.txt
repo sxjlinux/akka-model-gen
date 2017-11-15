@@ -345,18 +345,44 @@
   endif
 .endfunction
 
+.function dao_output_entity_key_as_param(entity, key)
+  my.result = ""
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + ",\n      "
+    endif
+    my.field_name = field.name
+    if !defined(my.entity->field(name = my.field_name))
+      my.ref_field = extract_fk_field(my.entity, my.field_name)
+      assign_field_type(field, my.ref_field)
+    endif
+    my.result = my.result + dao_output_entity_field_as_param(my.entity, field)
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_entity_field_as_param(entity, field)
+  if is_enum_type(my.field.type)
+    return "\"$(my.field.name:Camel)\" -> toValue($(my.entity.name:Camel).$(my.field.name:Camel))"
+  elsif my.field.type = "timestamp"
+    return "\"$(my.field.name:Camel)\" -> toDate($(my.entity.name:Camel).$(my.field.name:Camel))"
+  else
+    return "\"$(my.field.name:Camel)\" -> $(my.entity.name:Camel).$(my.field.name:Camel)"
+  endif
+.endfunction
+
 .function dao_output_entity_as_param(entity)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
-    my.result = my.result + dao_output_key_as_param(my.entity, my.pk)
+    my.result = my.result + dao_output_entity_key_as_param(my.entity, my.pk)
   endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       if string.length(my.result) > 0
         my.result = my.result + ",\n      "
       endif
-      my.result = my.result + "$(dao_output_field_as_param(field))"
+      my.result = my.result + "$(dao_output_entity_field_as_param(my.entity, field))"
     endif
   endfor
   return my.result
