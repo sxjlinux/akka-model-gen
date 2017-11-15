@@ -29,7 +29,7 @@ class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database
 .
 .  primaryKey = extract_pk(entity)
 
-  def deleteBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): Int \
+  def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): Int \
     = $(dao_output_delete_by_key(entity, primaryKey))
 . #  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 .
@@ -43,7 +43,6 @@ class $(entity.name:Pascal)DAO @Inject() (@NamedDatabase("dcim_config") database
 
   def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_add_method(entity, field))
 
-  val remove$(field.name:Pascal)Sql:SqlQuery = $(dao_output_remove_sql(entity, field))
   def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = $(dao_output_remove_method(entity, field))
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 

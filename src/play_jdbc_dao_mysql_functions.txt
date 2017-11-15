@@ -441,18 +441,6 @@
   return my.result
 .endfunction
 
-.function dao_output_add_sql(entity, field)
-  if my.field.type = "array"
-    if defined(my.field.entity)
-    elsif defined(my.field.valueType)
-    else
-    endif
-  elsif my.field.type = "map" & defined(my.field.valueType)
-  else
-  endif
-  return "???"
-.endfunction
-
 .function dao_output_remove_sql(entity, field)
   return "???"
 .endfunction
@@ -480,10 +468,26 @@
 .endfunction
 
 .function dao_output_add_method(entity, field)
+  if my.field.type = "array"
+    if defined(my.field.entity) & defined(my.field.valueField)
+    else
+      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate(x)).reduce(_ + _)"
+    endif
+  elsif my.field.type = "map"
+  else
+  endif
   return "???"
 .endfunction
 
 .function dao_output_remove_method(entity, field)
+  if my.field.type = "array"
+    if defined(my.field.entity) & defined(my.field.valueField)
+    else
+      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey(x)).reduce(_ + _)"
+    endif
+  elsif my.field.type = "map"
+  else
+  endif
   return "???"
 .endfunction
 
