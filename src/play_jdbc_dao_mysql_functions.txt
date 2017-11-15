@@ -389,7 +389,7 @@
 .endfunction
 
 .function dao_output_select_by_key_single(entity, key)
-  my.result = "database.withTransaction { implicit c =>"
+  my.result = "{"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + "\n    ).as(parser.single)"
@@ -398,7 +398,7 @@
 .endfunction
 
 .function dao_output_select_by_key(entity, key)
-  my.result = "database.withTransaction { implicit c =>"
+  my.result = "{"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + "\n    ).as(parser.*)"
@@ -414,7 +414,7 @@
 .endfunction
 
 .function dao_output_delete_by_key(entity, key)
-  my.result = "database.withTransaction { implicit c =>"
+  my.result = "{"
   my.result = my.result + "\n    $(dao_output_delete_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + "\n    ).executeUpdate()"
@@ -433,7 +433,7 @@
 .endfunction
 
 .function dao_output_create_or_update_method(entity)
-  my.result = "database.withTransaction { implicit c =>"
+  my.result = "{"
   my.result = my.result + "\n    $(dao_output_create_or_update_sql(my.entity)).on("
   my.result = my.result + "\n      $(dao_output_entity_as_param(my.entity))"
   my.result = my.result + "\n    ).executeUpdate()"
@@ -454,7 +454,7 @@
 .endfunction
 
 .function dao_output_change_method(entity, key, field)
-  my.result = "database.withTransaction { implicit c =>"
+  my.result = "{"
   my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
   my.result = my.result + ",\n      $(dao_output_field_as_param(my.field))"
@@ -470,8 +470,9 @@
 .function dao_output_add_method(entity, field)
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
-    else
+    elsif defined(my.field.valueType)
       return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate(x)).reduce(_ + _)"
+    else
     endif
   elsif my.field.type = "map"
   else
@@ -482,8 +483,9 @@
 .function dao_output_remove_method(entity, field)
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
-    else
+    elsif defined(my.field.valueType)
       return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey(x)).reduce(_ + _)"
+    else
     endif
   elsif my.field.type = "map"
   else
