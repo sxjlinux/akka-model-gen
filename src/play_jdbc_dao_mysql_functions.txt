@@ -471,7 +471,8 @@
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
-      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate(x)).reduce(_ + _)"
+      my.depended = model->entity(name = my.field.valueType)
+      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).reduce(_ + _)"
     else
     endif
   elsif my.field.type = "map"
@@ -480,11 +481,67 @@
   return "???"
 .endfunction
 
+
+.function dao_output_key_name_list(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(field.name:Camel)"
+    endfor
+  endif
+  return my.result
+.endfunction
+
+.function dao_output_entity_key_name_list(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.result = my.result + "$(entity.name:Camel).$(field.name:Camel)"
+    endfor
+  endif
+  return my.result
+.endfunction
+
+.function dao_out_aggregation_key_def_for(entity)
+  my.result = ""
+  if defined(my.entity.aggregationRoot) & my.entity.aggregationRoot="true"
+  elsif defined(my.entity.aggregationTo)
+    my.root = model->entity(name = my.entity.aggregationTo)
+    my.pk = extract_pk(my.root)
+    my.result = dao_output_key_as_param_def(my.root, my.pk)
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+  else
+  endif
+  return my.result
+.endfunction
+
+.function dao_out_aggregation_key_for(entity)
+  my.result = ""
+  if defined(my.entity.aggregationRoot) & my.entity.aggregationRoot="true"
+  elsif defined(my.entity.aggregationTo)
+    my.root = model->entity(name = my.entity.aggregationTo)
+    my.result = dao_output_key_name_list(my.root)
+  else
+  endif
+  return my.result
+.endfunction
+
 .function dao_output_remove_method(entity, field)
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
-      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey(x)).reduce(_ + _)"
+      my.depended = model->entity(name = my.field.valueType)
+      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(entity)), $(dao_output_entity_key_name_list(my.depended)))).reduce(_ + _)"
     else
     endif
   elsif my.field.type = "map"

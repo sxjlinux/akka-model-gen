@@ -25,7 +25,7 @@ import anorm._
 class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity, 1))) {
 . # val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
 .
-  def createOrUpdate($(entity.name:Camel): $(entity.name:Pascal)Vo)(implicit c: Connection): Int \
+  def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo)(implicit c: Connection): Int \
     = $(dao_output_create_or_update_method(entity))
 .
 .  primaryKey = extract_pk(entity)
