@@ -18,7 +18,7 @@ class Type(xml: Node) {
         x.child.filter(x => (x.label == "aggregation" || x.label == "message")
           && x.attribute("name") == Some(Text(typeName))).nonEmpty
       })
-      entities.nonEmpty || aggregates.reduce(_ || _)
+      entities.nonEmpty || (if(aggregates.nonEmpty) aggregates.reduce(_ || _) else false)
     }
   }
 

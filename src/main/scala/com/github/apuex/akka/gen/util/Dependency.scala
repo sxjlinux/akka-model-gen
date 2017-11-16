@@ -34,7 +34,7 @@ class Dependency(xml: Node, basePackage: String) {
     }
     xml.child.filter(x => x.label == "entity" && !(x.attribute("transient") == Some(Text("true"))))
       .foreach(x => {
-        seq +:= text(x.attribute("name"))
+        add(text(x.attribute("name")))
         x.child.filter(x => x.label == "field")
           .foreach(x => {
             optionalText(x.attribute("type")).flatMap(x => add(x))
@@ -45,11 +45,17 @@ class Dependency(xml: Node, basePackage: String) {
     seq
   }
 
-  def daoVars: Option[String] = {
-    Some(dao.map(x => s"${Identifier.toCamel(x)}DAO").reduce((x, y) => s"${x}, ${y}"))
+  def daoVars: String = {
+    if (dao.nonEmpty)
+      dao.map(x => s"${Identifier.toCamel(x)}DAO").reduce((x, y) => s"${x}, ${y}")
+    else
+      ""
   }
 
-  def daoDefs: Option[String] = {
-    Some(dao.map(x => s"${Identifier.toCamel(x)}DAO: ${Identifier.toPascal(x)}DAO").reduce((x, y) => s"${x}, ${y}"))
+  def daoDefs: String = {
+    if (dao.nonEmpty)
+      dao.map(x => s"${Identifier.toCamel(x)}DAO: ${Identifier.toPascal(x)}DAO").reduce((x, y) => s"${x}, ${y}")
+    else
+      ""
   }
 }

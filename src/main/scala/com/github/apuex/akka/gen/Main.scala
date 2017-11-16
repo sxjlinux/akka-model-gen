@@ -1,5 +1,7 @@
 package com.github.apuex.akka.gen
 
+import com.github.apuex.akka.gen.util.Dependency
+
 import scala.xml.{Node, Text}
 
 object Main extends App {

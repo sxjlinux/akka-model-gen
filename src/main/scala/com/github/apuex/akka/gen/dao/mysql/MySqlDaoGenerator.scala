@@ -19,7 +19,9 @@ class MySqlDaoGenerator(xml: Node) {
       s"""
 ${dependency.imports}|
 @Singleton
-class ${text(entity.attribute("name"))} @Inject() ()
+class ${text(entity.attribute("name"))} @Inject() (${dependency.daoDefs}) {
+
+}
       """.stripMargin
   }
 }
