@@ -496,15 +496,18 @@
   return my.result
 .endfunction
 
-.function dao_output_entity_key_name_list(entity)
+.function dao_output_entity_key_name_list(entity, entity_name)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
     for my.pk.field
-      if string.length(my.result) > 0
-        my.result = my.result + ", "
+      my.pk_field = field
+      if defined(my.entity->field(name = my.pk_field.name))
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "$(my.entity_name:Camel).$(field.name:Camel)"
       endif
-      my.result = my.result + "$(entity.name:Camel).$(field.name:Camel)"
     endfor
   endif
   return my.result
@@ -541,7 +544,9 @@
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
-      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(entity)), $(dao_output_entity_key_name_list(my.depended)))).reduce(_ + _)"
+      echo "$(my.entity.name), $(my.depended.name)"
+      my.entity_name = "x"
+      return "$(my.field.name:Camel).map($(my.entity_name) => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), $(dao_output_entity_key_name_list(my.depended, my.entity_name)))).reduce(_ + _)"
     else
     endif
   elsif my.field.type = "map"
