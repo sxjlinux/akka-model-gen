@@ -472,10 +472,16 @@
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
-      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).reduce(_ + _)"
+      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).sum"
     else
     endif
   elsif my.field.type = "map"
+    my.depended = model->entity(name = my.field.entity)
+    my.result = "{"
+    my.result = my.result + "\n    $(my.field.name:Camel).map(x => $(my.field.entity:Pascal)Vo($(dao_out_aggregation_key_for(my.depended)), x._1, x._2))"
+    my.result = my.result + "\n      .map(x => $(my.field.entity:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).sum"
+    my.result = my.result + "\n  }"
+    return my.result
   else
   endif
   return "???"
@@ -544,12 +550,16 @@
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
-      echo "$(my.entity.name), $(my.depended.name)"
       my.entity_name = "x"
-      return "$(my.field.name:Camel).map($(my.entity_name) => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), $(dao_output_entity_key_name_list(my.depended, my.entity_name)))).reduce(_ + _)"
+      return "$(my.field.name:Camel).map($(my.entity_name) => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), $(dao_output_entity_key_name_list(my.depended, my.entity_name)))).sum"
     else
     endif
   elsif my.field.type = "map"
+    my.depended = model->entity(name = my.field.entity)
+    my.result = "{"
+    my.result = my.result + "\n    $(my.field.name:Camel).map(x => $(my.field.entity:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), x._1)).sum"
+    my.result = my.result + "\n  }"
+    return my.result
   else
   endif
   return "???"
