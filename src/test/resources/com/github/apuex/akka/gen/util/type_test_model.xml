@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<model name="ecommerce" script="../src/cqrs_entities.gsl" package="com.apuex.sales" dbSchema="sales">
+  <entity name="product_type" enum="true">
+    <field name="type_code" type="int" required="true"/>
+    <field name="type_name" type="string" required="true"/>
+    <primaryKey name="product_type_pk">
+      <field name="type_code"/>
+    </primaryKey>
+  </entity>
+</model>
