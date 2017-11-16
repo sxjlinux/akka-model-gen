@@ -12,7 +12,8 @@ libraryDependencies ++= {
     "org.scala-lang.modules" %% "scala-xml"                % "1.0.6",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     "org.scala-lang.modules" %% "scala-swing"              % "2.0.0-M2",
-    "joda-time"              %  "joda-time"                % jodaTimeVersion
+    "joda-time"              %  "joda-time"                % jodaTimeVersion,
+    "org.scalatest"          %% "scalatest"                % "3.0.1"           % "test"
   )
 }
 

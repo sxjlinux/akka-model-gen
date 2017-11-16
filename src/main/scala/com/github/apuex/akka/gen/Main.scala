@@ -1,12 +1,14 @@
 package com.github.apuex.akka.gen
 
+import scala.xml.Node
+
 object Main extends App {
   if (args.length == 0) {
     println("Usage:\n <cmd> <xml file>")
     System.exit(-1)
   }
 
-  val xml = ModelLoader(args(0)).xml
+  val xml: Node = ModelLoader(args(0)).xml
 
   xml.child.filter(x => x.label == "entity")
     .foreach(x => {
