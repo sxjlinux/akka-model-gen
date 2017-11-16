@@ -6,5 +6,15 @@ object Main extends App {
     System.exit(-1)
   }
 
-  val doc = ModelLoader(args(0)).xml 
+  val xml = ModelLoader(args(0)).xml
+
+  xml.child.filter(x => x.label == "entity")
+    .foreach(x => {
+      println(s"${x.label} ${x.attribute("name")}")
+      x.child.filter(x => x.label == "field")
+        .foreach(x => {
+          println("  " + x.label)
+          println("    " + x.attribute("name"))
+        })
+    })
 }
