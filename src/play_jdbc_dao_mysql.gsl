@@ -3,7 +3,7 @@
 .pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if !defined(transient) | !(transient = "true")
+.if (!defined(transient) | !(transient = "true")) & !(name = "alarm_record")
 .output "$(pkgdir)/$(entity.name:Pascal)DAO.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -16,6 +16,7 @@ import $(model.package).util.EnumConvert._
 import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
 import java.sql.Connection
+import java.util.Date
 import javax.inject._
 import play.api.db._
 import anorm.SqlParser._
@@ -23,8 +24,8 @@ import anorm._
 
 @Singleton
 class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity, 1))) {
-. # val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
-.
+  val parser: RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
+
   def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo)(implicit c: Connection): Int \
     = $(dao_output_create_or_update_method(entity))
 .
@@ -32,10 +33,10 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
 
   def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): Int \
     = $(dao_output_delete_by_key(entity, primaryKey))
-. #  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
+  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 .
 .  for foreignKey
-. #  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey)))(implicit c: Connection): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
+  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey)))(implicit c: Connection): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
 .  endfor
 .
 .  for field

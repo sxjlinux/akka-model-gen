@@ -78,6 +78,29 @@
   return my.result
 .endfunction
 
+.function dao_get_type(typeName)
+  if my.typeName = "bool"
+    return "Boolean"
+  elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double" | my.typeName = "string" | my.typeName = "any" | my.typeName = "actor_ref"
+    return "$(my.typeName:Pascal)"
+  elsif my.typeName = "text"
+    return "String"
+  elsif my.typeName = "timestamp"
+    return "Date"
+  elsif my.typeName = "array"
+    return "Seq"
+  elsif my.typeName = "map"
+    return "Map"
+  else
+    ref = find_entity_by_type(my.typeName)
+    if defined(ref.enum) & ref.enum = "true"
+      return "$(my.typeName:Pascal)"
+    else
+      return "$(my.typeName:Pascal)Vo"
+    endif
+  endif
+.endfunction
+
 .function dao_output_parser_gets(entity)
   my.result = ""
   if defined(extract_pk(my.entity))
@@ -93,7 +116,7 @@
       if string.length(my.result) > 0
         my.result = my.result + " ~\n    "
       endif
-      my.result = my.result + "get[$(scala_get_type(my.field.type))](\"$(field.name:c)\")"
+      my.result = my.result + "get[$(dao_get_type(my.field.type))](\"$(field.name:c)\")"
     endfor
   endif
   for my.entity.field
@@ -102,7 +125,7 @@
         my.result = my.result + " ~\n    "
       endif
       if is_element_type(field.type)
-        my.result = my.result + "get[$(scala_get_type(field.type))](\"$(field.name:c)\")"
+        my.result = my.result + "get[$(dao_get_type(field.type))](\"$(field.name:c)\")"
       else
         my.result = my.result + "get[Int](\"$(field.name:c)\")"
       endif
@@ -145,7 +168,11 @@
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
-      my.result = my.result + "$(field.name:Camel)"
+      if field.type = "timestamp"
+        my.result = my.result + "toTimestamp($(field.name:Camel))"
+      else
+        my.result = my.result + "$(field.name:Camel)"
+      endif
     endfor
   endif
   for my.entity.field
@@ -153,7 +180,13 @@
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
-      if is_element_type(field.type)
+      if field.type = "timestamp"
+        if defined(field.required) & required = "true"
+          my.result = my.result + "toTimestamp($(field.name:Camel))"
+        else
+          my.result = my.result + "Some(toTimestamp($(field.name:Camel)))"
+        endif
+      elsif is_element_type(field.type)
         if defined(field.required) & required = "true"
           my.result = my.result + "$(field.name:Camel)"
         else
@@ -472,7 +505,10 @@
     if defined(my.field.entity) & defined(my.field.valueField)
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
-      return "$(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).sum"
+      my.result = "{"
+      my.result = my.result + "\n    $(my.field.name:Camel).map(x => $(my.field.valueType:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_for(my.depended)), x)).sum"
+      my.result = my.result + "\n  }"
+      return my.result
     else
     endif
   elsif my.field.type = "map"
@@ -521,27 +557,38 @@
 
 .function dao_out_aggregation_key_def_for(entity)
   my.result = ""
-  if defined(my.entity.aggregationRoot) & my.entity.aggregationRoot="true"
-  elsif defined(my.entity.aggregationTo)
-    my.root = model->entity(name = my.entity.aggregationTo)
-    my.pk = extract_pk(my.root)
-    my.result = dao_output_key_as_param_def(my.root, my.pk)
-    if string.length(my.result) > 0
-      my.result = my.result + ", "
+  my.pk = extract_pk(my.entity)
+  for my.pk.field
+    my.key_field = field
+    if !defined(my.entity->field(name = my.key_field.name))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.fk_field = extract_fk_field(my.entity, field.name)
+      assign_field_type(field, my.fk_field)
+      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
     endif
-  else
+  endfor
+  if string.length(my.result) > 0
+    my.result = my.result + ", "
   endif
   return my.result
 .endfunction
 
 .function dao_out_aggregation_key_for(entity)
   my.result = ""
-  if defined(my.entity.aggregationRoot) & my.entity.aggregationRoot="true"
-  elsif defined(my.entity.aggregationTo)
-    my.root = model->entity(name = my.entity.aggregationTo)
-    my.result = dao_output_key_name_list(my.root)
-  else
-  endif
+  my.pk = extract_pk(my.entity)
+  for my.pk.field
+    my.key_field = field
+    if !defined(my.entity->field(name = my.key_field.name))
+      if string.length(my.result) > 0
+        my.result = my.result + ", "
+      endif
+      my.fk_field = extract_fk_field(my.entity, field.name)
+      assign_field_type(field, my.fk_field)
+      my.result = my.result + "$(field.name:Camel)"
+    endif
+  endfor
   return my.result
 .endfunction
 
@@ -551,7 +598,10 @@
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
       my.entity_name = "x"
-      return "$(my.field.name:Camel).map($(my.entity_name) => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), $(dao_output_entity_key_name_list(my.depended, my.entity_name)))).sum"
+      my.result = "{"
+      my.result = my.result + "\n    $(my.field.name:Camel).map($(my.entity_name) => $(my.field.valueType:Camel)DAO.deleteByPrimaryKey($(dao_out_aggregation_key_for(my.depended)), $(dao_output_entity_key_name_list(my.depended, my.entity_name)))).sum"
+      my.result = my.result + "\n  }"
+      return my.result
     else
     endif
   elsif my.field.type = "map"
