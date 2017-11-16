@@ -619,6 +619,100 @@
   return "???"
 .endfunction
 
+.function output_defined_query_param_def(entity, query)
+  my.result = ""
+  for my.query.criteria
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.field = my.entity->field(name = criteria.field)
+    my.field.required = "true"
+    my.result = my.result + "$(my.field.name:Camel): $(scala_output_type(my.field))"
+  endfor
+  return my.result
+.endfunction
+
+.function output_defined_query_param(entity, query)
+  my.result = ""
+  for my.query.criteria
+    if string.length(my.result) > 0
+      my.result = my.result + ",\n     "
+    endif
+    my.field = my.entity->field(name = criteria.field)
+    my.result = my.result + "$(dao_output_field_as_param(my.field))"
+  endfor
+  return my.result
+.endfunction
+
+.function output_defined_query_result_type(entity, query)
+  if my.query.multiplication = "*"
+    return "List[$(dao_get_type(my.query.resultType))]"
+  elsif my.query.multiplication = "single"
+    return "$(dao_get_type(my.query.resultType))"
+  endif
+.endfunction
+
+.function output_defined_query_sql(entity, query)
+  my.result = ""
+  for my.query.select
+    if string.length(my.result) > 0
+      my.result = my.result + ",\n      "
+    else
+      my.result = "SELECT"
+    endif
+  endfor
+  my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
+  my.result = my.result + "\n      WHERE"
+  my.clause = ""
+  for my.query.criteria
+    if string.length(my.clause) > 0
+      my.clause = my.clause + ",\n      $(criteria.name:UPPER)"
+    else
+      my.clause = my.clause + "\n      "
+    endif
+    my.clause = "$(criteria.field:c) = {$(criteria.field:Camel)}"
+  endfor
+  my.result = my.result + my.clause
+  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+.endfunction
+
+.function dao_get_select_column_name(entity, query)
+  for my.query.select
+    return my.entity->field(name = select.column)
+  endfor
+.endfunction
+
+.function dao_put_parser(entity, query)
+  my.field = dao_get_select_column_name(my.entity, my.query)
+  if is_element_type(my.query.resultType)
+    if my.field.type = "text"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "string"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "double"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "int"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "bigint"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "bool"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    elsif my.field.type = "timestamp"
+      return "SqlParser.str(\"$(my.field.name)\")"
+    endif
+  endif
+  return ""
+.endfunction
+
 .function output_defined_query(entity, query)
-  return "def $(my.query.name:Camel)($(output_defined_query_params(entity, query)))"
+  my.result = "{"
+  my.result = my.result + "\n    $(output_defined_query_sql(my.entity, my.query)).on("
+  my.result = my.result + "\n      $(output_defined_query_param(my.entity, my.query))"
+  if my.query.multiplication = "*"
+    my.result = my.result + "\n    ).as($(dao_put_parser(my.entity, my.query)).*)"
+  elsif my.query.multiplication = "single"
+    my.result = my.result + "\n    ).as($(dao_put_parser(my.entity, my.query)).single)"
+  endif
+  my.result = my.result + "\n  }"
+  return my.result
 .endfunction

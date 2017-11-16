@@ -54,9 +54,9 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
 .    else
 .    endif
 .    for field.query
-.      if !defined(refQuery)
+.      if defined(name) & !defined(refName)
 
-  $(output_defined_query(entity, query))
+  def $(query.name:Camel)($(output_defined_query_param_def(entity, query)))(implicit c: Connection): $(output_defined_query_result_type(entity, query)) = $(output_defined_query(entity, query))
 .      endif
 .    endfor
 .  endfor
