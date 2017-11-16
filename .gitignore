@@ -1,8 +1,19 @@
 *.swp
 
 build
+cluster
+dao-mysql
+dbschema
+domain
+message
+rest
+
 target
 bin
 *.o
 tmp
 
+.cache-main
+.classpath
+.idea/
+.settings/
