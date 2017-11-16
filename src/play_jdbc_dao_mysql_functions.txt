@@ -619,3 +619,6 @@
   return "???"
 .endfunction
 
+.function output_defined_query(entity, query)
+  return "def $(my.query.name:Camel)($(output_defined_query_params(entity, query)))"
+.endfunction
