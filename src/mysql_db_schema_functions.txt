@@ -10,51 +10,57 @@
 .endfunction
 
 .function db_output_fk_pk(entity)
-  result = ""
-  pk = extract_pk(my.entity)
-  if defined(pk)
-    for pk.field
-      pkField = field
-      if defined(extract_pk_field(my.entity, pkField.name))
-        theField = extract_pk_field(my.entity, pkField.name)
+  my.result = ""
+  my.pk = extract_pk(my.entity)
+  if defined(my.pk)
+    for my.pk.field
+      my.pkField = field
+      if defined(extract_pk_field(my.entity, my.pkField.name))
+        my.theField = extract_pk_field(my.entity, my.pkField.name)
+        if defined(my.theField.joinKey)
+          my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+          my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+          assign_field_type(my.theField, my.theRefField)
+        endif
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n  "
+        endif
+        my.result = my.result + "$(db_output_field_basic(my.theField))"
       else
-        if has_fk(my.entity) & is_fk_field(my.entity, pkField.name)
-          theField = extract_fk_field(my.entity, pkField.name)
+        if has_fk(my.entity) & is_fk_field(my.entity, my.pkField.name)
+          my.theField = extract_fk_field(my.entity, my.pkField.name)
+          if string.length(my.result) > 0
+            my.result = my.result + ",\n  "
+          endif
+          assign_field_type(field, my.theField)
+          my.result = my.result + "$(db_output_field_basic(field))"
         else
           abort "E: no primaryKey/foreignKey is defined on entity $(my.entity.name)."
-          return result
         endif
       endif
-      if string.length(result) > 0
-        result = result + ",\n  "
-      endif
-      assign_field_type(field, theField)
-      result = result + "$(db_output_field_basic(field))"
     endfor
   else
     abort "E: no primaryKey is defined on entity $(my.entity.name)."
   endif
-  return result
+  return my.result
 .endfunction
 
 .function db_output_fk_only(entity)
-  result = ""
+  my.result = ""
   for my.entity.foreignKey
-    for field
-      fkField = extract_fk_field(my.entity, field.name)
-      if exists_field(my.entity, fkField.name) & (defined(fkField.type) & is_element_type(fkField.type))
-        abort "E: Not supposed to be like that."
-      elsif is_pk_field(my.entity, field.name)
+    for foreignKey.field
+      my.fkField = extract_fk_field(my.entity, field.name)
+      if is_pk_field(my.entity, field.name)
       else
-        if string.length(result) > 0
-          result = result + ",\n  "
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n  "
         endif
-        assign_field_type(field, fkField)
-        result = result + "$(db_output_field_basic(field))"
+        assign_field_type(field, my.fkField)
+        my.result = my.result + "$(db_output_field_basic(field))"
       endif
     endfor
   endfor
-  return result
+  return my.result
 .endfunction
 
 .function db_output_field_basic(field)
