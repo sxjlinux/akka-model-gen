@@ -2,15 +2,13 @@
   my.result = ""
   my.daos = XML.new("dao")
   for my.entity.field
-    if !(field.type = my.entity.name) \
-      & !(defined(field.entity) & field.entity = my.entity.name) \
-      & !(field.type = "any") \
-      & !(defined(field.valueType) & field.valueType = my.entity.name) \
+    if !(field.type = "any") \
       & !(defined(field.valueType) & field.valueType = "any") \
       & !is_element_type(field.type) \
       & !(defined(field.transient) & field.transient = "true")
 
       if defined(field->query)
+        echo "$(entity.name), $(field->query.entity)"
         if !defined(my.daos.$(field->query.entity))
           my.daos.$(field->query.entity) = field->query.entity
           if string.length(my.result) > 0
@@ -19,7 +17,9 @@
           my.result = my.result + "$(field->query.entity:Camel)DAO: $(field->query.entity:Pascal)DAO"
         else
         endif
-      else
+      elsif !(field.type = my.entity.name) \
+          & !(defined(field.entity) & field.entity = my.entity.name) \
+          & !(defined(field.valueType) & field.valueType = my.entity.name)
         if string.length(my.result) > 0
           my.result = my.result + ", "
         endif
