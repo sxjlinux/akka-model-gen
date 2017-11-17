@@ -8,7 +8,6 @@
       & !(defined(field.transient) & field.transient = "true")
 
       if defined(field->query)
-        echo "$(entity.name), $(field->query.entity)"
         if !defined(my.daos.$(field->query.entity))
           my.daos.$(field->query.entity) = field->query.entity
           if string.length(my.result) > 0
