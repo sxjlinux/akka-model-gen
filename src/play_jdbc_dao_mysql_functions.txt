@@ -166,7 +166,7 @@
     my.pk = extract_pk(my.entity)
     for my.pk.field
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n          "
       endif
       if field.type = "timestamp"
         my.result = my.result + "toTimestamp($(field.name:Camel))"
@@ -178,7 +178,7 @@
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | !(transient = "true"))
       if string.length(my.result) > 0
-        my.result = my.result + ", "
+        my.result = my.result + ",\n          "
       endif
       if field.type = "timestamp"
         if defined(field.required) & required = "true"
@@ -199,13 +199,23 @@
           my.result = my.result + "Some($(field.type:Pascal).fromValue($(field.name:Camel)))"
         endif
       elsif field.type = "array"
-        if defined(field.entity) & defined(field.valueField)
-          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        if defined(field->query)
+          my.the_query = field->query
+          my.ref_entity = model->entity(name = my.the_query.entity)
+          my.ref_query = dao_find_query(my.ref_entity, my.the_query.refName)
+          my.result = my.result + "$(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
         else
-          my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          if defined(field.entity) & defined(field.valueField)
+            my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          else
+            my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          endif
         endif
       elsif field.type = "map"
-        my.result = my.result + "$(field.entity:Camel)DAO.select$(field.name:Pascal)By$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        if defined(field.query)
+        else
+          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.name:Pascal)By$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        endif
       else
         my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
       endif
@@ -626,7 +636,7 @@
       my.result = my.result + ", "
     endif
     my.field = my.entity->field(name = criteria.field)
-    my.field.required = "true"
+    #my.field.required = "true"
     my.result = my.result + "$(my.field.name:Camel): $(scala_output_type(my.field))"
   endfor
   return my.result
@@ -715,4 +725,66 @@
   endif
   my.result = my.result + "\n  }"
   return my.result
+.endfunction
+
+.function output_parse_type(type, value)
+  if is_element_type(my.type)
+    if my.type = "text"
+      return "\"$(my.value)\""
+    elsif my.type = "string"
+      return "\"$(my.value)\""
+    elsif my.type = "double"
+      return "\"$(my.value)\".toDouble"
+    elsif my.type = "int"
+      return "\"$(my.value)\".toInt"
+    elsif my.type = "bigint"
+      return "\"$(my.value)\".toLong"
+    elsif my.type = "bool"
+      return "\"$(my.value)\".toBoolean"
+    elsif my.type = "timestamp"
+      return "parseTimestamp(\"$(my.value)\")"
+    endif
+  elsif is_enum_type(my.type)
+    return "$(my.type:Pascal).fromName(\"$(my.value:UPPER)\")"
+  else
+    return "$(my.type:Pascal)Vo($(my.value))"
+  endif
+.endfunction
+
+.function output_call_defined_query_param(entity, query, ref_entity, ref_query)
+  my.result = ""
+  for my.query.param
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    if defined(param.field)
+      my.result = my.result + "$(param.field:Camel)"
+    elsif defined(param.type)
+      echo "$(param.value)"
+      my.result = my.result + "$(output_parse_type(param.type, param.value))"
+    else
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function output_call_defined_query(entity, query, ref_entity, ref_query)
+  return "$(my.ref_entity.name:Camel)DAO.$(my.ref_query.name:Camel)($(output_call_defined_query_param(my.entity, my.query, my.ref_entity, my.ref_query)))"
+.endfunction
+
+.function dao_find_query(entity, queryName)
+  for my.entity.field
+    for field.query
+     if query.name = my.queryName
+       return query
+     endif
+    endfor
+  endfor
+  for my.entity.query
+    if query.name = my.queryName
+      return query
+    endif
+  endfor
+  echo "not found: $(my.entity.name), $(my.queryName)"
+  return ""
 .endfunction
