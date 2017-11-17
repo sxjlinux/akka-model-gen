@@ -760,7 +760,6 @@
     if defined(param.field)
       my.result = my.result + "$(param.field:Camel)"
     elsif defined(param.type)
-      echo "$(param.value)"
       my.result = my.result + "$(output_parse_type(param.type, param.value))"
     else
     endif
