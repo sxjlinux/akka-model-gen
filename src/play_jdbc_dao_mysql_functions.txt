@@ -20,10 +20,11 @@
         else
         endif
       else
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
         if type = "array"
-          if string.length(my.result) > 0
-            my.result = my.result + ", "
-          endif
+
           if defined(field.entity) & defined(field.valueField)
             my.result = my.result + "$(field.entity:Camel)DAO: $(field.entity:Pascal)DAO"
           else
@@ -386,12 +387,12 @@
       my.ref_field = extract_fk_field(my.entity, my.field_name)
       assign_field_type(field, my.ref_field)
     endif
-    my.result = my.result + dao_output_field_as_param(field)
+    my.result = my.result + dao_output_field_as_equals_param(field)
   endfor
   return my.result
 .endfunction
 
-.function dao_output_field_as_param(field)
+.function dao_output_field_as_equals_param(field)
   if is_enum_type(my.field.type)
     return "\"$(my.field.name:Camel)\" -> toValue($(my.field.name:Camel))"
   elsif my.field.type = "timestamp"
@@ -513,7 +514,7 @@
   my.result = "{"
   my.result = my.result + "\n    $(dao_output_change_sql(my.entity, my.key, my.field)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
-  my.result = my.result + ",\n      $(dao_output_field_as_param(my.field))"
+  my.result = my.result + ",\n      $(dao_output_field_as_equals_param(my.field))"
   my.result = my.result + "\n    ).executeUpdate()"
   my.result = my.result + "\n  }"
   return my.result
@@ -659,10 +660,14 @@
   my.result = ""
   for my.query.criteria
     if string.length(my.result) > 0
-      my.result = my.result + ",\n     "
+      my.result = my.result + ",\n      "
     endif
     my.field = my.entity->field(name = criteria.field)
-    my.result = my.result + "$(dao_output_field_as_param(my.field))"
+    if criteria.relation = "="
+      my.result = my.result + "$(dao_output_field_as_equals_param(my.field))"
+    else
+      my.result = my.result + "<UNDEFINED>"
+    endif
   endfor
   return my.result
 .endfunction
@@ -681,8 +686,9 @@
     if string.length(my.result) > 0
       my.result = my.result + ",\n      "
     else
-      my.result = "SELECT"
+      my.result = "SELECT\n"
     endif
+    my.result = my.result + "        $(column)"
   endfor
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      WHERE"
@@ -691,9 +697,9 @@
     if string.length(my.clause) > 0
       my.clause = my.clause + ",\n      $(criteria.name:UPPER)"
     else
-      my.clause = my.clause + "\n      "
+      my.clause = my.clause + "\n       "
     endif
-    my.clause = "$(criteria.field:c) = {$(criteria.field:Camel)}"
+    my.clause = my.clause + " $(criteria.field:c) $(criteria.relation) {$(criteria.field:Camel)}"
   endfor
   my.result = my.result + my.clause
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
