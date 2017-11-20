@@ -125,6 +125,19 @@
   endfor
 .endfunction
 
+.function get_field(entity_name, field_name)
+  my.entity = find_entity_by_type(my.entity_name)
+  if exists_field(my.entity, my.field_name)
+    my.field = my.entity->field(name = my.field_name)
+  elsif defined(extract_fk_field(my.entity, my.field_name))
+    my.field = extract_fk_field(my.entity, my.field_name)
+  elsif defined(my.entity.aggregationTo)
+    my.aggregationTo = find_entity_by_type(my.entity.aggregationTo)
+    my.field = my.aggregationTo->field(name = my.field_name)
+  endif
+  return my.field
+.endfunction
+
 include "mysql_db_schema_functions.txt"
 include "mysql_db_schema.gsl"
 
