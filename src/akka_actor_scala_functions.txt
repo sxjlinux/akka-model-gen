@@ -93,6 +93,12 @@
     else
       return "None"
     endif
+  elsif my.field.type = "text"
+    if defined(my.field.required) & my.field.required = "true"
+      return "null"
+    else
+      return "None"
+    endif
   elsif my.field.type = "timestamp"
     if defined(my.field.required) & my.field.required = "true"
       return "null"
