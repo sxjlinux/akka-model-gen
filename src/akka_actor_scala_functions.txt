@@ -50,6 +50,18 @@
   endif
 .endfunction
 
+.function scala_output_param(field)
+  if my.field.type = "array" | my.field.type = "map"
+    return "$(field.name:Camel)"
+  else
+    if defined(my.field.required) & my.field.required = "true"
+      return "$(field.name:Camel)"
+    else
+      return "Some($(field.name:Camel))"
+    endif
+  endif
+.endfunction
+
 .function scala_output_default(field)
   if my.field.type = "tinyint" | my.field.type = "bool"
     if defined(my.field.required) & my.field.required = "true"
