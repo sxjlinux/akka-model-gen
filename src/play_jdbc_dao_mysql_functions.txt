@@ -256,12 +256,17 @@
     endif
     if is_pk_field(my.entity, field.name)
       if defined(extract_pk_field(my.entity, field.name))
-        my.pk_field = extract_pk_field(my.entity, field.name)
+        my.theField = extract_pk_field(my.entity, field.name)
+        if defined(my.theField.joinKey)
+          my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+          my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+          assign_field_type(my.theField, my.theRefField)
+        endif
+        my.result = my.result + "$(my.theField.name:Camel): $(scala_output_type(my.theField))"
       else
         my.pk_field = extract_fk_field(my.entity, field.name)
+        my.result = my.result + "$(field.name:Camel): $(scala_output_type(my.pk_field))"
       endif
-      assign_field_type(field, my.pk_field)
-      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
     elsif is_fk_field(my.entity, field.name)
       my.fk_field = extract_fk_field(my.entity, field.name)
       assign_field_type(field, my.fk_field)
@@ -648,9 +653,13 @@
     if string.length(my.result) > 0
       my.result = my.result + ", "
     endif
-    my.field = my.entity->field(name = criteria.field)
-    #my.field.required = "true"
-    my.result = my.result + "$(my.field.name:Camel): $(scala_output_type(my.field))"
+    my.theField = my.entity->field(name = criteria.field)
+    if defined(my.theField.joinKey)
+      my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+      assign_field_type(my.theField, my.theRefField)
+    endif
+    my.result = my.result + "$(my.theField.name:Camel): $(scala_output_type(my.theField))"
   endfor
   return my.result
 .endfunction
@@ -661,9 +670,14 @@
     if string.length(my.result) > 0
       my.result = my.result + ",\n      "
     endif
-    my.field = my.entity->field(name = criteria.field)
+    my.theField = my.entity->field(name = criteria.field)
+    if defined(my.theField.joinKey)
+      my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+      assign_field_type(my.theField, my.theRefField)
+    endif
     if criteria.relation = "="
-      my.result = my.result + "$(dao_output_field_as_equals_param(my.field))"
+      my.result = my.result + "$(dao_output_field_as_equals_param(my.theField))"
     else
       my.result = my.result + "<UNDEFINED>"
     endif
