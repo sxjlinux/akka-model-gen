@@ -48,29 +48,41 @@
 
 .function dao_output_depended_daos(entity, first)
   my.result = ""
+  my.daos = XML.new("dao")
   for my.entity.field
-    if !(field.type = my.entity.name) \
-      & !(defined(field.entity) & field.entity = my.entity.name) \
-      & !(field.type = "any") \
-      & !(defined(field.valueType) & field.valueType = my.entity.name) \
+    if !(field.type = "any") \
       & !(defined(field.valueType) & field.valueType = "any") \
       & !is_element_type(field.type) \
       & !(defined(field.transient) & field.transient = "true")
-      if string.length(my.result) > 0
-        my.result = my.result + ", "
-      endif
-      if type = "array"
-        if defined(field.entity) & defined(field.valueField)
+
+      if defined(field->query)
+        if !defined(my.daos.$(field->query.entity))
+          my.daos.$(field->query.entity) = field->query.entity
+          if string.length(my.result) > 0
+            my.result = my.result + ", "
+          endif
+          my.result = my.result + "$(field->query.entity:Camel)DAO"
+        else
+        endif
+      elsif !(field.type = my.entity.name) \
+          & !(defined(field.entity) & field.entity = my.entity.name) \
+          & !(defined(field.valueType) & field.valueType = my.entity.name)
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        if type = "array"
+          if defined(field.entity) & defined(field.valueField)
+            my.result = my.result + "$(field.entity:Camel)DAO"
+          else
+            my.result = my.result + "$(field.valueType:Camel)DAO"
+          endif
+        elsif type = "map"
           my.result = my.result + "$(field.entity:Camel)DAO"
         else
-          my.result = my.result + "$(field.valueType:Camel)DAO"
+          my.result = my.result + "$(field.type:Camel)DAO"
         endif
-      elsif type = "map"
-        my.result = my.result + "$(field.entity:Camel)DAO"
-      else
-        my.result = my.result + "$(field.type:Camel)DAO"
       endif
-    endif
+   endif
   endfor
   if my.first
     return my.result
