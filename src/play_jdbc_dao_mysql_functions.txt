@@ -664,7 +664,7 @@
     if string.length(my.result) > 0
       my.result = my.result + ", "
     endif
-    my.theField = my.entity->field(name = criteria.field)
+    my.theField = get_field(my.entity.name, criteria.field)
     if defined(my.theField.joinKey)
       my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
       my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
@@ -681,7 +681,7 @@
     if string.length(my.result) > 0
       my.result = my.result + ",\n      "
     endif
-    my.theField = my.entity->field(name = criteria.field)
+    my.theField = get_field(my.entity.name, criteria.field)
     if defined(my.theField.joinKey)
       my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
       my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
@@ -729,14 +729,14 @@
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
-.function dao_get_select_column_name(entity, query)
+.function dao_get_select_column_field(entity, query)
   for my.query.select
-    return my.entity->field(name = select.column)
+    return get_field(my.entity.name, select.column)
   endfor
 .endfunction
 
 .function dao_put_parser(entity, query)
-  my.field = dao_get_select_column_name(my.entity, my.query)
+  my.field = dao_get_select_column_field(my.entity, my.query)
   if is_element_type(my.query.resultType)
     if my.field.type = "text"
       return "SqlParser.str(\"$(my.field.name)\")"
@@ -827,6 +827,5 @@
       return query
     endif
   endfor
-  echo "not found: $(my.entity.name), $(my.queryName)"
   return ""
 .endfunction

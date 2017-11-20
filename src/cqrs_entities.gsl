@@ -92,10 +92,11 @@
       if field.name = my.fieldName
         ref = model->entity(name = foreignKey.refEntity)
         if defined(ref->field(name = fkField.refField))
-          return ref->field(name = fkField.refField)
+          assign_field_type(field, ref->field(name = fkField.refField))
         else
-          return extract_fk_field(ref, field.refField)
+          assign_field_type(field, extract_fk_field(ref, field.refField))
         endif
+        return field
       endif
     endfor
   endfor
