@@ -227,13 +227,24 @@
       elsif field.type = "map"
         if defined(field.query)
         else
-          my.result = my.result + "$(field.entity:Camel)DAO.select$(field.name:Pascal)By$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          my.result = my.result + "$(dao_convert_result_set_to_map(field, my.result_set))"
         endif
       else
         my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
       endif
     endif
   endfor
+  return my.result
+.endfunction
+
+.function dao_convert_result_set_to_map(field, result_set)
+  my.result = "{"
+  my.result = my.result + "\n            var result: Map[$(scala_output_type(get_field(my.field.entity, my.field.keyField))), $(scala_output_type(get_field(my.field.entity, my.field.valueField)))] = Map()"
+  my.result = my.result + "\n            $(my.result_set:no)"
+  my.result = my.result + "\n              .foreach(x => result += (x.$(my.field.keyField:Camel) -> x.$(my.field.valueField:Camel)))"
+  my.result = my.result + "\n            result"
+  my.result = my.result + "\n          }"
   return my.result
 .endfunction
 
