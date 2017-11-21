@@ -149,11 +149,13 @@ include "play_json.gsl"
 
 include "akka_actor_scala_functions.txt"
 include "play_jdbc_dao_mysql_functions.txt"
+include "play_jdbc_tx_functions.txt"
 include "akka_actor_scala.gsl"
 include "akka_shard_actor_scala.gsl"
 include "akka_cluster_shard_actor_scala.gsl"
 
 include "play_jdbc_dao_mysql.gsl"
+include "play_jdbc_tx.gsl"
 
 .endtemplate
 

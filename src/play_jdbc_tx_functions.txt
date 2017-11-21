@@ -1,0 +1,140 @@
+.function tx_output_depended_tx_defs(entity, first)
+  my.result = ""
+  my.txs = XML.new("tx")
+  for my.entity.field
+    if !(field.type = "any") \
+      & !(defined(field.valueType) & field.valueType = "any") \
+      & !is_element_type(field.type) \
+      & !(defined(field.transient) & field.transient = "true")
+
+      if defined(field->query)
+        if !defined(my.txs.$(field->query.entity))
+          my.txs.$(field->query.entity) = field->query.entity
+          if string.length(my.result) > 0
+            my.result = my.result + ", "
+          endif
+          my.result = my.result + "$(field->query.entity:Camel)Tx: $(field->query.entity:Pascal)Tx"
+        else
+        endif
+      elsif !(field.type = my.entity.name) \
+          & !(defined(field.entity) & field.entity = my.entity.name) \
+          & !(defined(field.valueType) & field.valueType = my.entity.name)
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        if type = "array"
+
+          if defined(field.entity) & defined(field.valueField)
+            my.result = my.result + "$(field.entity:Camel)Tx: $(field.entity:Pascal)Tx"
+          else
+            my.result = my.result + "$(field.valueType:Camel)Tx: $(field.valueType:Pascal)Tx"
+          endif
+        elsif type = "map"
+          my.result = my.result + "$(field.entity:Camel)Tx: $(field.entity:Pascal)Tx"
+        else
+          my.result = my.result + "$(field.type:Camel)Tx: $(field.type:Pascal)Tx"
+        endif
+      endif
+   endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction
+
+.function tx_output_depended_txs(entity, first)
+  my.result = ""
+  my.txs = XML.new("tx")
+  for my.entity.field
+    if !(field.type = "any") \
+      & !(defined(field.valueType) & field.valueType = "any") \
+      & !is_element_type(field.type) \
+      & !(defined(field.transient) & field.transient = "true")
+
+      if defined(field->query)
+        if !defined(my.txs.$(field->query.entity))
+          my.txs.$(field->query.entity) = field->query.entity
+          if string.length(my.result) > 0
+            my.result = my.result + ", "
+          endif
+          my.result = my.result + "$(field->query.entity:Camel)Tx"
+        else
+        endif
+      elsif !(field.type = my.entity.name) \
+          & !(defined(field.entity) & field.entity = my.entity.name) \
+          & !(defined(field.valueType) & field.valueType = my.entity.name)
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        if type = "array"
+          if defined(field.entity) & defined(field.valueField)
+            my.result = my.result + "$(field.entity:Camel)Tx"
+          else
+            my.result = my.result + "$(field.valueType:Camel)Tx"
+          endif
+        elsif type = "map"
+          my.result = my.result + "$(field.entity:Camel)Tx"
+        else
+          my.result = my.result + "$(field.type:Camel)Tx"
+        endif
+      endif
+   endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction
+
+.function tx_output_key_as_value(entity, key)
+  my.result = ""
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    if is_pk_field(my.entity, field.name)
+      if defined(extract_pk_field(my.entity, field.name))
+        my.theField = extract_pk_field(my.entity, field.name)
+        if defined(my.theField.joinKey)
+          my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+          my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+          assign_field_type(my.theField, my.theRefField)
+        endif
+        my.result = my.result + "$(my.theField.name:Camel)"
+      else
+        my.pk_field = extract_fk_field(my.entity, field.name)
+        my.result = my.result + "$(field.name:Camel)"
+      endif
+    elsif is_fk_field(my.entity, field.name)
+      my.fk_field = extract_fk_field(my.entity, field.name)
+      assign_field_type(field, my.fk_field)
+      my.result = my.result + "$(field.name:Camel)"
+    else
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function tx_defined_query_param_value(entity, query)
+  my.result = ""
+  for my.query.criteria
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.theField = get_field(my.entity.name, criteria.field)
+    if defined(my.theField.joinKey)
+      my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+      assign_field_type(my.theField, my.theRefField)
+    endif
+    my.result = my.result + "$(my.theField.name:Camel)"
+  endfor
+  return my.result
+.endfunction

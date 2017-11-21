@@ -1,0 +1,92 @@
+.template 1
+.class_package = "$(model.package).tx"
+.pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.for entity
+.if (!defined(transient) | !(transient = "true")) & !(name = "alarm_record")
+.output "$(pkgdir)/$(entity.name:Pascal)Tx.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import $(model.package).message._
+import $(model.package).dao._
+import $(model.package).util.DateFormat._
+import $(model.package).util.EnumConvert._
+import com.google.protobuf.any.Any
+import com.google.protobuf.timestamp.Timestamp
+import java.sql.Connection
+import java.util.Date
+import javax.inject._
+import play.api.db._
+
+@Singleton
+class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database: Database, $(entity.name:Camel)DAO: $(entity.name:Pascal)DAO) {
+
+  def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel))
+  }
+
+.
+.  primaryKey = extract_pk(entity)
+
+  def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
+  }
+
+  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(primaryKey))($(tx_output_key_as_value(entity, primaryKey)))
+  }
+.
+.  for foreignKey
+
+  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(foreignKey))($(tx_output_key_as_value(entity, foreignKey)))
+  }
+.  endfor
+.
+.  for field
+.    theField = field
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+
+  def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.add$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+  }
+
+  def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.remove$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+  }
+
+.    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+
+  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.change$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+  }
+.    else
+.    endif
+.    for field.query
+.      if defined(query.name) & !(defined(query.refName) | defined(query.entity))
+
+  def $(query.name:Camel)($(output_defined_query_param_def(entity, query))): $(output_defined_query_result_type(entity, query)) = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.$(query.name:Camel)($(tx_defined_query_param_value(entity, query)))
+  }
+.      else
+.      endif
+.    endfor
+.  endfor
+.
+.  for message
+.    if !(defined(transient) & transient = "true")
+
+  def $(message.name:Pascal)(implicit c: Connection): Int = ???
+.    endif
+.  endfor
+}
+.close
+.endif
+.endfor
+
+.endtemplate
+
+

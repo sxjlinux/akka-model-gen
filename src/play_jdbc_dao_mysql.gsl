@@ -65,7 +65,6 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
 .  for message
 .    if !(defined(transient) & transient = "true")
 
-  val $(message.name:Pascal)Sql:SqlQuery = $(dao_output_message_sql(entity, message))
   def $(message.name:Pascal)(implicit c: Connection): Int = $(dao_output_message_method(entity, field))
 .    endif
 .  endfor
