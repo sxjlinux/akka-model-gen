@@ -25,7 +25,7 @@ import $(model.package).message._
 import scala.math.Numeric.IntIsIntegral._
 
 object Sharding$(entity.name:Pascal) {
-  def props($(tx_output_depended_tx_defs(entity, 1))) = Props(new Sharding$(entity.name:Pascal)($(tx_output_depended_txs(entity, 1))))
+  def props($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))) = Props(new Sharding$(entity.name:Pascal)($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))))
   def name($(entity.name:Camel)Id: String): String = $(entity.name:Camel)Id.toString
 
   val shardName: String = "Sharding$(entity.name:Pascal)"
@@ -42,8 +42,8 @@ object Sharding$(entity.name:Pascal) {
   }
 }
 
-class Sharding$(entity.name:Pascal)($(tx_output_depended_tx_defs(entity, 1)))
-  extends $(entity.name:Pascal)($(tx_output_depended_txs(entity, 1))) {
+class Sharding$(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0)))
+  extends $(entity.name:Pascal)($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))) {
   val settings = Settings(context.system)
   context.setReceiveTimeout(settings.actor.passivateTimeout)
 
