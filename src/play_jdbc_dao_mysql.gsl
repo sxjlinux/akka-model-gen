@@ -65,7 +65,7 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
 .  for message
 .    if !(defined(transient) & transient = "true")
 
-  def $(message.name:Pascal)(implicit c: Connection): Int = $(dao_output_message_method(entity, field))
+  def $(message.name:Camel)(evt: $(message.name:Pascal)Evt)(implicit c: Connection): Int = $(dao_output_message_method(entity, field))
 .    endif
 .  endfor
 }

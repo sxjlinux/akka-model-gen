@@ -3,7 +3,7 @@
 .pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if (!defined(transient) | !(transient = "true")) & !(name = "alarm_record")
+.if (!defined(transient) | !(transient = "true")) #& !(name = "alarm_record")
 .output "$(pkgdir)/$(entity.name:Pascal)Tx.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -79,7 +79,9 @@ class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database:
 .  for message
 .    if !(defined(transient) & transient = "true")
 
-  def $(message.name:Pascal)(implicit c: Connection): Int = ???
+  def $(message.name:Camel)(evt: $(message.name:Pascal)Evt)(implicit c: Connection): Int = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.$(message.name:Camel)(evt)
+  }
 .    endif
 .  endfor
 }
