@@ -17,7 +17,7 @@ package $(class_package)
 import akka.actor._
 import akka.cluster.sharding._
 import $(model.package).config._
-import $(model.package).dao._
+import $(model.package).tx._
 import $(model.package).message._
 import javax.inject._
 
@@ -26,7 +26,7 @@ object Sharding$(entity.name:Pascal)s {
   def name: String = "Sharding$(entity.name:Pascal)s"
 }
 
-class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(entity, 1)))
+class Sharding$(entity.name:Pascal)s @Inject() ($(tx_output_depended_tx_defs(entity, 1)))
   extends Actor with ActorLogging {
   val settings = Settings(context.system)
   Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
@@ -37,7 +37,7 @@ class Sharding$(entity.name:Pascal)s @Inject() ($(dao_output_depended_dao_defs(e
 
   ClusterSharding(context.system).start(
     Sharding$(entity.name:Pascal).shardName,
-    Sharding$(entity.name:Pascal).props($(dao_output_depended_daos(entity, 1))),
+    Sharding$(entity.name:Pascal).props($(tx_output_depended_txs(entity, 1))),
     ClusterShardingSettings(context.system),
     Sharding$(entity.name:Pascal).extractEntityId,
     Sharding$(entity.name:Pascal).extractShardId

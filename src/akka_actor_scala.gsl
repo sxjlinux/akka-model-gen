@@ -14,7 +14,7 @@
  *****************************************************/
 package $(class_package)
 
-import $(model.package).dao._
+import $(model.package).tx._
 import $(model.package).message._
 import $(model.package).message.ResponseType._
 import com.google.protobuf.any.Any
@@ -37,7 +37,7 @@ object $(entity.name:Pascal) {
   def props = Props[$(entity.name:Pascal)]
 }
 
-class $(entity.name:Pascal)($(dao_output_depended_dao_defs(entity, 1))) extends PersistentActor with ActorLogging {
+class $(entity.name:Pascal)($(tx_output_depended_tx_defs(entity, 1))) extends PersistentActor with ActorLogging {
   override def persistenceId: String = s"${self.path.name}"
   implicit def requestTimeout: Timeout = FiniteDuration(20, SECONDS)
   implicit def executionContext: ExecutionContext = context.dispatcher
