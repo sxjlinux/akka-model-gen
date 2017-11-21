@@ -125,11 +125,14 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_add_field_value(field))
+      $(entity.name:Camel)Tx.add$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
     case Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_remove_field_value(field))
+      $(entity.name:Camel)Tx.remove$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_set_field_value(field))
+      $(entity.name:Camel)Tx.change$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
 .    else
 .    endif
 .  endfor
