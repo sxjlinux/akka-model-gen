@@ -41,6 +41,14 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
   def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey)))(implicit c: Connection): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_key(entity, foreignKey))
 .  endfor
 .
+.  for query
+.    if defined(query.name) & !(defined(query.refName) | defined(query.entity))
+
+  def $(query.name:Camel)($(output_defined_query_param_def(entity, query)))(implicit c: Connection): $(output_defined_query_result_type(entity, query)) = $(output_defined_query(entity, query))
+.    else
+.    endif
+.  endfor
+.
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")

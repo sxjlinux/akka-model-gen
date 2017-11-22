@@ -331,7 +331,7 @@
   endfor
 .endfunction
 
-.function dao_output_entity_columns(entity)
+.function dao_output_entity_fields(entity)
   my.result = ""
   my.pk = extract_pk(my.entity)
   for my.pk.field
@@ -397,7 +397,7 @@
 
 .function dao_output_select_by_key_sql(entity, key)
   my.result = "SELECT"
-  my.result = my.result + "\n        $(dao_output_entity_columns(my.entity))"
+  my.result = my.result + "\n        $(dao_output_entity_fields(my.entity))"
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
@@ -508,7 +508,7 @@
 
 .function dao_output_create_or_update_sql(entity)
   my.result = "INSERT INTO $(model.dbSchema:c).$(my.entity.name)("
-  my.result = my.result + "\n        $(dao_output_entity_columns(my.entity))"
+  my.result = my.result + "\n        $(dao_output_entity_fields(my.entity))"
   my.result = my.result + "\n      ) VALUES ("
   my.result = my.result + "\n        $(dao_output_entity_insert_placeholders(my.entity))"
   my.result = my.result + "\n      ) ON DUPLICATE KEY UPDATE"
@@ -724,7 +724,7 @@
     else
       my.result = "SELECT\n"
     endif
-    my.result = my.result + "        $(column)"
+    my.result = my.result + "        $(field)"
   endfor
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      WHERE"
@@ -741,14 +741,14 @@
   return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
-.function dao_get_select_column_field(entity, query)
+.function dao_get_select_field_field(entity, query)
   for my.query.select
-    return get_field(my.entity.name, select.column)
+    return get_field(my.entity.name, select.field)
   endfor
 .endfunction
 
 .function dao_put_parser(entity, query)
-  my.field = dao_get_select_column_field(my.entity, my.query)
+  my.field = dao_get_select_field_field(my.entity, my.query)
   if is_element_type(my.query.resultType)
     if my.field.type = "text"
       return "SqlParser.str(\"$(my.field.name)\")"
