@@ -194,9 +194,9 @@
         my.result = my.result + ",\n          "
       endif
       if field.type = "timestamp"
-        my.result = my.result + "toTimestamp($(field.name:Camel))"
+        my.result = my.result + "$(field.name:Camel) = toTimestamp($(field.name:Camel))"
       else
-        my.result = my.result + "$(field.name:Camel)"
+        my.result = my.result + "$(field.name:Camel) = $(field.name:Camel)"
       endif
     endfor
   endif
@@ -207,43 +207,43 @@
       endif
       if field.type = "timestamp"
         if defined(field.required) & required = "true"
-          my.result = my.result + "toTimestamp($(field.name:Camel))"
+          my.result = my.result + "$(field.name:Camel) = toTimestamp($(field.name:Camel))"
         else
-          my.result = my.result + "Some(toTimestamp($(field.name:Camel)))"
+          my.result = my.result + "$(field.name:Camel) = Some(toTimestamp($(field.name:Camel)))"
         endif
       elsif is_element_type(field.type)
         if defined(field.required) & required = "true"
-          my.result = my.result + "$(field.name:Camel)"
+          my.result = my.result + "$(field.name:Camel) = $(field.name:Camel)"
         else
-          my.result = my.result + "Some($(field.name:Camel))"
+          my.result = my.result + "$(field.name:Camel) = Some($(field.name:Camel))"
         endif
       elsif is_enum_type(field.type)
         if defined(field.required) & required = "true"
-          my.result = my.result + "$(field.type:Pascal).fromValue($(field.name:Camel))"
+          my.result = my.result + "$(field.name:Camel) = $(field.type:Pascal).fromValue($(field.name:Camel))"
         else
-          my.result = my.result + "Some($(field.type:Pascal).fromValue($(field.name:Camel)))"
+          my.result = my.result + "$(field.name:Camel) = Some($(field.type:Pascal).fromValue($(field.name:Camel)))"
         endif
       elsif field.type = "array"
         if defined(field->query)
           my.the_query = field->query
           my.ref_entity = model->entity(name = my.the_query.entity)
           my.ref_query = dao_find_query(my.ref_entity, my.the_query.refName)
-          my.result = my.result + "$(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
+          my.result = my.result + "$(field.name:Camel) = $(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
         else
           if defined(field.entity) & defined(field.valueField)
-            my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result = my.result + "$(field.name:Camel) = $(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
           else
-            my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result = my.result + "$(field.name:Camel) = $(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
           endif
         endif
       elsif field.type = "map"
         if defined(field.query)
         else
           my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
-          my.result = my.result + "$(dao_convert_result_set_to_map(field, my.result_set))"
+          my.result = my.result + "$(field.name:Camel) = $(dao_convert_result_set_to_map(field, my.result_set))"
         endif
       else
-        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        my.result = my.result + "$(field.name:Camel) = $(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
       endif
     endif
   endfor
@@ -521,6 +521,7 @@
   my.result = my.result + "\n    $(dao_output_create_or_update_sql(my.entity)).on("
   my.result = my.result + "\n      $(dao_output_entity_as_param(my.entity))"
   my.result = my.result + "\n    ).executeUpdate()"
+  my.result = my.result + "\n\n    $(output_insert_dependency(my.entity))"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
@@ -800,7 +801,7 @@
       return "parseTimestamp(\"$(my.value)\")"
     endif
   elsif is_enum_type(my.type)
-    return "$(my.type:Pascal).fromName(\"$(my.value:UPPER)\")"
+    return "$(my.type:Pascal).fromName(\"$(my.value:UPPER)\").get"
   else
     return "$(my.type:Pascal)Vo($(my.value))"
   endif
@@ -820,7 +821,11 @@
         my.result = my.result + "Some($(param.field:Camel))"
       endif
     elsif defined(param.type)
-      my.result = my.result + "$(output_parse_type(param.type, param.value))"
+      if defined(my.field.required) & my.field.required = "true"
+        my.result = my.result + "$(output_parse_type(param.type, param.value))"
+      else
+        my.result = my.result + "Some($(output_parse_type(param.type, param.value)))"
+      endif
     else
     endif
   endfor
@@ -925,5 +930,46 @@
   my.result = my.result + "        $(output_defined_update_param(my.entity, my.update))\n"
   my.result = my.result + "    ).executeUpdate()\n"
   my.result = my.result + "  }"
+  return my.result
+.endfunction
+
+.function dao_output_construct_pattern(entity, insert)
+  my.result = ""
+  for my.insert.param
+    my.entity_field = get_field(my.insert.entity, param.name)
+    my.param_field = get_field(my.insert.entity, param.name)
+    if string.length(my.result) > 0
+      my.result = my.result + ",\n      "
+    endif
+    if defined(param.field)
+      if is_required(my.param_field) & is_required(my.entity_field)
+        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel)"
+      elsif !is_required(my.param_field) & !is_required(my.entity_field)
+        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel)"
+      elsif is_required(my.param_field) & !is_required(my.entity_field)
+        my.result = my.result + "$(param.name:Camel) = Some($(my.entity.name:Camel).$(param.field:Camel))"
+      elsif is_required(my.param_field) & !is_required(my.entity_field)
+        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel).get"
+      endif
+    elsif defined(param.value)
+      if is_required(my.param_field)
+        my.result = my.result + "$(param.name:Camel) = $(output_parse_type(my.param_field.type, param.value))"
+      else
+        my.result = my.result + "$(param.name:Camel) = Some($(output_parse_type(my.param_field.type, param.value)))"
+      endif
+    else
+      abort "E: not supported case."
+    endif
+  endfor #my.insert.param
+  return my.result
+.endfunction
+
+.function output_insert_dependency(entity)
+  my.result = ""
+  for my.entity.insert
+    my.result = my.result + "$(insert.entity:Camel)DAO.createOrUpdate($(insert.entity:Pascal)Vo("
+    my.result = my.result + "$(dao_output_construct_pattern(my.entity, insert))"
+    my.result = my.result + "))\n"
+  endfor #my.entity.insert
   return my.result
 .endfunction

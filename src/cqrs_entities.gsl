@@ -139,6 +139,14 @@
   return my.field
 .endfunction
 
+.function is_required(field)
+  if defined(my.field.required) & my.field.required = "true"
+    return 1
+  else
+    return 0
+  endif
+.endfunction
+
 include "mysql_db_schema_functions.txt"
 include "mysql_db_schema.gsl"
 
