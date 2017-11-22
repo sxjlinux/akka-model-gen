@@ -846,3 +846,84 @@
   endfor
   return ""
 .endfunction
+
+.function output_defined_update_param_def(entity, update)
+  my.result = ""
+  for my.update.set
+    if string.length(my.result) > 0
+      my.result = my.result + ", "
+    endif
+    my.theField = get_field(my.entity.name, set.field)
+    if defined(my.theField.joinKey)
+      my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+      assign_field_type(my.theField, my.theRefField)
+    endif
+    my.result = my.result + "$(my.theField.name:Camel): $(scala_output_type(my.theField))"
+  endfor
+  if string.length(my.result) > 0
+    my.result = my.result + ", "
+  endif
+  my.result = my.result + "$(output_defined_query_param_def(my.entity, my.update))"
+  return my.result
+.endfunction
+
+.function output_defined_update_param(entity, update)
+  my.result = ""
+  for my.update.set
+    if string.length(my.result) > 0
+      my.result = my.result + ",\n      "
+    endif
+    my.theField = get_field(my.entity.name, set.field)
+    if defined(my.theField.joinKey)
+      my.foreignKey =  my.entity->foreignKey(name = my.theField.joinKey)
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
+      assign_field_type(my.theField, my.theRefField)
+    endif
+    my.result = my.result + "$(dao_output_field_as_equals_param(my.theField))"
+  endfor
+  if string.length(my.result) > 0
+    my.result = my.result + ",\n "
+  endif
+  my.result = my.result + "       $(output_defined_query_param(my.entity, my.update))"
+  return my.result
+.endfunction
+
+.function output_defined_update_sql(entity, update)
+  my.result = ""
+  if string.length(my.result) > 0
+    my.result = my.result + ", "
+  else
+    my.result = "UPDATE $(model.dbSchema:no).$(my.entity.name:no)\n"
+    my.result = my.result + "      SET\n"
+  endif
+  my.sets = ""
+  for my.update.set
+    if string.length(my.sets) > 0
+      my.sets = my.sets + ",\n"
+    endif
+    my.sets = my.sets + "        $(field:no) = {$(field:Camel)}"
+  endfor #my.update.set
+  my.clause = ""
+  for my.update.criteria
+    if string.length(my.clause) > 0
+      my.clause = my.clause + ",\n      $(criteria.name:UPPER)"
+    else
+      my.clause = my.clause + "      WHERE\n"
+    endif
+    my.clause = my.clause + "        $(criteria.field:c) $(criteria.relation) {$(criteria.field:Camel)}"
+  endfor
+  my.result = my.result + "$(my.sets:no)\n"
+  my.result = my.result + my.clause
+  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+.endfunction
+
+.function output_defined_update(entity, update)
+  my.result = "{\n"
+  my.result = my.result + "    $(output_defined_update_sql(my.entity, my.update))"
+  my.result = my.result + ".on(\n"
+  my.result = my.result + "        $(output_defined_update_param(my.entity, my.update))\n"
+  my.result = my.result + "    ).executeUpdate()\n"
+  my.result = my.result + "  }"
+  return my.result
+.endfunction
