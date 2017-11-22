@@ -812,8 +812,13 @@
     if string.length(my.result) > 0
       my.result = my.result + ", "
     endif
+    my.field = get_field(my.ref_entity.name, param.name)
     if defined(param.field)
-      my.result = my.result + "$(param.field:Camel)"
+      if defined(my.field.required) & my.field.required = "true"
+        my.result = my.result + "$(param.field:Camel)"
+      else
+        my.result = my.result + "Some($(param.field:Camel))"
+      endif
     elsif defined(param.type)
       my.result = my.result + "$(output_parse_type(param.type, param.value))"
     else
