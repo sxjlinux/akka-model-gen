@@ -2,7 +2,8 @@
 .class_package = "$(model.package).json"
 .pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
-.output "$(pkgdir)/JsonSupport.scala_"
+.for entity
+.output "$(pkgdir)/$(entity.name:Pascal)JsonSupport.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
@@ -11,18 +12,15 @@ package $(class_package)
 import $(model.package).message._
 import play.api.libs.json._
 
-trait JsonSupport {
+trait $(entity.name:Pascal)JsonSupport {
   implicit val byteStringFormat = ByteStringFormat.format
   implicit val timestampFormat = TimestampFormat.format
   /*
    * Ad-hoc line, tight coupling.
    */
   implicit val anyAlarmEventFormat = AnyAlarmEventFormat.format
-.for entity
-.if defined(entity.enum) & entity.enum = "true"
-  implicit val $(entity.name:Camel)Format = EnumFormat.format($(entity.name:Pascal))
-.endif
-  implicit val $(entity.name:Camel)VoFormat = Json.format[$(entity.name:Pascal)Vo]
+
+$(json_output_format_with_dependency(entity))
 
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
   implicit val create$(entity.name:Pascal)CmdFormat = Json.format[Create$(entity.name:Pascal)Cmd]
@@ -44,7 +42,7 @@ trait JsonSupport {
   implicit val change$(field.name:Pascal)EvtFormat = Json.format[Change$(field.name:Pascal)Evt]
 
 .    else
-.    endif    
+.    endif
 .  endfor
 .else
 .endif
@@ -63,8 +61,8 @@ trait JsonSupport {
 
 .endif
 .endfor
-.endfor
 }
 
 .close
+.endfor
 .endtemplate

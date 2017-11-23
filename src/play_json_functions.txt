@@ -1,0 +1,83 @@
+.function json_output_format_with_dependency(entity)
+  my.names = XML.new("ol")
+  my.result = ""
+  my.names = json_get_depended_entity_names(my.entity, my.names)
+  if !defined(my.names.$(entity.name))
+    if !(my.entity.name = entity.name)
+      my.names = json_get_depended_entity_names(find_entity_by_type(entity.name), my.names)
+    endif
+    define my.names.$(entity.name) = "true"
+    my.names.load_string("<li>$(entity.name)</li>")
+  endif #!defined(my.names.$(entity.name))
+  for my.names.li
+    my.type = "$(li)"
+    if my.type = "timestamp"
+      my.result = my.result + "  implicit val timestampFormat = TimestampFormat.format\n"
+    elsif is_element_type(my.type)
+    elsif my.type = "array"
+      #my.result = my.result + "  byteStringFormat = ByteStringFormat.format\n"
+    elsif my.type = "map"
+    elsif my.type = "actor_ref"
+    elsif my.type = "any"
+    elsif is_enum_type(my.type)
+      my.result = my.result + "  implicit val $(my.type:Camel)Format = EnumFormat.format($(my.type:Pascal))\n"
+      my.result = my.result + "  implicit val $(my.type:Camel)VoFormat = Json.format[$(my.type:Pascal)Vo]\n"
+    else
+      my.result = my.result + "  implicit val $(my.type:Camel)VoFormat = Json.format[$(my.type:Pascal)Vo]\n"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function json_get_depended_entity_names(entity, names)
+  if !defined(my.entity)
+    return my.names
+  endif
+  for my.entity.field
+    if defined(field.type) \
+      & !(defined(field.valueType) | defined(field.entity)) \
+      & !is_element_type(field.type)
+      if !defined(my.names.$(field.type))
+        if !(my.entity.name = field.type)
+          my.result = json_get_depended_entity_names(find_entity_by_type(field.type), my.names)
+        endif
+        if !defined(my.names.$(field.type))
+          define my.names.$(field.type) = "true"
+          my.names.load_string("<li>$(field.type)</li>")
+        endif
+      endif #!defined(my.names.$(field.type))
+    elsif defined(field.entity)
+      if !defined(my.names.$(field.entity))
+        if !(my.entity.name = field.entity)
+          my.result = json_get_depended_entity_names(find_entity_by_type(field.entity), my.names)
+        endif
+        if !defined(my.names.$(field.entity))
+          define my.names.$(field.entity) = "true"
+          my.names.load_string("<li>$(field.entity)</li>")
+        endif
+      endif #!defined(my.names.$(field.entity))
+    elsif defined(field.valueType)
+      if !defined(my.names.$(field.valueType))
+        if !(my.entity.name = field.valueType)
+          my.result = json_get_depended_entity_names(find_entity_by_type(field.valueType), my.names)
+        endif
+        if !defined(my.names.$(field.valueType))
+          define my.names.$(field.valueType) = "true"
+          my.names.load_string("<li>$(field.valueType)</li>")
+        endif
+      endif #!defined(my.names.$(field.valueType))
+    endif #!is_element_type(my.type)
+    for field.query
+      if !defined(my.names.$(query.entity))
+        if !(my.entity.name = query.entity)
+          my.result = json_get_depended_entity_names(find_entity_by_type(query.entity), my.names)
+        endif
+        if !defined(my.names.$(query.entity))
+          define my.names.$(query.entity) = "true"
+          my.names.load_string("<li>$(query.entity)</li>")
+        endif
+      endif #!defined(my.names.$(query.entity))
+    endfor
+  endfor
+  return my.names
+.endfunction
