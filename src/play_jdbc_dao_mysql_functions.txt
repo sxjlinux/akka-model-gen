@@ -555,6 +555,16 @@
 .function dao_output_add_method(entity, field)
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
+      # FIXME: taking shortcut!!!
+      my.update_name = "update_parent_id"
+      my.update_entity = my.field.entity
+      if defined(my.field->query)
+        my.update_entity = my.field->query.entity
+      endif
+      my.result = "{"
+      my.result = my.result + "\n    $(my.field.name:Camel).map(x => $(my.update_entity:Camel)DAO.$(my.update_name:Camel)(Some($(dao_output_key_name_list(my.entity))), x)).sum"
+      my.result = my.result + "\n  }"
+      return my.result
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
       my.result = "{"
@@ -647,6 +657,16 @@
 .function dao_output_remove_method(entity, field)
   if my.field.type = "array"
     if defined(my.field.entity) & defined(my.field.valueField)
+      # FIXME: taking shortcut!!!
+      my.update_name = "update_parent_id"
+      my.update_entity = my.field.entity
+      if defined(my.field->query)
+        my.update_entity = my.field->query.entity
+      endif
+      my.result = "{"
+      my.result = my.result + "\n    $(my.field.name:Camel).map(x => $(my.update_entity:Camel)DAO.$(my.update_name:Camel)(None, x)).sum"
+      my.result = my.result + "\n  }"
+      return my.result
     elsif defined(my.field.valueType)
       my.depended = model->entity(name = my.field.valueType)
       my.entity_name = "x"
@@ -847,6 +867,22 @@
   for my.entity.query
     if query.name = my.queryName
       return query
+    endif
+  endfor
+  return ""
+.endfunction
+
+.function dao_find_update(entity, updateName)
+  for my.entity.field
+    for field.update
+     if update.name = my.updateName
+       return update
+     endif
+    endfor
+  endfor
+  for my.entity.update
+    if update.name = my.updateName
+      return update
     endif
   endfor
   return ""
