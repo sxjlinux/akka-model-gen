@@ -1,0 +1,54 @@
+.template 1
+.class_package = "$(model.package).controller"
+.pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.output "$(pkgdir)/$(entity.name:Pascal)Controller.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import javax.inject._
+
+import akka.actor._
+import akka.pattern._
+import akka.util._
+import $(model.package).json._
+import $(model.package).message.ResponseType._
+import $(model.package).message._
+import play.api.libs.json._
+import play.api.mvc._
+
+import scala.concurrent._
+import scala.concurrent.duration._
+
+@Singleton
+class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("ShardingAlarms") alarm: ActorRef)(implicit ec: ExecutionContext)
+  extends AbstractController(cc)
+    with $(entity.name:Pascal)JsonSupport {
+  implicit val requestTimeout: Timeout = FiniteDuration(20, SECONDS)
+
+  def create = Action.async(parse.json) { request =>
+    val result = request.body.validate[$(entity.name:Pascal)Vo]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case r@ResponseVo(SUCCESS, _) =>
+            Created(Json.toJson(r))
+          case ResponseVo(ALREADY_EXISTS, _) => NotModified
+          case _ => NotFound
+        }
+      }
+    )
+  }
+}
+
+.close
+.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endfor
+.endtemplate
