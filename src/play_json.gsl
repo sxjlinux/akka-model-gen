@@ -3,6 +3,7 @@
 .pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .output "$(pkgdir)/$(entity.name:Pascal)JsonSupport.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -64,5 +65,6 @@ $(json_output_format_with_dependency(entity))
 }
 
 .close
+.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .endfor
 .endtemplate
