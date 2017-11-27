@@ -47,6 +47,22 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
     )
   }
 
+  def retrieve = Action.async(parse.json) { request =>
+    val result = request.body.validate[Retrieve$(entity.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case r: $(entity.name:Pascal)Vo =>
+            Ok(Json.toJson(r))
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+
   def update = Action.async(parse.json) { request =>
     val result = request.body.validate[Update$(entity.name:Pascal)Cmd]
     result.fold(
@@ -55,7 +71,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         alarm.ask(x).mapTo[ValueObject].map {
-          case r@ResponseVo(SUCCESS, _) =>
+          case ResponseVo(SUCCESS, _) =>
             NoContent
           case _ => InternalServerError
         }
@@ -71,7 +87,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         alarm.ask(x).mapTo[ValueObject].map {
-          case r@ResponseVo(SUCCESS, _) =>
+          case ResponseVo(SUCCESS, _) =>
             NoContent
           case _ => InternalServerError
         }
