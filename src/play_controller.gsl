@@ -31,7 +31,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
   implicit val requestTimeout: Timeout = FiniteDuration(20, SECONDS)
 
   def create = Action.async(parse.json) { request =>
-    val result = request.body.validate[$(entity.name:Pascal)Vo]
+    val result = request.body.validate[Create$(entity.name:Pascal)Cmd]
     result.fold(
       errors => Future({
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
@@ -41,11 +41,28 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
           case r@ResponseVo(SUCCESS, _) =>
             Created(Json.toJson(r))
           case ResponseVo(ALREADY_EXISTS, _) => NotModified
-          case _ => NotFound
+          case _ => InternalServerError
         }
       }
     )
   }
+
+  def update = Action.async(parse.json) { request =>
+    val result = request.body.validate[Update$(entity.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case r@ResponseVo(SUCCESS, _) =>
+            Ok(Json.toJson(r))
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+
 }
 
 .close
