@@ -133,7 +133,7 @@ message Delete$(entity.name:Pascal)Cmd {
 };
 
 message Delete$(entity.name:Pascal)Evt {
-  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
+  option (scalapb.message).extends = "$(message_package).Event";
   optional string userId = 1;
 .  fieldNo = 2
 .  keys = pb_output_pk(entity, fieldNo)
