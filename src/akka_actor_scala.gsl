@@ -70,7 +70,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
       if(!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        persist(Delete$(entity.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))) (updateState)
+        persist(Delete$(entity.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)))) (updateState)
       }
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       if (!isValid()) {
