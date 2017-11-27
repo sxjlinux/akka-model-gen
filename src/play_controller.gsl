@@ -39,7 +39,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       x => {
         alarm.ask(x).mapTo[ValueObject].map {
           case r@ResponseVo(SUCCESS, _) =>
-            Created(Json.toJson(r))
+            Created
           case ResponseVo(ALREADY_EXISTS, _) => NotModified
           case _ => InternalServerError
         }
@@ -56,7 +56,23 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       x => {
         alarm.ask(x).mapTo[ValueObject].map {
           case r@ResponseVo(SUCCESS, _) =>
-            Ok(Json.toJson(r))
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+
+  def delete = Action.async(parse.json) { request =>
+    val result = request.body.validate[Delete$(entity.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case r@ResponseVo(SUCCESS, _) =>
+            NoContent
           case _ => InternalServerError
         }
       }

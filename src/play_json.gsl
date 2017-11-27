@@ -26,8 +26,10 @@ $(json_output_format_with_dependency(entity))
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
   implicit val create$(entity.name:Pascal)CmdFormat = Json.format[Create$(entity.name:Pascal)Cmd]
   implicit val create$(entity.name:Pascal)EvtFormat = Json.format[Create$(entity.name:Pascal)Evt]
-  implicit val update$(entity.name:Pascal)CmdFormat = Json.format[Create$(entity.name:Pascal)Cmd]
-  implicit val update$(entity.name:Pascal)EvtFormat = Json.format[Create$(entity.name:Pascal)Evt]
+  implicit val update$(entity.name:Pascal)CmdFormat = Json.format[Update$(entity.name:Pascal)Cmd]
+  implicit val update$(entity.name:Pascal)EvtFormat = Json.format[Update$(entity.name:Pascal)Evt]
+  implicit val delete$(entity.name:Pascal)CmdFormat = Json.format[Delete$(entity.name:Pascal)Cmd]
+  implicit val delete$(entity.name:Pascal)EvtFormat = Json.format[Delete$(entity.name:Pascal)Evt]
   implicit val retrieve$(entity.name:Pascal)CmdFormat = Json.format[Retrieve$(entity.name:Pascal)Cmd]
 
 .  for field
