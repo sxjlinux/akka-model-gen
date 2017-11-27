@@ -122,6 +122,26 @@ message Update$(entity.name:Pascal)Evt {
 .endfor
 };
 
+message Delete$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
+message Delete$(entity.name:Pascal)Evt {
+  option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
 message Retrieve$(entity.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(message_package).$(aggRoot:Pascal)Command";
   optional string userId = 1;
