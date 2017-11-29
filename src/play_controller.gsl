@@ -94,7 +94,113 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }
     )
   }
+.  for field
+.    theField = field
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+  def add$(field.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[Add$(field.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
 
+  def remove$(field.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[Remove$(field.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+.    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+
+  def change$(field.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[Change$(field.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+.    else
+.    endif
+.  endfor
+.for aggregation
+
+  def update$(aggregation.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[Update$(aggregation.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+
+  def get$(aggregation.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[get$(aggregation.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+.endfor
+.
+.for message
+
+  def $(message.name:Pascal) = Action.async(parse.json) { request =>
+    val result = request.body.validate[$(message.name:Pascal)Cmd]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        alarm.ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) =>
+            NoContent
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+.endfor
 }
 
 .close
