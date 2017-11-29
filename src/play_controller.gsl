@@ -185,7 +185,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
 .
 .for message
 
-  def $(message.name:Pascal) = Action.async(parse.json) { request =>
+  def $(message.name:Camel) = Action.async(parse.json) { request =>
     val result = request.body.validate[$(message.name:Pascal)Cmd]
     result.fold(
       errors => Future({

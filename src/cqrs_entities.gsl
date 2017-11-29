@@ -157,6 +157,7 @@ include "play_json_functions.txt"
 include "play_json.gsl"
 include "play_controller_functions.txt"
 include "play_controller.gsl"
+include "play_router.gsl"
 
 include "akka_actor_scala_functions.txt"
 include "play_jdbc_dao_mysql_functions.txt"

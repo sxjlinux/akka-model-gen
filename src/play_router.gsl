@@ -1,0 +1,56 @@
+.template 1
+.class_package = "$(model.package).router"
+.pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.output "$(pkgdir)/$(entity.name:Pascal)Router.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import javax.inject._
+
+import $(model.package).controller._
+import javax.inject.Inject
+
+import play.api.mvc._
+import play.api.routing.Router.Routes
+import play.api.routing.SimpleRouter
+import play.api.routing.sird._
+
+@Singleton
+class $(entity.name:Pascal)Router @Inject()(controller: $(entity.name:Pascal)Controller)
+  extends SimpleRouter {
+
+  override def routes: Routes = {
+    case POST(p"/create$(entity.name:Pascal)") => controller.create
+    case POST(p"/retrieve$(entity.name:Pascal)") => controller.retrieve
+    case POST(p"/update$(entity.name:Pascal)") => controller.update
+    case POST(p"/delete$(entity.name:Pascal)") => controller.delete
+.  for field
+.    theField = field
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+    case POST(p"/add$(field.name:Pascal)") => controller.add$(field.name:Pascal)
+    case POST(p"/remove$(field.name:Pascal)") => controller.remove$(field.name:Pascal)
+.    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+    case POST(p"/change$(field.name:Pascal)") => controller.change$(field.name:Pascal)
+.    else
+.    endif
+.  endfor
+.for aggregation
+    case POST(p"/update$(aggregation.name:Pascal)") => controller.update$(aggregation.name:Pascal)
+    case POST(p"/get$(aggregation.name:Pascal)") => controller.get$(aggregation.name:Pascal)
+.endfor
+.
+.for message
+    case POST(p"/$(message.name:Camel)") => controller.$(message.name:Camel)
+.endfor
+  }
+}
+
+.close
+.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endfor
+.endtemplate
