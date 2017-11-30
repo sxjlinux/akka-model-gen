@@ -1,6 +1,6 @@
 .template 1
 .class_package = "$(model.package).json"
-.pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
+.pkgdir = "rest/app/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"

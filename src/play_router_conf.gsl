@@ -1,8 +1,8 @@
 .template 1
 .class_package = "$(model.package).router"
-.resdir = "rest/src/main/resources"
+.resdir = "rest/conf"
 .directory.create(resdir)
-.output "$(resdir)/reference.conf"
+.output "$(resdir)/routes"
 ######################################################
 ## This file is 100% ***GENERATED***, DO NOT EDIT!  ##
 ######################################################
@@ -11,6 +11,18 @@
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .api_path = "$(entity.name:cobol)"
 ->      /resources/$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
+.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endfor
+.close
+.output "$(resdir)/rest.routes"
+######################################################
+## This file is 100% ***GENERATED***, DO NOT EDIT!  ##
+######################################################
+
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.api_path = "$(entity.name:cobol)"
+->      /$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
 .endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .endfor
 .close
