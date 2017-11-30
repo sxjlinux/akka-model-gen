@@ -24,27 +24,27 @@ class $(entity.name:Pascal)Router @Inject()(controller: $(entity.name:Pascal)Con
   extends SimpleRouter {
 
   override def routes: Routes = {
-    case POST(p"/create$(entity.name:Pascal)") => controller.create
-    case POST(p"/retrieve$(entity.name:Pascal)") => controller.retrieve
-    case POST(p"/update$(entity.name:Pascal)") => controller.update
-    case POST(p"/delete$(entity.name:Pascal)") => controller.delete
+    case POST(p"/create-$("$(entity.name:cobol)":lower)") => controller.create
+    case POST(p"/retrieve-$("$(entity.name:cobol)":lower)") => controller.retrieve
+    case POST(p"/update-$("$(entity.name:cobol)":lower)") => controller.update
+    case POST(p"/delete-$("$(entity.name:cobol)":lower)") => controller.delete
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case POST(p"/add$(field.name:Pascal)") => controller.add$(field.name:Pascal)
-    case POST(p"/remove$(field.name:Pascal)") => controller.remove$(field.name:Pascal)
+    case POST(p"/add-$("$(field.name:cobol)":lower)") => controller.add$(field.name:Pascal)
+    case POST(p"/remove-$("$(field.name:cobol)":lower)") => controller.remove$(field.name:Pascal)
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case POST(p"/change$(field.name:Pascal)") => controller.change$(field.name:Pascal)
+    case POST(p"/change-$("$(field.name:cobol)":lower)") => controller.change$(field.name:Pascal)
 .    else
 .    endif
 .  endfor
 .for aggregation
-    case POST(p"/update$(aggregation.name:Pascal)") => controller.update$(aggregation.name:Pascal)
-    case POST(p"/get$(aggregation.name:Pascal)") => controller.get$(aggregation.name:Pascal)
+    case POST(p"/update-$("$(aggregation.name:cobol)":lower)") => controller.update$(aggregation.name:Pascal)
+    case POST(p"/get-$("$(aggregation.name:cobol)":lower)") => controller.get$(aggregation.name:Pascal)
 .endfor
 .
 .for message
-    case POST(p"/$(message.name:Camel)") => controller.$(message.name:Camel)
+    case POST(p"/$("$(message.name:cobol)":lower)") => controller.$(message.name:Camel)
 .endfor
   }
 }
