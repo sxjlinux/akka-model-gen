@@ -1,6 +1,6 @@
 .template 1
 .class_package = "$(model.package).controller"
-.pkgdir = "rest/src/main/scala/$(string.replace(class_package, ".|/"))"
+.pkgdir = "rest/app/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
@@ -25,7 +25,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 @Singleton
-class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("ShardingAlarms") alarm: ActorRef)(implicit ec: ExecutionContext)
+class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("Sharding$(entity.name:Pascal)s") $(entity.name:Camel): ActorRef)(implicit ec: ExecutionContext)
   extends AbstractController(cc)
     with $(entity.name:Pascal)JsonSupport {
   implicit val requestTimeout: Timeout = FiniteDuration(20, SECONDS)
@@ -37,9 +37,8 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case r@ResponseVo(SUCCESS, _) =>
-            Created
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case r@ResponseVo(SUCCESS, _) => Created
           case ResponseVo(ALREADY_EXISTS, _) => NotModified
           case _ => InternalServerError
         }
@@ -54,9 +53,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case r: $(entity.name:Pascal)Vo =>
-            Ok(Json.toJson(r))
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case r: $(entity.name:Pascal)Vo => Ok(Json.toJson(r))
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -70,9 +69,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -86,9 +85,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -104,9 +103,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -120,9 +119,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -137,9 +136,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -157,9 +156,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -173,9 +172,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
@@ -192,9 +191,9 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
       }),
       x => {
-        alarm.ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) =>
-            NoContent
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }
       }
