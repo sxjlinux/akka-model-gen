@@ -6,13 +6,13 @@
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 
-DROP USER IF EXISTS '$(model.dbSchema:c)'@'localhost';
+DROP USER IF EXISTS '$(model.dbSchema:c)'@'0.0.0.0';
 DROP DATABASE IF EXISTS $(model.dbSchema:c);
 
 CREATE DATABASE $(model.dbSchema:c) DEFAULT CHARACTER SET 'UTF8' DEFAULT COLLATE utf8_unicode_ci;
 
-CREATE USER '$(model.dbSchema:c)'@'localhost' IDENTIFIED BY 'password';
-GRANT ALL PRIVILEGES ON *.* TO '$(model.dbSchema:c)'@'localhost' WITH GRANT OPTION;
+CREATE USER '$(model.dbSchema:c)'@'0.0.0.0' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO '$(model.dbSchema:c)'@'0.0.0.0' WITH GRANT OPTION;
 
 USE $(model.dbSchema:c);
 
