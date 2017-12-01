@@ -1,0 +1,56 @@
+.template 1
+.pkgdir = "webapp/public/"
+.output "$(pkgdir)/static.js"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+
+window.WUI = window.WUI || {};
+.for entity
+.if (defined(enum) & enum = "true")
+WUI.$(entity.name:Camel)s = [
+.  for row
+.    out = ""
+.    if !first()
+.       out = out + ", "
+.    endif
+.    out = out + "{"
+.    for entity.field
+.      if !first()
+.        out = out + ", "
+.      endif
+.      if field.type = "string" | field.type = "text"
+.        out = out + "$(field.name:Camel):'$($(field.name):no)' "
+.      else
+.        out = out + "$(field.name:Camel):$($(field.name):no)"
+.      endif
+.    endfor
+.    out = out + "}"
+    $(out:no)
+.  endfor
+];
+
+WUI.$(entity.name:Pascal) = {
+.  enumConf = entity->enum(name = entity.name)
+.for entity.row
+.    out = "{"
+.    for entity.field
+.      if !first()
+.        out = out + ", "
+.      endif
+.      if field.type = "string" | field.type = "text"
+.        out = out + "$(field.name:Camel):'$($(field.name):no)' "
+.      else
+.        out = out + "$(field.name:Camel):$($(field.name):no)"
+.      endif
+.    endfor
+.    out = out + "}"
+    $($(enumConf.nameField):no): $(out:no),
+.endfor
+};
+
+.endif
+.endfor
+
+.close
+.endtemplate
