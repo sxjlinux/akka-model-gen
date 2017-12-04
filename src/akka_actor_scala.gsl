@@ -17,7 +17,6 @@ package $(class_package)
 import $(model.package).tx._
 import $(model.package).message._
 import $(model.package).message.ResponseType._
-import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
 import akka.actor._
 import akka.event._
@@ -123,24 +122,30 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
     case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
       $(scala_output_set_field_values(entity))
       $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+      replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created.")))
     case Update$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
       $(scala_output_set_field_values(entity))
       $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+      replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated.")))
     case Delete$(entity.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))) =>
       $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+      replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted.")))
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_add_field_value(field))
       $(entity.name:Camel)Tx.add$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+      replyToSender(ResponseVo(SUCCESS, Some("$(field.name:Pascal) added.")))
     case Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_remove_field_value(field))
       $(entity.name:Camel)Tx.remove$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+      replyToSender(ResponseVo(SUCCESS, Some("$(field.name:Pascal) removed.")))
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
       $(scala_output_set_field_value(field))
       $(entity.name:Camel)Tx.change$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+      replyToSender(ResponseVo(SUCCESS, Some("Change $(field.name:Pascal) accepted.")))
 .    else
 .    endif
 .  endfor
@@ -148,6 +153,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  for message
 .    if !(defined(transient) & transient = "true")
     case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message, 1))) =>
+      replyToSender(ResponseVo(SUCCESS, Some("$(message.name:Pascal)Evt accepted.")))
 .    endif
 .  endfor
   }
@@ -158,6 +164,10 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  else
     $(entity.name:Camel)Name.isDefined
 .endif
+  }
+
+  private def replyToSender(msg: Any) = {
+    if ("deadLetters" != sender().path.name) sender() ! msg
   }
 }
 

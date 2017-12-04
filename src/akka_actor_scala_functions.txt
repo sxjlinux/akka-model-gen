@@ -1,6 +1,8 @@
 .function scala_get_type(typeName)
   if my.typeName = "bool"
     return "Boolean"
+  elsif my.typeName = "any"
+    return "com.google.protobuf.any.Any"
   elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double" | my.typeName = "string" | my.typeName = "timestamp" | my.typeName = "any" | my.typeName = "actor_ref"
     return "$(my.typeName:Pascal)"
   elsif my.typeName = "text"
@@ -24,10 +26,10 @@
     if defined(my.field.entity) & defined(my.field.valueField)
       my.valueField = model->entity(name = my.field.entity)->field(name = my.field.valueField)
       my.valueType = scala_get_type(my.valueField.type)
-      return "Seq[$(my.valueType:Pascal)]"
+      return "Seq[$(my.valueType:no)]"
     else
       my.valueType = scala_get_type(my.field.valueType)
-      return "Seq[$(my.valueType:Pascal)]"
+      return "Seq[$(my.valueType:no)]"
     endif
   elsif my.field.type = "map"
     if defined(my.field.entity)
