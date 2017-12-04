@@ -170,6 +170,7 @@ include "akka_cluster_shard_actor_scala.gsl"
 include "play_jdbc_dao_mysql.gsl"
 include "play_jdbc_tx.gsl"
 include "js_static.gsl"
+include "js_api_url.gsl"
 
 .endtemplate
 

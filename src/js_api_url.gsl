@@ -1,0 +1,42 @@
+.template 1
+.pkgdir = "webapp/public/"
+.output "$(pkgdir)/api_url.js"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+
+.  api="api"
+window.WUI = window.WUI || {};
+window.WUI.apiUrl={
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.   api_path = "$(entity.name:cobol)"
+.   api_path = $(api)+"/$(api_path:lower)"
+    create$(entity.name:Pascal): '$(api_path)/create-$("$(entity.name:cobol)":lower)',
+    retrieve$(entity.name:Pascal): '$(api_path)/retrieve-$("$(entity.name:cobol)":lower)',
+    update$(entity.name:Pascal): '$(api_path)/update-$("$(entity.name:cobol)":lower)',
+    delete$(entity.name:Pascal): '$(api_path)/delete-$("$(entity.name:cobol)":lower)',
+.  for field
+.    theField = field
+.    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+    add$(field.name:Pascal): '$(api_path)/add-$("$(field.name:cobol)":lower)',
+    remove$(field.name:Pascal): '$(api_path)/remove-$("$(field.name:cobol)":lower)',
+.    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
+    change$(field.name:Pascal): '$(api_path)/change-$("$(field.name:cobol)":lower)',
+.    else
+.    endif
+.  endfor
+.for aggregation
+    update$(aggregation.name:Pascal): '$(api_path)/update-$("$(aggregation.name:cobol)":lower)',
+    get$(aggregation.name:Pascal): '$(api_path)/get-$("$(aggregation.name:cobol)":lower)',
+.endfor
+.
+.for message
+    $(message.name:Camel): '$(api_path)/$("$(message.name:cobol)":lower)',
+.endfor
+
+.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endfor
+};
+.close
+.endtemplate
