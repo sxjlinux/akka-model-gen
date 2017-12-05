@@ -25,7 +25,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 @Singleton
-class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("Sharding$(entity.name:Pascal)s") $(entity.name:Camel): ActorRef)(implicit ec: ExecutionContext)
+class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("$(entity.name:Pascal)Service") $(entity.name:Camel): ActorRef)(implicit ec: ExecutionContext)
   extends AbstractController(cc)
     with $(entity.name:Pascal)JsonSupport {
   implicit val requestTimeout: Timeout = FiniteDuration(20, SECONDS)

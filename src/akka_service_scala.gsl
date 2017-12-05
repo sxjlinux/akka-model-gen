@@ -1,0 +1,76 @@
+.template 1
+.class_package = "$(model.package).shard"
+.pkgdir = "cluster/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+.for entity
+.aggRoot = ""
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.  pk = extract_pk(entity)
+.  aggRoot = entity.name
+.
+.output "$(pkgdir)/Sharding$(entity.name:Pascal)s.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import akka.actor._
+import akka.cluster.sharding._
+import $(model.package).config._
+import $(model.package).tx._
+import $(model.package).message._
+import javax.inject._
+
+object Sharding$(entity.name:Pascal)s {
+  def props = Props[Sharding$(entity.name:Pascal)s]
+  def name: String = "Sharding$(entity.name:Pascal)s"
+}
+
+class Sharding$(entity.name:Pascal)s @Inject() ($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0)))
+  extends Actor with ActorLogging {
+  val settings = Settings(context.system)
+  Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
+
+  def $(entity.name:Camel)Shard(): ActorRef = {
+    ClusterSharding(context.system).shardRegion(Sharding$(entity.name:Pascal).shardName)
+  }
+
+  ClusterSharding(context.system).start(
+    Sharding$(entity.name:Pascal).shardName,
+    Sharding$(entity.name:Pascal).props($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))),
+    ClusterShardingSettings(context.system),
+    Sharding$(entity.name:Pascal).extractEntityId,
+    Sharding$(entity.name:Pascal).extractShardId
+  )
+
+  override def receive: Receive = {
+    case cmd: Command =>
+      $(entity.name:Camel)Shard() forward cmd
+    case x => log.info("unhandled COMMAND: {} {}", this, x)
+  }
+}
+
+.close
+.endif
+.endfor
+.output "$(pkgdir)/Module.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+import com.google.inject.AbstractModule
+import play.api.libs.concurrent.AkkaGuiceSupport
+
+class Module extends AbstractModule with AkkaGuiceSupport {
+  override def configure() = {
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+    bindActor[Sharding$(entity.name:Pascal)s]("Sharding$(entity.name:Pascal)s")
+.endif
+.endfor
+  }
+}
+.endtemplate
+
+
