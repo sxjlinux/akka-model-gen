@@ -114,7 +114,12 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .endfor
 .
 .for message
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message, 1))) =>
+.  extra_fields = scala_output_field_name_list(message, 1)
+.  if string.length(extra_fields) > 0
+.    extra_fields = ", " + extra_fields
+.  endif
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields)) =>
+      // TODO: Un-implemented.
 .endfor
   }
 
