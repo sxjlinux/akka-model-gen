@@ -10,22 +10,21 @@ window.WUI = window.WUI || {};
 .if (defined(enum) & enum = "true")
 WUI.$(entity.name:Camel)s = [
 .  for row
-.    out = ""
-.    if !first()
-.       out = out + ", "
-.    endif
-.    out = out + "{"
+.    out = "{"
 .    for entity.field
 .      if !first()
 .        out = out + ", "
 .      endif
 .      if field.type = "string" | field.type = "text"
-.        out = out + "$(field.name:Camel):'$($(field.name):no)' "
+.        out = out + "$(field.name:Camel):'$($(field.name):no)'"
 .      else
 .        out = out + "$(field.name:Camel):$($(field.name):no)"
 .      endif
 .    endfor
 .    out = out + "}"
+.    if !last()
+.       out = out + ", "
+.    endif
     $(out:no)
 .  endfor
 ];
@@ -33,19 +32,23 @@ WUI.$(entity.name:Camel)s = [
 WUI.$(entity.name:Pascal) = {
 .  enumConf = entity->enum(name = entity.name)
 .for entity.row
-.    out = "{"
+.     out="{"
 .    for entity.field
-.      if !first()
-.        out = out + ", "
-.      endif
 .      if field.type = "string" | field.type = "text"
-.        out = out + "$(field.name:Camel):'$($(field.name):no)' "
+.        out = out + "$(field.name:Camel):'$($(field.name):no)'"
 .      else
 .        out = out + "$(field.name:Camel):$($(field.name):no)"
 .      endif
+.     if !last()
+.        out = out + ", "
+.      endif
 .    endfor
 .    out = out + "}"
+.     if !last()
     $($(enumConf.nameField):no): $(out:no),
+.   else
+    $($(enumConf.nameField):no): $(out:no)
+.   endif
 .endfor
 };
 

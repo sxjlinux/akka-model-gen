@@ -36,7 +36,24 @@ window.WUI.apiUrl={
 .endfor
 
 .endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.
 .endfor
+.
+.for service
+.   api_path = "$(service.name:cobol)"
+.   api_path = $(api)+"/$(api_path:lower)"
+.   for query
+    $(query.name:Camel): '$(api_path)/$("$(query.name:cobol)":lower)',
+.   endfor
+.   for insert
+.      for request
+    insert$(request.entity:Pascal): '$(api_path)/insert-$("$(request.entity:cobol)":lower)',
+.       endfor
+.   endfor
+
+.endfor
+.
 };
+
 .close
 .endtemplate
