@@ -69,7 +69,9 @@
   else
     nullOpt = ""
   endif
-  if defined(my.field.type) & my.field.type = "string"
+  if defined(my.field.type) & my.field.type = "text"
+    return my.field.name + " TEXT" + nullOpt
+  elsif defined(my.field.type) & my.field.type = "string"
     return my.field.name + " VARCHAR(" + my.field.length + ")" + nullOpt
   elsif defined(my.field.type) & my.field.type = "double"
     return my.field.name + " DOUBLE" + nullOpt
