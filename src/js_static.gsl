@@ -1,6 +1,6 @@
 .template 1
 .pkgdir = "webapp/public/"
-.output "$(pkgdir)/static.js"
+.output "$(pkgdir)static.js"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/

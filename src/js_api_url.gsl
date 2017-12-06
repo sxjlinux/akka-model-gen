@@ -1,6 +1,6 @@
 .template 1
 .pkgdir = "webapp/public/"
-.output "$(pkgdir)/api_url.js"
+.output "$(pkgdir)api_url.js"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
@@ -50,7 +50,9 @@ window.WUI.apiUrl={
     insert$(request.entity:Pascal): '$(api_path)/insert-$("$(request.entity:cobol)":lower)',
 .       endfor
 .   endfor
-
+.   for update
+    $(update.name:Camel): '$(api_path)/$("$(update.name:cobol)":lower)',
+.   endfor
 .endfor
 .
 };
