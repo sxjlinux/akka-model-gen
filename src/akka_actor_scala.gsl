@@ -118,7 +118,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  if string.length(extra_fields) > 0
 .    extra_fields = ", " + extra_fields
 .  endif
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields)) =>
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields:no)) =>
       // TODO: Un-implemented.
 .endfor
   }
