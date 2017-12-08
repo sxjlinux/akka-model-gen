@@ -248,9 +248,65 @@ message Change$(field.name:Pascal)Evt {
 .  endfor
 .elsif defined(entity.aggregationTo)
 .  aggRoot = "$(entity.aggregationTo)"
-.else
-.  ###abort "E: no aggregationRoot or aggregationTo is defined on entity $(entity.name)."
-.endif
+.elsif !(defined(entity.transient) & entity.transient = "true")
+message Create$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).Command";
+  optional string userId = 1;
+.fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.for field
+.  theField = field
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
+.  else
+  $(pb_output_field(field, fieldNo))
+.    fieldNo = fieldNo + 1
+.  endif
+.endfor
+};
+
+message Update$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).Command";
+  optional string userId = 1;
+.fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+.for field
+.  theField = field
+.  if defined(field.transient) & field.transient = "true" | defined(pk->field(name = theField.name))
+.  else
+  $(pb_output_field(field, fieldNo))
+.    fieldNo = fieldNo + 1
+.  endif
+.endfor
+};
+
+message Delete$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
+message Retrieve$(entity.name:Pascal)Cmd {
+  option (scalapb.message).extends = "$(message_package).Command";
+  optional string userId = 1;
+.  fieldNo = 2
+.  keys = pb_output_pk(entity, fieldNo)
+.  if string.length(keys) > 0
+  $(keys:no)
+.  endif
+};
+
+.else  # elsif !(defined(entity.transient) & entity.transient = "true")
+.endif # if defined(entity.aggregationRoot)...
 .
 .for aggregation
 message Update$(aggregation.name:Pascal)Cmd {
