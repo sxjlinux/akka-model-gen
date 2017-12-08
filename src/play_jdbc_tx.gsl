@@ -27,7 +27,6 @@ class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database:
   def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo): Int = database.withTransaction { implicit c =>
     $(entity.name:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel))
   }
-
 .
 .  primaryKey = extract_pk(entity)
 
