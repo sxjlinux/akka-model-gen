@@ -10,7 +10,7 @@
 .for entity
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .api_path = "$(entity.name:cobol)"
-->      /resources/$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
+->      /api/$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
 .endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .endfor
 .close
