@@ -32,6 +32,16 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
   override def receive: Receive = {
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
     case cmd: $(entity.name:Pascal)Command => $(entity.name:Camel) forward cmd
+.elsif defined(entity.aggregationTo) & string.length(entity.aggregationTo) > 0
+.else
+    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+    case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+    case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+      $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+    case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+      $(entity.name:Camel)Tx.selectBy$(dao_output_key_as_var_name(extract_pk(entity)))($(tx_output_key_as_value(entity, extract_pk(entity))))
 .endif
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
