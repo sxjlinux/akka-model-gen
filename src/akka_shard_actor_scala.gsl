@@ -32,12 +32,12 @@ object Sharding$(entity.name:Pascal) {
   var defaultNumberOfShards = 100
 
   val extractEntityId: ShardRegion.ExtractEntityId = {
-    case cmd: Command =>
+    case cmd: ShardingEntityCommand =>
       (cmd.entityId.toString, cmd)
   }
 
   val extractShardId: ShardRegion.ExtractShardId = {
-    case cmd: Command =>
+    case cmd: ShardingEntityCommand =>
       (abs(cmd.entityId.hashCode) % defaultNumberOfShards).toString
   }
 }
