@@ -395,12 +395,17 @@
   return my.result
 .endfunction
 
-.function dao_output_select_by_key_sql(entity, key)
+.function dao_output_select_sql(entity)
   my.result = "SELECT"
   my.result = my.result + "\n        $(dao_output_entity_fields(my.entity))"
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
+  return my.result
+.endfunction
+
+.function dao_output_select_by_key_sql(entity, key)
+  my.result = "${sql}"
   my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_key_as_param(entity, key)
@@ -494,7 +499,7 @@
   my.result = "DELETE"
   my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
   my.result = my.result + "\n      WHERE $(dao_output_where_by_key(my.key))"
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_delete_by_key(entity, key)
@@ -513,7 +518,7 @@
   my.result = my.result + "\n        $(dao_output_entity_insert_placeholders(my.entity))"
   my.result = my.result + "\n      ) ON DUPLICATE KEY UPDATE"
   my.result = my.result + "\n        $(dao_output_entity_update_placeholders(my.entity))"
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_create_or_update_method(entity)
@@ -535,7 +540,7 @@
   my.result = my.result + "\n        SET $(field.name:c) = {$(field.name:Camel)}"
   my.result = my.result + "\n      WHERE"
   my.result = my.result + "\n        $(dao_output_where_by_key(my.key))"
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_output_change_method(entity, key, field)
@@ -759,7 +764,7 @@
     my.clause = my.clause + " $(criteria.field:c) $(criteria.relation) {$(criteria.field:Camel)}"
   endfor
   my.result = my.result + my.clause
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function dao_get_select_field_field(entity, query)
@@ -956,7 +961,7 @@
   endfor
   my.result = my.result + "$(my.sets:no)\n"
   my.result = my.result + my.clause
-  return "SQL(\"\"\"\n      $(my.result:no)\n    \"\"\")"
+  return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
 .function output_defined_update(entity, update)
