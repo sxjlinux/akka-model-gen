@@ -141,7 +141,11 @@
       if string.length(my.result) > 0
         my.result = my.result + " ~\n    "
       endif
-      my.result = my.result + "get[$(dao_get_type(my.field.type))](\"$(field.name:c)\")"
+      if is_element_type(field.type)
+        my.result = my.result + "get[$(dao_get_type(field.type))](\"$(field.name:c)\")"
+      else
+        my.result = my.result + "get[Int](\"$(field.name:c)\")"
+      endif
     endfor
   endif
   for my.entity.field
@@ -195,6 +199,8 @@
       endif
       if field.type = "timestamp"
         my.result = my.result + "$(field.name:Camel) = toTimestamp($(field.name:Camel))"
+      elsif is_enum_type(field.type)
+        my.result = my.result + "$(field.name:Camel) = $(field.type:Pascal).fromValue($(field.name:Camel))"
       else
         my.result = my.result + "$(field.name:Camel) = $(field.name:Camel)"
       endif

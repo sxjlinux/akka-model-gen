@@ -34,8 +34,8 @@ class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database:
     $(entity.name:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
   }
 
-  def selectBy$(dao_output_key_as_var_name(primaryKey))($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(primaryKey))($(tx_output_key_as_value(entity, primaryKey)))
+  def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.selectByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
   }
 .
 .  for foreignKey

@@ -41,7 +41,7 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
     case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
-      $(entity.name:Camel)Tx.selectBy$(dao_output_key_as_var_name(extract_pk(entity)))($(tx_output_key_as_value(entity, extract_pk(entity))))
+      $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
 .endif
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
