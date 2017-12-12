@@ -9,13 +9,14 @@
 window.WUI = window.WUI || {};
 window.WUI.apiUrl={
 .for entity
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .   api_path = "$(entity.name:cobol)"
 .   api_path = $(api)+"/$(api_path:lower)"
     create$(entity.name:Pascal): '$(api_path)/create-$("$(entity.name:cobol)":lower)',
     retrieve$(entity.name:Pascal): '$(api_path)/retrieve-$("$(entity.name:cobol)":lower)',
     update$(entity.name:Pascal): '$(api_path)/update-$("$(entity.name:cobol)":lower)',
     delete$(entity.name:Pascal): '$(api_path)/delete-$("$(entity.name:cobol)":lower)',
+    query$(entity.name:Pascal): '$(api_path)/query-$("$(entity.name:cobol)":lower)',
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
