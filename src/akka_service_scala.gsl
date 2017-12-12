@@ -3,7 +3,7 @@
 .pkgdir = "service/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if !(defined(entity.transient) & entity.transient = "true")
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .output "$(pkgdir)/$(entity.name:Pascal)Service.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -42,13 +42,15 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
       $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+    case q: QueryCommand =>
+      $(entity.name:Camel)Tx.selectByQueryCriteria(q)
 .endif
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
 }
 
 .close
-.endif
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
 .output "$(pkgdir)/Module.scala"
 /*****************************************************
@@ -62,9 +64,9 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
 .for entity
-.if !(defined(entity.transient) & entity.transient = "true")
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
     bindActor[$(entity.name:Pascal)Service]("$(entity.name:Pascal)Service")
-.endif
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
   }
 }

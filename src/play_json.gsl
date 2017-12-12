@@ -16,6 +16,7 @@ import play.api.libs.json._
 trait $(entity.name:Pascal)JsonSupport {
   implicit val byteStringFormat = ByteStringFormat.format
   implicit val timestampFormat = TimestampFormat.format
+  implicit val queryCommandFormat = QueryCommandFormat.queryCommandFormat
   /*
    * Ad-hoc line, tight coupling.
    */

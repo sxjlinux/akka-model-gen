@@ -28,6 +28,7 @@ class $(entity.name:Pascal)Router @Inject()(controller: $(entity.name:Pascal)Con
     case POST(p"/retrieve-$("$(entity.name:cobol)":lower)") => controller.retrieve
     case POST(p"/update-$("$(entity.name:cobol)":lower)") => controller.update
     case POST(p"/delete-$("$(entity.name:cobol)":lower)") => controller.delete
+    case POST(p"/query-$("$(entity.name:cobol)":lower)") => controller.query
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")

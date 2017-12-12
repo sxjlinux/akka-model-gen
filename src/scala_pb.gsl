@@ -49,6 +49,11 @@ message $(entity.name:Pascal)Vo {
 .endfor
 };
 
+message $(entity.name:Pascal)ListVo {
+  option (scalapb.message).extends = "$(extends_class:no)";
+  repeated $(entity.name:Pascal)Vo list = 1 [(scalapb.field).collection_type="List"];
+};
+
 .aggRoot = ""
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
 .  pk = extract_pk(entity)

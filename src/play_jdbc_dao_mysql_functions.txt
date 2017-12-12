@@ -538,7 +538,7 @@
 .endfunction
 
 .function dao_output_remove_sql(entity, field)
-  return "???"
+  return "0"
 .endfunction
 
 .function dao_output_change_sql(entity, key, field)
@@ -560,7 +560,7 @@
 .endfunction
 
 .function dao_output_message_sql(entity, message)
-  return "???"
+  return "0"
 .endfunction
 
 .function dao_output_add_method(entity, field)
@@ -1019,4 +1019,8 @@
     my.result = my.result + "))\n"
   endfor #my.entity.insert
   return my.result
+.endfunction
+
+.function dao_output_select_by_query_command(entity)
+  return "List()"
 .endfunction

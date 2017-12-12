@@ -78,6 +78,22 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
     )
   }
 
+  def query = Action.async(parse.json) { request =>
+    val result = request.body.validate[QueryCommand]
+    result.fold(
+      errors => Future({
+        BadRequest(Json.toJson(ResponseVo(BAD_COMMAND, Some(errors.toString()))))
+      }),
+      x => {
+        $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+          case $(entity.name:Pascal)ListVo(list) => Ok(Json.toJson(list))
+          case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
+          case _ => InternalServerError
+        }
+      }
+    )
+  }
+
   def delete = Action.async(parse.json) { request =>
     val result = request.body.validate[Delete$(entity.name:Pascal)Cmd]
     result.fold(
@@ -192,7 +208,13 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
+.if defined(returns) & ((defined(multiply) & multiply = "1") | !defined(multiply))
+          case r: $(returns:Pascal)Vo => Ok(Json.toJson(r))
+.elsif defined(returns) & defined(multiply) & multiply = "*"
+          case $(entity.name:Pascal)ListVo(list) => Ok(Json.toJson(list))
+.else
           case ResponseVo(SUCCESS, _) => NoContent
+.endif
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case _ => InternalServerError
         }

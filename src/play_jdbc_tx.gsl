@@ -37,6 +37,10 @@ class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database:
   def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
     $(entity.name:Camel)DAO.selectByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
   }
+
+  def selectByQueryCriteria(q: QueryCommand): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
+    $(entity.name:Camel)DAO.selectByQueryCriteria(q)
+  }
 .
 .  for foreignKey
 
