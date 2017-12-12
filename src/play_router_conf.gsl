@@ -8,10 +8,10 @@
 ######################################################
 
 .for entity
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .api_path = "$(entity.name:cobol)"
 ->      /api/$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
-.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
 .close
 .output "$(resdir)/rest.routes"
@@ -20,10 +20,10 @@
 ######################################################
 
 .for entity
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .api_path = "$(entity.name:cobol)"
 ->      /$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
-.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
 .close
 .endtemplate

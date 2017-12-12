@@ -3,7 +3,7 @@
 .pkgdir = "rest/app/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .output "$(pkgdir)/$(entity.name:Pascal)Router.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -50,6 +50,6 @@ class $(entity.name:Pascal)Router @Inject()(controller: $(entity.name:Pascal)Con
 }
 
 .close
-.endif #defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
 .endtemplate
