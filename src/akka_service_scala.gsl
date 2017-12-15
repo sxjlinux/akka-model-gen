@@ -14,6 +14,7 @@ import akka.actor._
 import $(model.package).config._
 import $(model.package).tx._
 import $(model.package).message._
+import $(model.package).message.ResponseType._
 import javax.inject._
 
 object $(entity.name:Pascal)Service {
@@ -36,15 +37,18 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
 .else
     case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
       $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created."))
     case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
       $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated."))
     case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
       $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted."))
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
-      $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
-    case q: QueryCommand =>
-      $(entity.name:Camel)Tx.selectByQueryCriteria(q)
+      sender() ! $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
 .endif
+    case q: QueryCommand =>
+      sender() ! $(entity.name:Pascal)ListVo($(entity.name:Camel)Tx.selectByQueryCriteria(q))
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
 }

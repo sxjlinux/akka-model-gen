@@ -487,7 +487,7 @@
   my.result = "{"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
-  my.result = my.result + "\n    ).as(parser.single)"
+  my.result = my.result + "\n    ).as(rowParser.single)"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
@@ -496,7 +496,7 @@
   my.result = "{"
   my.result = my.result + "\n    $(dao_output_select_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
-  my.result = my.result + "\n    ).as(parser.*)"
+  my.result = my.result + "\n    ).as(rowParser.*)"
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
@@ -702,7 +702,7 @@
 .endfunction
 
 .function dao_output_message_method(entity, message)
-  return "???"
+  return "0"
 .endfunction
 
 .function output_defined_query_param_def(entity, query)
@@ -1026,13 +1026,15 @@
 
 .function dao_get_parser(fieldName, typeName)
   if my.typeName = "bool"
-    return "\"$(my.fieldName:Camel)\"-> BooleanParser"
-  elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double" | my.typeName = "string"
-    return "\"$(my.fieldName:Camel)\" -> $(my.typeName:Pascal)Parser"
+    return "case \"$(my.fieldName:Camel)\" => paramName -> BooleanParser.parse(paramValue)"
+  elsif my.typeName = "int" | my.typeName = "long" | my.typeName = "double"
+    return "case \"$(my.fieldName:Camel)\" => paramName -> $(my.typeName:Pascal)Parser.parse(paramValue)"
+  elsif my.typeName = "string"
+    return "case \"$(my.fieldName:Camel)\" => paramName -> paramValue"
   elsif my.typeName = "text"
-    return "\"$(my.fieldName:Camel)\" -> StringParser"
+    return "case \"$(my.fieldName:Camel)\" => paramName -> paramValue"
   elsif my.typeName = "timestamp"
-    return "\"$(my.fieldName:Camel)\" -> DateParser"
+    return "case \"$(my.fieldName:Camel)\" => paramName -> DateParser.parse(paramValue)"
   elsif my.typeName = "array"
     return ""
   elsif my.typeName = "map"
@@ -1042,7 +1044,7 @@
   else
     ref = find_entity_by_type(my.typeName)
     if defined(ref.enum) & ref.enum = "true"
-      return "\"$(my.fieldName:Camel)\" -> EnumParser($(my.typeName:Pascal))"
+      return "case \"$(my.fieldName:Camel)\" => paramName -> EnumParser($(my.typeName:Pascal)).parse(paramValue).value"
     else
       return ""
     endif
@@ -1063,7 +1065,7 @@
       endif
       my.parser = dao_get_parser(field.name, field.type)
       if string.length(my.result) > 0 & string.length(my.parser) > 0
-        my.result = my.result + ",\n      "
+        my.result = my.result + "\n      "
       endif
       my.result = my.result + my.parser
     endfor
@@ -1072,7 +1074,7 @@
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
       my.parser = dao_get_parser(field.name, field.type)
       if string.length(my.result) > 0 & string.length(my.parser) > 0
-        my.result = my.result + ",\n      "
+        my.result = my.result + "\n      "
       endif
       my.result = my.result + my.parser
     endif
@@ -1080,9 +1082,9 @@
   return my.result
 .endfunction
 
-.function dao_output_param_parser_map(entity)
-  my.result = "Map(\n"
+.function dao_output_param_parser(entity)
+  my.result = "fieldName match {\n"
   my.result = my.result + "      $(dao_output_param_parsers(my.entity))\n"
-  my.result = my.result + "    )"
+  my.result = my.result + "    }"
   return my.result
 .endfunction

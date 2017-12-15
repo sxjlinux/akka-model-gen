@@ -11,6 +11,7 @@
 package $(class_package)
 
 import $(model.package).message._
+import $(model.package).message.SqlWhereClause._
 import $(model.package).util._
 import $(model.package).util.DateFormat._
 import $(model.package).util.EnumConvert._
@@ -22,20 +23,20 @@ import java.util.Date
 import javax.inject._
 import play.api.db._
 import anorm.SqlParser._
+import anorm.ParameterValue._
 import anorm._
 
 @Singleton
 class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity, 1))) {
   val sql = """$(dao_output_select_sql(entity))"""
 
-  private def parser(implicit c: Connection): RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
+  def parseParam(fieldName: String, paramName:String, paramValue: String): NamedParameter = $(dao_output_param_parser(entity))
+
+  private def rowParser(implicit c: Connection): RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
 
   private def namedParams(q: QueryCommand): Seq[NamedParameter] = {
-    val parsers: Map[String, Parser[_]] = $(dao_output_param_parser_map(entity))
-    SqlWhereClause.toNamedParams(q.predicate, q.params)
-      .map(x => (x._2, parsers(x._1).parse(x._3)))
-      .asInstanceOf[Map[String, _]]
-      .toSeq
+    toNamedParams(q.predicate, q.params)
+      .map(x => parseParam(x._1, x._2, x._3))
       .asInstanceOf[Seq[NamedParameter]]
   }
 
@@ -52,10 +53,10 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
   def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = {
     SQL(s"""
       ${sql}
-      ${SqlWhereClause.toWhereClause(q.predicate, 6)}
+      ${toWhereClause(q.predicate, 6)}
     """).on(
       namedParams(q):_*
-    ).as(parser.*)
+    ).as(rowParser.*)
   }
 
 .
