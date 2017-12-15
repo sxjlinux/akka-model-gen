@@ -11,8 +11,10 @@
 package $(class_package)
 
 import $(model.package).message._
+import $(model.package).util._
 import $(model.package).util.DateFormat._
 import $(model.package).util.EnumConvert._
+import $(model.package).util.Parser._
 import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
 import java.sql.Connection
@@ -26,7 +28,16 @@ import anorm._
 class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity, 1))) {
   val sql = """$(dao_output_select_sql(entity))"""
 
-  def parser(implicit c: Connection): RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
+  private def parser(implicit c: Connection): RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
+
+  private def namedParams(q: QueryCommand): Seq[NamedParameter] = {
+    val parsers: Map[String, Parser[_]] = $(dao_output_param_parser_map(entity))
+    SqlWhereClause.toNamedParams(q.predicate, q.params)
+      .map(x => (x._2, parsers(x._1).parse(x._3)))
+      .asInstanceOf[Map[String, _]]
+      .toSeq
+      .asInstanceOf[Seq[NamedParameter]]
+  }
 
   def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo)(implicit c: Connection): Int \
 = $(dao_output_create_or_update_method(entity))
@@ -38,7 +49,15 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
 
   def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 
-  def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = $(dao_output_select_by_query_command(entity))
+  def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = {
+    SQL(s"""
+      ${sql}
+      ${SqlWhereClause.toWhereClause(q.predicate, 6)}
+    """).on(
+      namedParams(q):_*
+    ).as(parser.*)
+  }
+
 .
 .  for foreignKey
 
