@@ -40,7 +40,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case r@ResponseVo(SUCCESS, _) => Created
           case ResponseVo(ALREADY_EXISTS, _) => NotModified
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -56,7 +56,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case r: $(entity.name:Pascal)Vo => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -72,7 +72,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -88,7 +88,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case $(entity.name:Pascal)ListVo(list) => Ok(Json.toJson(list))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -104,7 +104,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -122,7 +122,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -138,7 +138,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -155,7 +155,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -175,7 +175,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -191,7 +191,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
           case ResponseVo(SUCCESS, _) => NoContent
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
@@ -216,7 +216,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
           case ResponseVo(SUCCESS, _) => NoContent
 .endif
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
-          case _ => InternalServerError
+          case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
       }
     )
