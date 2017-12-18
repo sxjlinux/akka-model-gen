@@ -36,19 +36,40 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
 .elsif defined(entity.aggregationTo) & string.length(entity.aggregationTo) > 0
 .else
     case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
-      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
-      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created."))
+      try {
+        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+        sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created."))
+      } catch {
+        case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
+      }
     case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
-      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
-      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated."))
+      try {
+        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+        sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated."))
+      } catch {
+        case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
+      }
     case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
-      $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
-      sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted."))
+      try {
+        $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+        sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted."))
+      } catch {
+        case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
+      }
     case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
-      sender() ! $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+      try {
+        sender() ! $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+      } catch {
+        case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
+      }
 .endif
     case q: QueryCommand =>
-      sender() ! $(entity.name:Pascal)ListVo($(entity.name:Camel)Tx.selectByQueryCriteria(q))
+      try {
+        sender() ! $(entity.name:Pascal)ListVo($(entity.name:Camel)Tx.selectByQueryCriteria(q))
+      } catch {
+        case x: Throwable =>
+          sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
+      }
     case x => log.info("unhandled COMMAND: {} {}", this, x)
   }
 }
