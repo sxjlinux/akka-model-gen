@@ -55,15 +55,15 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
     val stmt = SQL(s"""${sql}\n${toWhereClause(q.predicate, 6)}""")
     val params = namedParams(q)
     Logger.info(s"""
-      ${sql}\n${toWhereClause(q.predicate, 6)}
-  [params for substitution] => {}
+  [SQL statement] =>
+    ${sql}\n${toWhereClause(q.predicate, 4)}
+  [params for substitution] =>
+    {}
     """,
-      namedParams(q))
+      params)
     if(params.isEmpty) {
-      Logger.info(s"params is empty: {}", params)
       stmt.as(rowParser.*)
     } else {
-      Logger.info(s"params is not empty: {}", params)
       stmt.on(
         params:_*
       ).as(rowParser.*)
