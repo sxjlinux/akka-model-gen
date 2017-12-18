@@ -52,19 +52,13 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
   def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 
   def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = {
-    Logger.info(s"""
-      ${sql}
-      ${toWhereClause(q.predicate, 6)}
-      where clause: {}
-      params: {}
-    """,
-      toWhereClause(q.predicate, 6),
-      namedParams(q))
-    val stmt = SQL(s"""
-      ${sql}
-      ${toWhereClause(q.predicate, 6)}
-    """)
+    val stmt = SQL(s"""${sql}\n${toWhereClause(q.predicate, 6)}""")
     val params = namedParams(q)
+    Logger.info(s"""
+      ${sql}\n${toWhereClause(q.predicate, 6)}
+  [params for substitution] => {}
+    """,
+      namedParams(q))
     if(params.isEmpty) {
       Logger.info(s"params is empty: {}", params)
       stmt.as(rowParser.*)
