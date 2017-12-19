@@ -297,9 +297,14 @@
         my.result = my.result + "$(field.name:Camel): $(scala_output_type(my.pk_field))"
       endif
     elsif is_fk_field(my.entity, field.name)
-      my.fk_field = extract_fk_field(my.entity, field.name)
-      assign_field_type(field, my.fk_field)
-      my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
+      if exists_field(my.entity, field.name)
+        my.fk_field = get_field(my.entity.name, field.name)
+        my.result = my.result + "$(my.fk_field.name:Camel): $(scala_output_type(my.fk_field))"
+      else
+        my.fk_field = extract_fk_field(my.entity, field.name)
+        assign_field_type(field, my.fk_field)
+        my.result = my.result + "$(field.name:Camel): $(scala_output_type(field))"
+      endif
     else
     endif
   endfor
@@ -424,8 +429,10 @@
     if !defined(my.entity->field(name = my.field_name))
       my.ref_field = extract_fk_field(my.entity, my.field_name)
       assign_field_type(field, my.ref_field)
+      my.result = my.result + dao_output_field_as_equals_param(field)
+    else
+      my.result = my.result + dao_output_field_as_equals_param(my.entity->field(name = my.field_name))
     endif
-    my.result = my.result + dao_output_field_as_equals_param(field)
   endfor
   return my.result
 .endfunction

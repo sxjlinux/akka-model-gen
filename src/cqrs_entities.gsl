@@ -60,9 +60,11 @@
 .endfunction
 
 .function assign_field_type(field, refField)
-  my.field.type = my.refField.type
-  if defined(my.refField.length)
-    my.field.length = my.refField.length
+  if !defined(my.field.type)
+    my.field.type = my.refField.type
+    if defined(my.refField.length)
+      my.field.length = my.refField.length
+    endif
   endif
 .endfunction
 
