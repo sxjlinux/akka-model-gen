@@ -38,7 +38,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case r@ResponseVo(SUCCESS, _) => Created
+          case r@ResponseVo(SUCCESS, _) => Created(Json.toJson(r))
           case ResponseVo(ALREADY_EXISTS, _) => NotModified
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -70,7 +70,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -102,7 +102,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -120,7 +120,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -136,7 +136,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -153,7 +153,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -173,7 +173,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -189,7 +189,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
       }),
       x => {
         $(entity.name:Camel).ask(x).mapTo[ValueObject].map {
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
         }
@@ -213,7 +213,7 @@ class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named
 .elsif defined(returns) & defined(multiply) & multiply = "*"
           case $(entity.name:Pascal)ListVo(list) => Ok(Json.toJson(list))
 .else
-          case ResponseVo(SUCCESS, _) => NoContent
+          case r@ResponseVo(SUCCESS, _) => Ok(Json.toJson(r))
 .endif
           case r@ResponseVo(NOT_EXIST, _) => NotFound(Json.toJson(r))
           case r: ResponseVo => InternalServerError(Json.toJson(r))
