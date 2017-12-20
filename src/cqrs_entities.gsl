@@ -24,7 +24,7 @@
     return 1
   elsif my.type = "int"
     return 1
-  elsif my.type = "bigint"
+  elsif my.type = "long"
     return 1
   elsif my.type = "bool"
     return 1

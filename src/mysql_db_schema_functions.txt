@@ -87,6 +87,8 @@
     return ""
   elsif defined(my.field.type) & my.field.type = "map"
     return ""
+  elsif defined(my.field.type) & is_enum_type(my.field.type)
+    return my.field.name + " INT" + nullOpt
   elsif defined(my.field.type)
     return ""
   else

@@ -62,6 +62,14 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
       } catch {
         case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
       }
+.for message
+.  extra_fields = scala_output_field_name_list(message, 1)
+.  if string.length(extra_fields) > 0
+.    extra_fields = ", " + extra_fields
+.  endif
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields:no)) =>
+      // TODO: Un-implemented.
+.endfor
 .endif
     case q: QueryCommand =>
       try {

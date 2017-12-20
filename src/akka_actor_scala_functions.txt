@@ -77,7 +77,7 @@
     else
       return "None"
     endif
-  elsif my.field.type = "bigint"
+  elsif my.field.type = "long"
     if defined(my.field.required) & my.field.required = "true"
       return "0"
     else

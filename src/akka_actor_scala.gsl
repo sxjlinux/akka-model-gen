@@ -4,7 +4,7 @@
 .directory.create(pkgdir)
 .for entity
 .aggRoot = ""
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true" & !(defined(entity.generate) & entity.generate = "false")
 .  pk = extract_pk(entity)
 .  aggRoot = entity.name
 .
@@ -120,6 +120,9 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  endif
     case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields:no)) =>
       // TODO: Un-implemented.
+.  if !(defined(message.transient) & transient = "true")
+      persist($(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))$(extra_fields:no)))(updateState)
+.  endif
 .endfor
   }
 
@@ -157,7 +160,12 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .
 .  for message
 .    if !(defined(transient) & transient = "true")
-    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(message, 1))) =>
+.      field_names = scala_output_field_name_list(message, 1)
+.      if string.length(field_names) > 0
+.        field_names = ", " + field_names
+.      endif
+    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))$(field_names:no)) =>
+      // TODO: Un-implemented.
       replyToSender(ResponseVo(SUCCESS, Some("$(message.name:Pascal)Evt accepted.")))
 .    endif
 .  endfor
