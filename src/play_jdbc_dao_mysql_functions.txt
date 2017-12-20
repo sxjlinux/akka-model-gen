@@ -409,7 +409,7 @@
 .function dao_output_select_sql(entity)
   my.result = "SELECT"
   my.result = my.result + "\n        $(dao_output_entity_fields(my.entity))"
-  my.result = my.result + "\n      FROM $(model.dbSchema:c).$(my.entity.name)"
+  my.result = my.result + "\n    FROM $(model.dbSchema:c).$(my.entity.name)"
   return my.result
 .endfunction
 
