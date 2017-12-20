@@ -5,13 +5,13 @@
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 
-.  api="api"
+.  api="dcim-api"
 window.WUI = window.WUI || {};
 window.WUI.apiUrl={
 .for entity
 .if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .   api_path = "$(entity.name:cobol)"
-.   api_path = $(api)+"/$(api_path:lower)"
+.   api_path = "$(api)"+"/$(api_path:lower)"
     create$(entity.name:Pascal): '$(api_path)/create-$("$(entity.name:cobol)":lower)',
     retrieve$(entity.name:Pascal): '$(api_path)/retrieve-$("$(entity.name:cobol)":lower)',
     update$(entity.name:Pascal): '$(api_path)/update-$("$(entity.name:cobol)":lower)',
@@ -42,7 +42,7 @@ window.WUI.apiUrl={
 .
 .for service
 .   api_path = "$(service.name:cobol)"
-.   api_path = $(api)+"/$(api_path:lower)"
+.   api_path = "$(api)"+"/$(api_path:lower)"
 .   for query
     $(query.name:Camel): '$(api_path)/$("$(query.name:cobol)":lower)',
 .   endfor
