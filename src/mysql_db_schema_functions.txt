@@ -100,10 +100,15 @@
   if is_fk_field(my.entity, my.field.name) | is_pk_field(my.entity, my.field.name)
     return ""
   elsif defined(my.field.joinKey)
-    foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
-    theRefField = model->entity(name = foreignKey.refEntity)->field(name = my.field.refField)
-    assign_field_type(my.field, theRefField)
-    return db_output_field_basic(my.field)
+    my.foreignKey =  my.entity->foreignKey(name = my.field.joinKey)
+    if defined(my.entity.extendsEntity) & my.entity.extendsEntity = my.foreignKey.refEntity
+      # skip extended fields
+      return ""
+    else
+      my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.field.refField)
+      assign_field_type(my.field, my.theRefField)
+      return db_output_field_basic(my.field)
+    endif
   else
     return db_output_field_basic(my.field)
   endif

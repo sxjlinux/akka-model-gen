@@ -149,6 +149,26 @@
   endif
 .endfunction
 
+.function scala_output_define_extended_fields(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(entity, my.fk.name, field.name)
+        # echo "$(field.name) overridden."
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + "\n  "
+        endif
+        my.result = my.result + "var $(field.name:Camel): $(scala_output_type(field)) = $(scala_output_default(field)) "
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
+
 .function scala_output_define_fields(entity)
   my.result = ""
   if defined(extract_pk(my.entity))
@@ -175,6 +195,11 @@
       my.result = my.result + "var $(field.name:Camel): $(scala_output_type(field)) = $(scala_output_default(field)) "
     endif
   endfor
+  my.extended = scala_output_define_extended_fields(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + "\n  "
+  endif
+  my.result = my.result + my.extended
   return my.result
 .endfunction
 
@@ -240,6 +265,26 @@
   return "this.$(field.name:Camel) = $(field.name:Camel)"
 .endfunction
 
+.function scala_output_set_extended_field_values(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(entity, my.fk.name, field.name)
+        # echo "$(field.name) overridden."
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + "\n      "
+        endif
+        my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
+
 .function scala_output_set_field_values(entity)
   my.result = ""
   for my.entity.field
@@ -250,6 +295,11 @@
       my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
     endif
   endfor
+  my.extended = scala_output_set_extended_field_values(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + "\n      "
+  endif
+  my.result = my.result + my.extended
   return my.result
 .endfunction
 
@@ -264,35 +314,6 @@
       my.result = my.result + "$(field.name:Camel)"
     endfor
   endif
-  return my.result
-.endfunction
-
-.function scala_output_get_field_values(entity, include_transient)
-  my.result = ""
-  if defined(extract_pk(my.entity))
-    my.pk = extract_pk(my.entity)
-    for my.pk.field
-      if string.length(my.result) > 0
-        my.result = my.result + ", "
-      endif
-      my.result = my.result + "$(field.name:Camel)"
-    endfor
-  endif
-  for my.entity.field
-    if(my.include_transient)
-      if string.length(my.result) > 0
-        my.result = my.result + ", "
-      endif
-      my.result = my.result + "$(field.name:Camel)"
-    else
-      if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | transient = "false")
-        if string.length(my.result) > 0
-          my.result = my.result + ", "
-        endif
-        my.result = my.result + "$(field.name:Camel)"
-      endif
-    endif
-  endfor
   return my.result
 .endfunction
 

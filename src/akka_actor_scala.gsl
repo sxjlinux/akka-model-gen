@@ -75,7 +75,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
       if (!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        sender() ! $(entity.name:Pascal)Vo($(scala_output_get_field_values(entity, 0)))
+        sender() ! $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0)))
       }
 .  for field
 .    theField = field
