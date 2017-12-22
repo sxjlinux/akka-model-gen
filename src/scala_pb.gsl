@@ -19,8 +19,8 @@ package $(message_package);
 
 .for entity
 . extends_class = "$(message_package).ValueObject"
-.  if defined(entity.extends)
-.    extends_class = entity.extends
+.  if defined(entity.extendsClass)
+.    extends_class = entity.extendsClass
 .  endif
 .if defined(entity.enum) & entity.enum = "true"
 enum $(entity.name:Pascal) {
@@ -374,7 +374,7 @@ message Get$(aggregation.name:Pascal)Cmd {
 .for message
 . extends_class = "$(message_package).$(aggRoot:Pascal)"
 .  if defined(message.extends)
-.    extends_class = message.extends
+.    extends_class = message.extendsClass
 .  endif
 message $(message.name:Pascal)Cmd {
   option (scalapb.message).extends = "$(extends_class:no)Command";
