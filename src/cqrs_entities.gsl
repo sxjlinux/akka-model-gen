@@ -105,6 +105,15 @@
   abort "E: no foreignKey field with name $(field.name) is defined on entity $(my.entity.name)."
 .endfunction
 
+.function exists_reference(entity, refKey, refFieldName)
+  for my.entity.field
+    if defined(field.joinKey) & field.joinKey = my.refKey & defined(field.refField) & field.refField = my.refFieldName
+      return 1
+    endif
+  endfor
+  return 0
+.endfunction
+
 .function exists_field(entity, fieldName)
   for my.entity.field
     if field.name = my.fieldName

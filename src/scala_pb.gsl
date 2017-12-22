@@ -47,6 +47,10 @@ message $(entity.name:Pascal)Vo {
 .    fieldNo = fieldNo + 1
 .  endif
 .endfor
+.  extended_fields = pb_output_extended_fields(entity)
+.  if string.length(extended_fields) > 0
+  $(extended_fields:no)
+.  endif
 };
 
 message $(entity.name:Pascal)ListVo {
@@ -75,6 +79,10 @@ message Create$(entity.name:Pascal)Cmd {
 .    fieldNo = fieldNo + 1
 .  endif
 .endfor
+.  extended_fields = pb_output_extended_fields(entity)
+.  if string.length(extended_fields) > 0
+  $(extended_fields:no)
+.  endif
 };
 
 message Create$(entity.name:Pascal)Evt {
@@ -93,6 +101,10 @@ message Create$(entity.name:Pascal)Evt {
 .    fieldNo = fieldNo + 1
 .  endif
 .endfor
+.  extended_fields = pb_output_extended_fields(entity)
+.  if string.length(extended_fields) > 0
+  $(extended_fields:no)
+.  endif
 };
 
 message Update$(entity.name:Pascal)Cmd {
@@ -129,6 +141,10 @@ message Update$(entity.name:Pascal)Evt {
 .    fieldNo = fieldNo + 1
 .  endif
 .endfor
+.  extended_fields = pb_output_extended_fields(entity)
+.  if string.length(extended_fields) > 0
+  $(extended_fields:no)
+.  endif
 };
 
 message Delete$(entity.name:Pascal)Cmd {

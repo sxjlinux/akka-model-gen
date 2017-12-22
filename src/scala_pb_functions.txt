@@ -94,5 +94,25 @@
   return result
 .endfunction
 
+.function pb_output_extended_fields(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(entity, my.fk.name, field.name)
+        # echo "$(field.name) overridden."
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + "\n  "
+        endif
+        my.result = my.result + "$(pb_output_field(field, fieldNo))"
+        fieldNo = fieldNo + 1
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
 
 
