@@ -178,6 +178,29 @@
   return my.result
 .endfunction
 
+.function scala_output_extended_field_name_list(entity, include_transient)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(entity, my.fk.name, field.name)
+        # echo "$(field.name) overridden."
+      else
+        if defined(field.transient) & field.transient = "true" & my.include_transient = 0
+          # skip transient fields
+        else
+          if string.length(my.result) > 0
+            my.result = my.result + ", "
+          endif
+          my.result = my.result + "$(field.name:Camel)"
+        endif
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
 
 .function scala_output_field_name_list(entity, include_transient)
   my.result = ""
@@ -205,6 +228,11 @@
       endif
     endif
   endfor
+  my.extended = scala_output_extended_field_name_list(my.entity, my.include_transient)
+  if string.length(my.extended) > 0
+    my.result = my.result + ", "
+  endif
+  my.result = my.result + "$(my.extended:no)"
   return my.result
 .endfunction
 
