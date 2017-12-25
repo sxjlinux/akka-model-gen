@@ -126,6 +126,39 @@
   endif
 .endfunction
 
+.function dao_output_parser_extended_gets(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(my.entity, my.fk.name, field.name)
+        #my.extendedField = find_reference(my.entity, my.fk.name, field.name)
+        #my.result = my.result + "$(my.extendedField.name:c)"
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + " ~\n    "
+        endif
+        if is_element_type(field.type)
+          if defined(field.required) & required = "true"
+            my.result = my.result + "get[$(dao_get_type(field.type))](\"$(field.name:c)\")"
+          else
+            my.result = my.result + "get[Option[$(dao_get_type(field.type))]](\"$(field.name:c)\")"
+          endif
+        else
+          if defined(field.required) & required = "true"
+            my.result = my.result + "get[Int](\"$(field.name:c)\")"
+          else
+            my.result = my.result + "get[Option[Int]](\"$(field.name:c)\")"
+          endif
+        endif
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
+
 .function dao_output_parser_gets(entity)
   my.result = ""
   if defined(extract_pk(my.entity))
@@ -168,6 +201,30 @@
       endif
     endif
   endfor
+  my.extended = dao_output_parser_extended_gets(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + " ~\n    "
+    my.result = my.result + my.extended
+  endif
+  return my.result
+.endfunction
+
+.function dao_output_parser_case_pattern_extended(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(my.entity, my.fk.name, field.name)
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + " ~ "
+        endif
+        my.result = my.result + "$(field.name:Camel)"
+      endif
+    endfor
+  else
+  endif
   return my.result
 .endfunction
 
@@ -193,9 +250,63 @@
       endif
     endif
   endfor
+  my.extended = dao_output_parser_case_pattern_extended(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + " ~ "
+    my.result = my.result + my.extended
+  endif
   return my.result
 .endfunction
 
+.function dao_output_parser_construct_pattern_extended(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(my.entity, my.fk.name, field.name)
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n          "
+        endif
+        if field.type = "timestamp"
+          my.result = my.result + "toTimestamp($(field.name:Camel))"
+        elsif is_element_type(field.type)
+          my.result = my.result + "$(field.name:Camel)"
+        elsif is_enum_type(field.type)
+          if(defined(field.required) & field.required = "true")
+            my.result = my.result + "$(field.type:Pascal).fromValue($(field.name:Camel))"
+          else
+            my.result = my.result + "$(field.name:Camel).map(x => $(field.type:Pascal).fromValue(x))"
+          endif
+        elsif field.type = "array"
+          if defined(field->query)
+            my.the_query = field->query
+            my.ref_entity = model->entity(name = my.the_query.entity)
+            my.ref_query = dao_find_query(my.ref_entity, my.the_query.refName)
+            my.result = my.result + "$(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
+          else
+            if defined(field.entity) & defined(field.valueField)
+              my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            else
+              my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            endif
+          endif
+        elsif field.type = "map"
+          if defined(field.query)
+          else
+            my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result = my.result + "$(dao_convert_result_set_to_map(field, my.result_set))"
+          endif
+        else
+          my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        endif
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
 
 .function dao_output_parser_construct_pattern(entity)
   my.result = ""
@@ -253,6 +364,11 @@
       endif
     endif
   endfor
+  my.extended = dao_output_parser_construct_pattern_extended(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + ",\n          "
+    my.result = my.result + my.extended
+  endif
   return my.result
 .endfunction
 
@@ -342,6 +458,32 @@
   endfor
 .endfunction
 
+.function dao_output_extended_fields(entity)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    for my.extended.field
+      if exists_reference(my.entity, my.fk.name, field.name)
+        my.extendedField = find_reference(my.entity, my.fk.name, field.name)
+        if !is_pk_field(my.entity, my.extendedField.name)
+          if string.length(my.result) > 0
+            my.result = my.result + ",\n        "
+          endif
+          my.result = my.result + "$(my.entity.name).$(my.extendedField.name:c)"
+        endif
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n        "
+        endif
+        my.result = my.result + "$(my.entity.extendsEntity).$(field.name:c)"
+      endif
+    endfor
+  else
+  endif
+  return my.result
+.endfunction
+
 .function dao_output_entity_fields(entity)
   my.result = ""
   my.pk = extract_pk(my.entity)
@@ -349,14 +491,22 @@
     if string.length(my.result) > 0
       my.result = my.result + ",\n        "
     endif
-    my.result = my.result + "$(field.name:c)"
+    my.result = my.result + "$(my.entity.name).$(field.name:c)"
   endfor
+
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
-      if string.length(my.result) > 0
-        my.result = my.result + ",\n        "
+      if defined(my.entity.extendsEntity) & defined(field.joinKey) & field.joinKey = my.fk.name
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n        "
+        endif
+        my.result = my.result + "$(my.entity.name).$(field.name:c)"
       endif
-      my.result = my.result + "$(field.name:c)"
     endif
   endfor
   return my.result
@@ -371,12 +521,20 @@
     endif
     my.result = my.result + "{$(field.name:Camel)}"
   endfor
+
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
-      if string.length(my.result) > 0
-        my.result = my.result + ",\n        "
+      if defined(my.entity.extendsEntity) & defined(field.joinKey) & field.joinKey = my.fk.name
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n        "
+        endif
+        my.result = my.result + "{$(field.name:Camel)}"
       endif
-      my.result = my.result + "{$(field.name:Camel)}"
     endif
   endfor
   return my.result
@@ -384,12 +542,19 @@
 
 .function dao_output_entity_update_placeholders(entity)
   my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
-      if string.length(my.result) > 0
-        my.result = my.result + ",\n        "
+      if defined(my.entity.extendsEntity) & defined(field.joinKey) & field.joinKey = my.fk.name
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n        "
+        endif
+        my.result = my.result + "$(field.name:c)={$(field.name:Camel)}"
       endif
-      my.result = my.result + "$(field.name:c)={$(field.name:Camel)}"
     endif
   endfor
   return my.result
@@ -406,10 +571,58 @@
   return my.result
 .endfunction
 
+.function dao_output_where_by_extended_key(entity, key)
+  my.result = ""
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
+  for my.key.field
+    if string.length(my.result) > 0
+      my.result = my.result + "\n        AND "
+    endif
+    if defined(extract_pk_field(my.entity, field.name))
+      my.pk_field = extract_pk_field(my.entity, field.name)
+      if defined(my.entity.extendsEntity) & defined(my.pk_field.joinKey) & my.pk_field.joinKey = my.fk.name
+        my.result = my.result + "$(my.pk_field.refField:c) = {$(field.name:Camel)}"
+      endif
+    else
+      my.result = my.result + "$(field.name:c) = {$(field.name:Camel)}"
+    endif
+  endfor
+  return my.result
+.endfunction
+
+.function dao_output_join_extends_entity(entity)
+  my.joinColumns = ""
+  my.result = "INNER JOIN $(model.dbSchema:c).$(my.entity.extendsEntity) ON ("
+  my.extendedEntity = find_entity_by_type(my.entity.extendsEntity)
+  my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+  for my.fk.field
+    if exists_reference(my.entity, my.fk.name, field.refField)
+      if string.length(my.joinColumns) > 0
+        my.joinColumns = my.joinColumns + " AND "
+      endif
+      my.extendedField = find_reference(my.entity, my.fk.name, field.refField)
+      my.joinColumns = my.joinColumns + "$(my.entity.name).$(my.extendedField.name:c) = $(my.entity.extendsEntity).$(my.extendedField.refField:c)"
+    endif
+  endfor
+  my.result = my.result + my.joinColumns + ")"
+  return my.result
+.endfunction
+
 .function dao_output_select_sql(entity)
   my.result = "SELECT"
   my.result = my.result + "\n        $(dao_output_entity_fields(my.entity))"
+  my.extended = dao_output_extended_fields(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + ",\n        "
+    my.result = my.result + my.extended
+  endif
   my.result = my.result + "\n    FROM $(model.dbSchema:c).$(my.entity.name)"
+  if defined(my.entity.extendsEntity)
+    my.result = my.result + "\n      $(dao_output_join_extends_entity(my.entity))"
+  endif
   return my.result
 .endfunction
 
@@ -479,12 +692,20 @@
     my.pk = extract_pk(my.entity)
     my.result = my.result + dao_output_entity_key_as_param(my.entity, my.pk)
   endif
+
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
   for my.entity.field
     if !is_pk_field(my.entity, field.name) & (is_element_type(field.type) | is_enum_type(field.type))
-      if string.length(my.result) > 0
-        my.result = my.result + ",\n      "
+      if defined(my.entity.extendsEntity) & defined(field.joinKey) & field.joinKey = my.fk.name
+      else
+        if string.length(my.result) > 0
+          my.result = my.result + ",\n      "
+        endif
+        my.result = my.result + "$(dao_output_entity_field_as_param(my.entity, field))"
       endif
-      my.result = my.result + "$(dao_output_entity_field_as_param(my.entity, field))"
     endif
   endfor
   return my.result
@@ -515,6 +736,20 @@
   return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
+.function dao_output_delete_by_pk(entity, key)
+  my.result = "{"
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+    my.result = my.result + "\n    $(my.entity.extendsEntity:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(my.entity, my.key)))"
+  endif
+  my.result = my.result + "\n    $(dao_output_delete_by_key_sql(my.entity, my.key)).on("
+  my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"
+  my.result = my.result + "\n    ).executeUpdate()"
+  my.result = my.result + "\n  }"
+  return my.result
+.endfunction
+
 .function dao_output_delete_by_key(entity, key)
   my.result = "{"
   my.result = my.result + "\n    $(dao_output_delete_by_key_sql(my.entity, my.key)).on("
@@ -536,13 +771,13 @@
 
 .function dao_output_create_or_update_method(entity)
   my.result = "{"
+  my.extended = output_insert_extended(my.entity)
+  if string.length(my.extended) > 0
+    my.result = my.result + "\n    $(my.extended:no)"
+  endif
   my.result = my.result + "\n    $(dao_output_create_or_update_sql(my.entity)).on("
   my.result = my.result + "\n      $(dao_output_entity_as_param(my.entity))"
   my.result = my.result + "\n    ).executeUpdate()"
-  my.dependency = output_insert_dependency(my.entity)
-  if string.length(my.dependency) > 0
-    my.result = my.result + "\n\n    $(my.dependency:no)"
-  endif
   my.result = my.result + "\n  }"
   return my.result
 .endfunction
@@ -552,10 +787,21 @@
 .endfunction
 
 .function dao_output_change_sql(entity, key, field)
-  my.result = "UPDATE $(model.dbSchema:c).$(my.entity.name)"
-  my.result = my.result + "\n        SET $(field.name:c) = {$(field.name:Camel)}"
-  my.result = my.result + "\n      WHERE"
-  my.result = my.result + "\n        $(dao_output_where_by_key(my.key))"
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
+  if defined(my.entity.extendsEntity) & defined(my.field.joinKey) & my.field.joinKey = my.fk.name
+    my.result = "UPDATE $(model.dbSchema:c).$(my.entity.extendsEntity)"
+    my.result = my.result + "\n        SET $(my.field.refField:c) = {$(my.field.name:Camel)}"
+    my.result = my.result + "\n      WHERE"
+    my.result = my.result + "\n        $(dao_output_where_by_extended_key(my.entity, my.key))"
+  else
+    my.result = "UPDATE $(model.dbSchema:c).$(my.entity.name)"
+    my.result = my.result + "\n        SET $(field.name:c) = {$(field.name:Camel)}"
+    my.result = my.result + "\n      WHERE"
+    my.result = my.result + "\n        $(dao_output_where_by_key(my.key))"
+  endif
   return "SQL(s\"\"\"\n      $(my.result:no)\n    \"\"\")"
 .endfunction
 
@@ -990,44 +1236,35 @@
   return my.result
 .endfunction
 
-.function dao_output_construct_pattern(entity, insert)
+.function dao_output_construct_extended_pattern(entity)
   my.result = ""
-  for my.insert.param
-    my.entity_field = get_field(my.insert.entity, param.name)
-    my.param_field = get_field(my.insert.entity, param.name)
+  if defined(my.entity.extendsEntity)
+    my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
+    my.extended = find_entity_by_type(my.entity.extendsEntity)
+  endif
+  for my.extended.field
     if string.length(my.result) > 0
       my.result = my.result + ",\n      "
-    endif
-    if defined(param.field)
-      if is_required(my.param_field) & is_required(my.entity_field)
-        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel)"
-      elsif !is_required(my.param_field) & !is_required(my.entity_field)
-        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel)"
-      elsif is_required(my.param_field) & !is_required(my.entity_field)
-        my.result = my.result + "$(param.name:Camel) = Some($(my.entity.name:Camel).$(param.field:Camel))"
-      elsif is_required(my.param_field) & !is_required(my.entity_field)
-        my.result = my.result + "$(param.name:Camel) = $(my.entity.name:Camel).$(param.field:Camel).get"
-      endif
-    elsif defined(param.value)
-      if is_required(my.param_field)
-        my.result = my.result + "$(param.name:Camel) = $(output_parse_type(my.param_field.type, param.value))"
-      else
-        my.result = my.result + "$(param.name:Camel) = Some($(output_parse_type(my.param_field.type, param.value)))"
-      endif
     else
-      abort "E: not supported case."
+      my.result = my.result + "\n      "
+    endif
+    if exists_reference(my.entity, my.fk.name, field.name)
+      my.extendedField = find_reference(my.entity, my.fk.name, field.name)
+      my.result = my.result + "$(field.name:Camel) = $(my.entity.name:Camel).$(my.extendedField.name:Camel)"
+    else
+      my.result = my.result + "$(field.name:Camel) = $(my.entity.name:Camel).$(field.name:Camel)"
     endif
   endfor #my.insert.param
   return my.result
 .endfunction
 
-.function output_insert_dependency(entity)
+.function output_insert_extended(entity)
   my.result = ""
-  for my.entity.insert
-    my.result = my.result + "$(insert.entity:Camel)DAO.createOrUpdate($(insert.entity:Pascal)Vo("
-    my.result = my.result + "$(dao_output_construct_pattern(my.entity, insert))"
+  if defined(my.entity.extendsEntity)
+    my.result = my.result + "$(my.entity.extendsEntity:Camel)DAO.createOrUpdate($(my.entity.extendsEntity:Pascal)Vo("
+    my.result = my.result + "$(dao_output_construct_extended_pattern(my.entity))"
     my.result = my.result + "))\n"
-  endfor #my.entity.insert
+  endif
   return my.result
 .endfunction
 
