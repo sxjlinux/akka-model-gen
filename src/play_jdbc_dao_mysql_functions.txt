@@ -37,6 +37,14 @@
       endif
    endif
   endfor
+  if defined(my.entity.extendsEntity) & !defined(my.daos.$(my.entity.extendsEntity))
+    my.daos.$(my.entity.extendsEntity) = my.entity.extendsEntity
+    if string.length(my.result) > 0
+      my.result = "$(my.entity.extendsEntity:Camel)DAO: $(my.entity.extendsEntity:Pascal)DAO, " + my.result
+    else
+      my.result = "$(my.entity.extendsEntity:Camel)DAO: $(my.entity.extendsEntity:Pascal)DAO"
+    endif
+  endif
   if my.first
     return my.result
   elsif string.length(my.result) > 0
@@ -470,7 +478,7 @@
           if string.length(my.result) > 0
             my.result = my.result + ",\n        "
           endif
-          my.result = my.result + "$(my.entity.name).$(my.extendedField.name:c)"
+          my.result = my.result + "$(my.entity.extendsEntity).$(field.name:c) as $(my.extendedField.name:c)"
         endif
       else
         if string.length(my.result) > 0
@@ -1019,7 +1027,7 @@
   my.clause = ""
   for my.query.criteria
     if string.length(my.clause) > 0
-      my.clause = my.clause + ",\n      $(criteria.name:UPPER)"
+      my.clause = my.clause + "\n      $(criteria.name:UPPER)"
     else
       my.clause = my.clause + "\n       "
     endif

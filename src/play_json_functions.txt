@@ -4,6 +4,9 @@
 # FIXME: shortcuts: add response as universal dependency
   my.names = add_dependency_by_entity_name("", "response", my.names)
 # add dependency
+  if defined(my.entity.extendsEntity)
+    my.names = add_dependency_by_entity_name("", my.entity.extendsEntity, my.names)
+  endif
   my.names = json_get_depended_entity_names(my.entity, my.names)
 # add its own
   my.names = add_dependency_by_entity_name("", my.entity.name, my.names)

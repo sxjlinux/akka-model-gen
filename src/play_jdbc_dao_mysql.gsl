@@ -52,11 +52,12 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
   def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 
   def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = {
-    val stmt = SQL(s"""${sql}\n${toWhereClause(q.predicate, 6)}""")
+    val sqlStr = s"""${sql}\n${toWhereClause(q.predicate, 4)}"""
+    val stmt = SQL(sqlStr)
     val params = namedParams(q)
     Logger.info(s"""
   [SQL statement] =>
-    ${sql}\n${toWhereClause(q.predicate, 4)}
+    ${sqlStr}
   [params for substitution] =>
     {}
     """,
