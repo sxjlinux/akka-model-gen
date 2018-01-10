@@ -338,3 +338,78 @@
   endif
   return ""
 .endfunction
+
+.function actor_output_depended_named_actor_ref_defs(entity, first)
+  my.result = ""
+  my.actors = XML.new("actors")
+  for my.entity.message
+    if defined(message->request)
+      my.request = message->request
+      if defined(my.request.[to]) & !defined(my.actors.$(my.request.[to]))
+        my.actors.$(my.request.[to]) = my.request.[to]
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "@Named(\"Sharding$(my.request.[to]:Pascal)s\") $(my.request.[to]:Camel)Shard: ActorRef"
+      else
+      endif
+    endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction
+
+.function actor_output_depended_actor_ref_defs(entity, first)
+  my.result = ""
+  my.actors = XML.new("actors")
+  for my.entity.message
+    if defined(message->request)
+      my.request = message->request
+      if defined(my.request.[to]) & !defined(my.actors.$(my.request.[to]))
+        my.actors.$(my.request.[to]) = my.request.[to]
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "$(my.request.[to]:Camel)Shard: ActorRef"
+      else
+      endif
+    endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction
+
+.function actor_output_depended_actors(entity, first)
+  my.result = ""
+  my.actors = XML.new("actors")
+  for my.entity.message
+    if defined(message->request)
+      my.request = message->request
+      if defined(my.request.[to]) & !defined(my.actors.$(my.request.[to]))
+        my.actors.$(my.request.[to]) = my.request.[to]
+        if string.length(my.result) > 0
+          my.result = my.result + ", "
+        endif
+        my.result = my.result + "$(my.request.[to]:Camel)Shard"
+      else
+      endif
+    endif
+  endfor
+  if my.first
+    return my.result
+  elsif string.length(my.result) > 0
+    return ", "+ my.result
+  else
+    return my.result
+  endif
+.endfunction

@@ -36,7 +36,7 @@ object $(entity.name:Pascal) {
   def props = Props[$(entity.name:Pascal)]
 }
 
-class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))) extends PersistentActor with ActorLogging {
+class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))$(actor_output_depended_actor_ref_defs(entity, 0))) extends PersistentActor with ActorLogging {
   override def persistenceId: String = s"${self.path.name}"
   implicit def requestTimeout: Timeout = FiniteDuration(20, SECONDS)
   implicit def executionContext: ExecutionContext = context.dispatcher

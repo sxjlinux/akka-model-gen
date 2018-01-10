@@ -26,7 +26,7 @@ object Sharding$(entity.name:Pascal)s {
   def name: String = "Sharding$(entity.name:Pascal)s"
 }
 
-class Sharding$(entity.name:Pascal)s @Inject() ($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0)))
+class Sharding$(entity.name:Pascal)s @Inject() ($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))$(actor_output_depended_named_actor_ref_defs(entity, 0)))
   extends Actor with ActorLogging {
   val settings = Settings(context.system)
   Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
@@ -37,7 +37,7 @@ class Sharding$(entity.name:Pascal)s @Inject() ($(entity.name:Camel)Tx: $(entity
 
   ClusterSharding(context.system).start(
     Sharding$(entity.name:Pascal).shardName,
-    Sharding$(entity.name:Pascal).props($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))),
+    Sharding$(entity.name:Pascal).props($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))$(actor_output_depended_actors(entity, 0))),
     ClusterShardingSettings(context.system),
     Sharding$(entity.name:Pascal).extractEntityId,
     Sharding$(entity.name:Pascal).extractShardId
