@@ -123,6 +123,19 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  if !(defined(message.transient) & transient = "true")
       persist($(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))$(extra_fields:no)))(updateState)
 .  endif
+.  if defined(message->request)
+.    request = message->request
+      // TODO: implement send request.
+.    if defined(request.[to])
+.      to_entity = find_entity_by_type(request.[to])
+     // $(request.[to]:Camel)Shard ! $(request.message:Pascal)Cmd(user, $(scala_output_key_name_list(to_entity)))
+.    endif
+.  endif
+.  if defined(message->response)
+.    response = message->response
+    case x: $(response.message:Pascal)Vo =>
+      // TODO: implement process response.
+.  endif
 .endfor
   }
 
