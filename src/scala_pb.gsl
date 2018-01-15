@@ -18,7 +18,8 @@ package $(message_package);
 
 
 .for entity
-. extends_class = "$(message_package).ValueObject"
+. default_extends_class = "$(message_package).ValueObject"
+. extends_class = default_extends_class
 .  if defined(entity.extendsClass)
 .    extends_class = entity.extendsClass
 .  endif
@@ -54,7 +55,7 @@ message $(entity.name:Pascal)Vo {
 };
 
 message $(entity.name:Pascal)ListVo {
-  option (scalapb.message).extends = "$(extends_class:no)";
+  option (scalapb.message).extends = "$(default_extends_class:no)";
   repeated $(entity.name:Pascal)Vo list = 1 [(scalapb.field).collection_type="List"];
 };
 
