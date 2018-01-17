@@ -4,7 +4,7 @@
 .directory.create(pkgdir)
 .for entity
 .aggRoot = ""
-.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true" & !(defined(entity.generate) & entity.generate = "false")
 .  pk = extract_pk(entity)
 .  aggRoot = entity.name
 .

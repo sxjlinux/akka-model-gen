@@ -3,7 +3,7 @@
 .pkgdir = "rest/app/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true") & !(defined(entity.generate) & entity.generate = "false")
 .output "$(pkgdir)/$(entity.name:Pascal)Router.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
