@@ -28,7 +28,7 @@ import scala.concurrent.duration._
 class $(entity.name:Pascal)Controller @Inject()(cc: ControllerComponents, @Named("$(entity.name:Pascal)Service") $(entity.name:Camel): ActorRef)(implicit ec: ExecutionContext)
   extends AbstractController(cc)
     with $(entity.name:Pascal)JsonSupport {
-  implicit val requestTimeout: Timeout = FiniteDuration(20, SECONDS)
+  implicit val timeout: Timeout = FiniteDuration(20, SECONDS)
 
   def create = Action.async(parse.json) { request =>
     val result = request.body.validate[Create$(entity.name:Pascal)Cmd]
