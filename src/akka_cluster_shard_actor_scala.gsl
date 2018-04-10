@@ -66,7 +66,7 @@ class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
 .for entity
 .if defined(entity.aggregationRoot) & entity.aggregationRoot = "true"
-    bindActor[Sharding$(entity.name:Pascal)s]("Sharding$(entity.name:Pascal)s")
+    bindActor[Sharding$(entity.name:Pascal)s](Sharding$(entity.name:Pascal)s.name)
 .endif
 .endfor
   }

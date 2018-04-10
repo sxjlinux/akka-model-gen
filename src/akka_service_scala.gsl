@@ -98,7 +98,7 @@ class Module extends AbstractModule with AkkaGuiceSupport {
   override def configure() = {
 .for entity
 .if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
-    bindActor[$(entity.name:Pascal)Service]("$(entity.name:Pascal)Service")
+    bindActor[$(entity.name:Pascal)Service]($(entity.name:Pascal)Service.name)
 .endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.transient) & entity.transient = "true")
 .endfor
   }
