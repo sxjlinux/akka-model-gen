@@ -45,7 +45,7 @@ object Sharding$(entity.name:Pascal) {
 class Sharding$(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))$(actor_output_depended_actor_ref_defs(entity, 0)))
   extends $(entity.name:Pascal)($(entity.name:Camel)Tx$(tx_output_depended_txs(entity, 0))$(actor_output_depended_actors(entity, 0))) {
   val settings = Settings(context.system)
-  context.setReceiveTimeout(settings.actor.passivateTimeout)
+  context.setReceiveTimeout(settings.entity.passivateTimeout)
 
   override def unhandled(message: Any): Unit = message match {
     case ReceiveTimeout =>
