@@ -11,69 +11,42 @@
 package $(class_package)
 
 import $(model.package).message._
-import $(model.package).dao._
-import $(model.package).util.DateFormat._
-import $(model.package).util.EnumConvert._
-import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
-import java.sql.Connection
-import java.util.Date
-import javax.inject._
-import play.api.db._
 
-@Singleton
-class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database: Database, $(entity.name:Camel)DAO: $(entity.name:Pascal)DAO) {
+trait $(entity.name:Pascal)Tx {
 
-  def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel))
-  }
+  def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo): Int = ???
 .
 .  primaryKey = extract_pk(entity)
 
-  def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
-  }
+  def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): Int = ???
 
-  def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
-  }
+  def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = ???
 
-  def selectByQueryCriteria(q: QueryCommand): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectByQueryCriteria(q)
-  }
+  def selectByQueryCriteria(q: QueryCommand): List[$(entity.name:Pascal)Vo] = ???
 .
 .  for foreignKey
 
-  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(foreignKey))($(tx_output_key_as_value(entity, foreignKey)))
-  }
+  def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = ???
 .  endfor
 .
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 
-  def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.add$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
-  }
+  def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = ???
 
-  def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.remove$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
-  }
+  def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = ???
 
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 
-  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.change$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
-  }
+  def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = ???
 .    else
 .    endif
 .    for field.query
 .      if defined(query.name) & !(defined(query.refName) | defined(query.entity))
 
-  def $(query.name:Camel)($(output_defined_query_param_def(entity, query))): $(output_defined_query_result_type(entity, query)) = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.$(query.name:Camel)($(tx_defined_query_param_value(entity, query)))
-  }
+  def $(query.name:Camel)($(output_defined_query_param_def(entity, query))): $(output_defined_query_result_type(entity, query)) = ???
 .      else
 .      endif
 .    endfor
@@ -82,16 +55,30 @@ class $(entity.name:Pascal)Tx @Inject() (@NamedDatabase("dcim_config") database:
 .  for message
 .    if !(defined(transient) & transient = "true")
 
-  def $(message.name:Camel)(evt: $(message.name:Pascal)Evt)(implicit c: Connection): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.$(message.name:Camel)(evt)
-  }
+  def $(message.name:Camel)(evt: $(message.name:Pascal)Evt): Int = ???
 .    endif
 .  endfor
 }
 .close
 .endif
 .endfor
+.output "$(pkgdir)/Module.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
 
+import com.google.inject._
+
+class Module extends AbstractModule {
+  override def configure() = {
+.for entity
+.if (!defined(transient) | !(transient = "true")) #& !(name = "alarm_record")
+    bind(classOf[$(entity.name:Pascal)Tx]).to(classOf[$(entity.name:Pascal)TxImpl])
+.endif
+.endfor
+  }
+}
 .endtemplate
 
 

@@ -29,7 +29,7 @@ object Sharding$(entity.name:Pascal)s {
 class Sharding$(entity.name:Pascal)s @Inject() ($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_output_depended_tx_defs(entity, 0))$(actor_output_depended_named_actor_ref_defs(entity, 0)))
   extends Actor with ActorLogging {
   val settings = Settings(context.system)
-  Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.actor.numberOfShards
+  Sharding$(entity.name:Pascal).defaultNumberOfShards = settings.entity.numberOfShards
 
   def $(entity.name:Camel)Shard(): ActorRef = {
     ClusterSharding(context.system).shardRegion(Sharding$(entity.name:Pascal).shardName)
