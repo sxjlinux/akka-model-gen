@@ -285,6 +285,19 @@
   return my.result
 .endfunction
 
+.function scala_output_set_pk_values(entity)
+  my.result = ""
+  for my.entity.field
+    if is_pk_field(my.entity, field.name)
+      if string.length(my.result) > 0
+        my.result = my.result + "\n      "
+      endif
+      my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+    endif
+  endfor
+  return my.result
+.endfunction
+
 .function scala_output_set_field_values(entity)
   my.result = ""
   for my.entity.field

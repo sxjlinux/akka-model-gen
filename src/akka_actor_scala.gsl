@@ -47,6 +47,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
     case evt: Event =>
       updateState(evt)
     case SnapshotOffer(_, $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0)))) =>
+      $(scala_output_set_pk_values(entity))
       $(scala_output_set_field_values(entity))
     case x: RecoveryCompleted =>
     case x => log.info("RECOVER: {} {}", this, x)
@@ -141,6 +142,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 
   private def updateState: (Event => Unit) = {
     case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
+      $(scala_output_set_pk_values(entity))
       $(scala_output_set_field_values(entity))
       $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
       replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created.")))
