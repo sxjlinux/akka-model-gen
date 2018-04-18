@@ -3,7 +3,7 @@
 .pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if (!defined(transient) | !(transient = "true")) #& !(name = "alarm_record")
+.if (!defined(transient) | !(transient = "true"))
 .output "$(pkgdir)/$(entity.name:Pascal)Tx.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
@@ -73,7 +73,7 @@ import com.google.inject._
 class Module extends AbstractModule {
   override def configure() = {
 .for entity
-.if (!defined(transient) | !(transient = "true")) #& !(name = "alarm_record")
+.if (!defined(transient) | !(transient = "true"))
     bind(classOf[$(entity.name:Pascal)Tx]).to(classOf[$(entity.name:Pascal)TxImpl])
 .endif
 .endfor

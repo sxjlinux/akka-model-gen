@@ -3,7 +3,7 @@
 .pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if (!defined(transient) | !(transient = "true")) #& !(name = "alarm_record")
+.if (!defined(transient) | !(transient = "true")) 
 .output "$(pkgdir)/$(entity.name:Pascal)TxImpl.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **

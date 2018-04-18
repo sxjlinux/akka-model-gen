@@ -17,10 +17,6 @@ trait $(entity.name:Pascal)JsonSupport {
   implicit val byteStringFormat = ByteStringFormat.format
   implicit val timestampFormat = TimestampFormat.format
   implicit val queryCommandFormat = QueryCommandFormat.queryCommandFormat
-  /*
-   * Ad-hoc line, tight coupling.
-   */
-  implicit val anyAlarmEventFormat = AnyAlarmEventFormat.format
 
 $(json_output_format_with_dependency(entity))
 
