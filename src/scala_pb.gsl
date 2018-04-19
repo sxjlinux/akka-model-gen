@@ -445,6 +445,8 @@ message $(message.name:Pascal)Evt {
 .endfor
 .endfor
 
+.include "$(pkgdir)/include-messages.txt"
+
 .close
 .endtemplate
 
