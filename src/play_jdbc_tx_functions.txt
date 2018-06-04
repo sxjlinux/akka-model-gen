@@ -93,7 +93,7 @@
   endif
 .endfunction
 
-.function tx_output_key_as_value(entity, key)
+.function tx_output_key_as_value(entity, key, prefix)
   my.result = ""
   for my.key.field
     if string.length(my.result) > 0
@@ -107,15 +107,15 @@
           my.theRefField = model->entity(name = my.foreignKey.refEntity)->field(name = my.theField.refField)
           assign_field_type(my.theField, my.theRefField)
         endif
-        my.result = my.result + "$(my.theField.name:Camel)"
+        my.result = my.result + "$(my.prefix)$(my.theField.name:Camel)"
       else
         my.pk_field = extract_fk_field(my.entity, field.name)
-        my.result = my.result + "$(field.name:Camel)"
+        my.result = my.result + "$(my.prefix)$(field.name:Camel)"
       endif
     elsif is_fk_field(my.entity, field.name)
       my.fk_field = extract_fk_field(my.entity, field.name)
       assign_field_type(field, my.fk_field)
-      my.result = my.result + "$(field.name:Camel)"
+      my.result = my.result + "$(my.prefix)$(field.name:Camel)"
     else
     endif
   endfor

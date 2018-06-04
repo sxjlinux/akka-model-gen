@@ -227,7 +227,7 @@
   return my.result
 .endfunction
 
-.function scala_output_field_name_list(entity, include_transient)
+.function scala_output_field_name_list(entity, include_transient, prefix)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
@@ -235,7 +235,7 @@
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
-      my.result = my.result + "$(field.name:Camel)"
+      my.result = my.result + "$(my.prefix)$(field.name:Camel)"
     endfor
   endif
   for my.entity.field
@@ -243,13 +243,13 @@
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
-      my.result = my.result + "$(field.name:Camel)"
+      my.result = my.result + "$(my.prefix)$(field.name:Camel)"
     else
       if !is_pk_field(my.entity, field.name) & (!defined(field.transient) | transient = "false")
         if string.length(my.result) > 0
           my.result = my.result + ", "
         endif
-        my.result = my.result + "$(field.name:Camel)"
+        my.result = my.result + "$(my.prefix)$(field.name:Camel)"
       endif
     endif
   endfor
@@ -261,11 +261,11 @@
   return my.result
 .endfunction
 
-.function scala_output_set_field_value(field)
-  return "this.$(field.name:Camel) = $(field.name:Camel)"
+.function scala_output_set_field_value(field, prefix)
+  return "this.$(field.name:Camel) = $(my.prefix)$(field.name:Camel)"
 .endfunction
 
-.function scala_output_set_extended_field_values(entity)
+.function scala_output_set_extended_field_values(entity, prefix)
   my.result = ""
   if defined(my.entity.extendsEntity)
     my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
@@ -277,7 +277,7 @@
         if string.length(my.result) > 0
           my.result = my.result + "\n      "
         endif
-        my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+        my.result = my.result + "this.$(field.name:Camel) = $(my.prefix)$(field.name:Camel)"
       endif
     endfor
   else
@@ -285,30 +285,30 @@
   return my.result
 .endfunction
 
-.function scala_output_set_pk_values(entity)
+.function scala_output_set_pk_values(entity, prefix)
   my.result = ""
   for my.entity.field
     if is_pk_field(my.entity, field.name)
       if string.length(my.result) > 0
         my.result = my.result + "\n      "
       endif
-      my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+      my.result = my.result + "this.$(field.name:Camel) = $(my.prefix)$(field.name:Camel)"
     endif
   endfor
   return my.result
 .endfunction
 
-.function scala_output_set_field_values(entity)
+.function scala_output_set_field_values(entity, prefix)
   my.result = ""
   for my.entity.field
     if !is_pk_field(my.entity, field.name)
       if string.length(my.result) > 0
         my.result = my.result + "\n      "
       endif
-      my.result = my.result + "this.$(field.name:Camel) = $(field.name:Camel)"
+      my.result = my.result + "this.$(field.name:Camel) = $(my.prefix)$(field.name:Camel)"
     endif
   endfor
-  my.extended = scala_output_set_extended_field_values(my.entity)
+  my.extended = scala_output_set_extended_field_values(my.entity, my.prefix)
   if string.length(my.extended) > 0
     my.result = my.result + "\n      "
   endif
@@ -316,7 +316,7 @@
   return my.result
 .endfunction
 
-.function scala_output_key_name_list(entity)
+.function scala_output_key_name_list(entity, prefix)
   my.result = ""
   if defined(extract_pk(my.entity))
     my.pk = extract_pk(my.entity)
@@ -324,7 +324,7 @@
       if string.length(my.result) > 0
         my.result = my.result + ", "
       endif
-      my.result = my.result + "$(field.name:Camel)"
+      my.result = my.result + "$(my.prefix)$(field.name:Camel)"
     endfor
   endif
   return my.result
@@ -334,19 +334,19 @@
   return "$(field.name:Camel)"
 .endfunction
 
-.function scala_output_field_name(field)
-  return "$(field.name:Camel)"
+.function scala_output_field_name(field, prefix)
+  return "$(my.prefix)$(field.name:Camel)"
 .endfunction
 
-.function scala_output_add_field_value(field)
-  return "this.$(field.name:Camel) ++= $(field.name:Camel)"
+.function scala_output_add_field_value(field, prefix)
+  return "this.$(field.name:Camel) ++= $(my.prefix)$(field.name:Camel)"
 .endfunction
 
-.function scala_output_remove_field_value(field)
+.function scala_output_remove_field_value(field, prefix)
   if my.field.type = "array"
-    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => !$(field.name:Camel).contains(x))"
+    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => !$(my.prefix)$(field.name:Camel).contains(x))"
   elsif my.field.type = "map"
-    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => $(field.name:Camel).contains(x._1))"
+    return "this.$(field.name:Camel) = this.$(field.name:Camel).filter(x => $(my.prefix)$(field.name:Camel).contains(x._1))"
   else
   endif
   return ""

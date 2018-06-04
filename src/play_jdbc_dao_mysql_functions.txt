@@ -295,19 +295,19 @@
             my.result = my.result + "$(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
           else
             if defined(field.entity) & defined(field.valueField)
-              my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+              my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
             else
-              my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+              my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
             endif
           endif
         elsif field.type = "map"
           if defined(field.query)
           else
-            my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
             my.result = my.result + "$(dao_convert_result_set_to_map(field, my.result_set))"
           endif
         else
-          my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
         endif
       endif
     endfor
@@ -356,19 +356,19 @@
           my.result = my.result + "$(output_call_defined_query(my.entity, my.the_query, my.ref_entity, my.ref_query))"
         else
           if defined(field.entity) & defined(field.valueField)
-            my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result = my.result + "$(field.entity:Camel)DAO.select$(field.valueField:Pascal)sBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
           else
-            my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+            my.result = my.result + "$(field.valueType:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
           endif
         endif
       elsif field.type = "map"
         if defined(field.query)
         else
-          my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+          my.result_set = "$(field.entity:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
           my.result = my.result + "$(dao_convert_result_set_to_map(field, my.result_set))"
         endif
       else
-        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity)))"
+        my.result = my.result + "$(field.type:Camel)DAO.selectBy$(dao_output_key_as_var_name(extract_pk(my.entity)))($(scala_output_key_name_list(my.entity, '')))"
       endif
     endif
   endfor
@@ -749,7 +749,7 @@
   if defined(my.entity.extendsEntity)
     my.fk = my.entity->foreignKey(refEntity = my.entity.extendsEntity)
     my.extended = find_entity_by_type(my.entity.extendsEntity)
-    my.result = my.result + "\n    $(my.entity.extendsEntity:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(my.entity, my.key)))"
+    my.result = my.result + "\n    $(my.entity.extendsEntity:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(my.entity, my.key, '')))"
   endif
   my.result = my.result + "\n    $(dao_output_delete_by_key_sql(my.entity, my.key)).on("
   my.result = my.result + "\n      $(dao_output_key_as_param(my.entity, my.key))"

@@ -35,39 +35,39 @@ class $(entity.name:Pascal)Service @Inject() ($(actor_ref:no)$(entity.name:Camel
     case cmd: $(entity.name:Pascal)Command => $(entity.name:Camel) forward cmd
 .elsif defined(entity.aggregationTo) & string.length(entity.aggregationTo) > 0
 .else
-    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0, ''))) =>
       try {
-        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0, ''))))
         sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created."))
       } catch {
         case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
       }
-    case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+    case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0, ''))) =>
       try {
-        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+        $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0, ''))))
         sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated."))
       } catch {
         case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
       }
-    case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+    case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity, ''))) =>
       try {
-        $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+        $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity), '')))
         sender() ! ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted."))
       } catch {
         case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
       }
-    case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+    case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity, ''))) =>
       try {
-        sender() ! $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+        sender() ! $(entity.name:Camel)Tx.selectByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity), '')))
       } catch {
         case x: Throwable => sender() ! ResponseVo(BAD_COMMAND, Some(x.toString))
       }
 .for message
-.  extra_fields = scala_output_field_name_list(message, 1)
+.  extra_fields = scala_output_field_name_list(message, 1, '')
 .  if string.length(extra_fields) > 0
 .    extra_fields = ", " + extra_fields
 .  endif
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields:no)) =>
+    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity, ''))$(extra_fields:no)) =>
       // TODO: Un-implemented.
 .endfor
 .endif

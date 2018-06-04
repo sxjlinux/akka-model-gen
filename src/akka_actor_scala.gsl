@@ -46,57 +46,57 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
   override def receiveRecover: Receive = {
     case evt: Event =>
       updateState(evt)
-    case SnapshotOffer(_, $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0)))) =>
-      $(scala_output_set_pk_values(entity))
-      $(scala_output_set_field_values(entity))
+    case SnapshotOffer(_, x: $(entity.name:Pascal)Vo) =>
+      $(scala_output_set_pk_values(entity, 'x.'))
+      $(scala_output_set_field_values(entity, 'x.'))
     case x: RecoveryCompleted =>
     case x => log.info("RECOVER: {} {}", this, x)
   }
 
   override def receiveCommand: Receive = {
-    case Create$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+    case cmd: Create$(entity.name:Pascal)Cmd =>
       if(isValid()) {
         sender() ! ResponseVo(ALREADY_EXISTS, Some("$(entity.name:Pascal) already exists."))
       } else {
-        persist(Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0)))) (updateState)
+        persist(Create$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.')))) (updateState)
       }
-    case Update$(entity.name:Pascal)Cmd(user, $(scala_output_field_name_list(entity, 0))) =>
+    case cmd: Update$(entity.name:Pascal)Cmd =>
       if(!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        persist(Update$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0)))) (updateState)
+        persist(Update$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.')))) (updateState)
       }
-    case Delete$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+    case cmd: Delete$(entity.name:Pascal)Cmd =>
       if(!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        persist(Delete$(entity.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)))) (updateState)
+        persist(Delete$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')))) (updateState)
       }
-    case Retrieve$(entity.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+    case _: Retrieve$(entity.name:Pascal)Cmd =>
       if (!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        sender() ! $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0)))
+        sender() ! $(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0, 'this.')))
       }
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Add$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
+    case cmd: Add$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
+        persist(Add$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
-    case Remove$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
+    case cmd: Remove$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
+        persist(Remove$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Change$(field.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
+    case cmd: Change$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))))(updateState)
+        persist(Change$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
@@ -104,32 +104,32 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .    endif
 .  endfor
 .for aggregation
-    case Update$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name_list(aggregation, 1))) =>
+    case cmd: Update$(aggregation.name:Pascal)Cmd =>
       $(scala_output_set_field_values(aggregation))
-    case Get$(aggregation.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))) =>
+    case cmd: Get$(aggregation.name:Pascal)Cmd =>
       if (isValid()) {
-        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_key_name_list(entity)), $(scala_output_get_field_values(aggregation, 0)))
+        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_get_field_values(aggregation, 0, 'cmd.')))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .endfor
 .
 .for message
-.  extra_fields = scala_output_field_name_list(message, 1)
+.  extra_fields = scala_output_field_name_list(message, 1, 'cmd.')
 .  if string.length(extra_fields) > 0
 .    extra_fields = ", " + extra_fields
 .  endif
-    case $(message.name:Pascal)Cmd(user, $(scala_output_key_name_list(entity))$(extra_fields:no)) =>
+    case cmd: $(message.name:Pascal)Cmd =>
       // TODO: Un-implemented.
 .  if !(defined(message.transient) & transient = "true")
-      persist($(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))$(extra_fields:no)))(updateState)
+      persist($(message.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.'))$(extra_fields:no)))(updateState)
 .  endif
 .  if defined(message->request)
 .    request = message->request
       // TODO: implement send request.
 .    if defined(request.[to])
 .      to_entity = find_entity_by_type(request.[to])
-     // $(request.[to]:Camel)Shard ! $(request.message:Pascal)Cmd(user, $(scala_output_key_name_list(to_entity)))
+     // $(request.[to]:Camel)Shard ! $(request.message:Pascal)Cmd(cmd.userId, $(scala_output_key_name_list(to_entity, 'cmd.')))
 .    endif
 .  endif
 .  if defined(message->response)
@@ -141,33 +141,33 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
   }
 
   private def updateState: (Event => Unit) = {
-    case Create$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
-      $(scala_output_set_pk_values(entity))
-      $(scala_output_set_field_values(entity))
-      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+    case evt: Create$(entity.name:Pascal)Evt =>
+      $(scala_output_set_pk_values(entity, 'evt.'))
+      $(scala_output_set_field_values(entity, 'evt.'))
+      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0, 'evt.'))))
       replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) created.")))
-    case Update$(entity.name:Pascal)Evt(user, $(scala_output_field_name_list(entity, 0))) =>
-      $(scala_output_set_field_values(entity))
-      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0))))
+    case evt: Update$(entity.name:Pascal)Evt =>
+      $(scala_output_set_field_values(entity, 'evt.'))
+      $(entity.name:Camel)Tx.createOrUpdate($(entity.name:Pascal)Vo($(scala_output_field_name_list(entity, 0, 'evt.'))))
       replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) updated.")))
-    case Delete$(entity.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))) =>
-      $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity))))
+    case evt: Delete$(entity.name:Pascal)Evt =>
+      $(entity.name:Camel)Tx.deleteByPrimaryKey($(tx_output_key_as_value(entity, extract_pk(entity), 'evt.')))
       replyToSender(ResponseVo(SUCCESS, Some("$(entity.name:Pascal) deleted.")))
 .  for field
 .    theField = field
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Add$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
-      $(scala_output_add_field_value(field))
-      $(entity.name:Camel)Tx.add$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case evt: Add$(field.name:Pascal)Evt =>
+      $(scala_output_add_field_value(field, 'evt.'))
+      $(entity.name:Camel)Tx.add$(field.name:Pascal)($(scala_output_key_name_list(entity, 'evt.')), $(scala_output_field_name(field, 'evt.')))
       replyToSender(ResponseVo(SUCCESS, Some("$(field.name:Pascal) added.")))
-    case Remove$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
-      $(scala_output_remove_field_value(field))
-      $(entity.name:Camel)Tx.remove$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case evt: Remove$(field.name:Pascal)Evt =>
+      $(scala_output_remove_field_value(field, 'evt.'))
+      $(entity.name:Camel)Tx.remove$(field.name:Pascal)($(scala_output_key_name_list(entity, 'evt.')), $(scala_output_field_name(field, 'evt.')))
       replyToSender(ResponseVo(SUCCESS, Some("$(field.name:Pascal) removed.")))
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
-    case Change$(field.name:Pascal)Evt(user, $(scala_output_key_name_list(entity)), $(scala_output_field_name(field))) =>
-      $(scala_output_set_field_value(field))
-      $(entity.name:Camel)Tx.change$(field.name:Pascal)($(scala_output_key_name_list(entity)), $(scala_output_field_name(field)))
+    case evt: Change$(field.name:Pascal)Evt =>
+      $(scala_output_set_field_value(field, 'evt.'))
+      $(entity.name:Camel)Tx.change$(field.name:Pascal)($(scala_output_key_name_list(entity, 'evt.')), $(scala_output_field_name(field, 'evt.')))
       replyToSender(ResponseVo(SUCCESS, Some("Change $(field.name:Pascal) accepted.")))
 .    else
 .    endif
@@ -175,11 +175,11 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .
 .  for message
 .    if !(defined(transient) & transient = "true")
-.      field_names = scala_output_field_name_list(message, 1)
+.      field_names = scala_output_field_name_list(message, 1, 'evt.')
 .      if string.length(field_names) > 0
 .        field_names = ", " + field_names
 .      endif
-    case $(message.name:Pascal)Evt(user, $(scala_output_key_name_list(entity))$(field_names:no)) =>
+    case evt: $(message.name:Pascal)Evt =>
       // TODO: Un-implemented.
       replyToSender(ResponseVo(SUCCESS, Some("$(message.name:Pascal)Evt accepted.")))
 .    endif

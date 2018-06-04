@@ -32,11 +32,11 @@ class $(entity.name:Pascal)TxImpl @Inject() (@NamedDatabase("dcim_config") datab
 .  primaryKey = extract_pk(entity)
 
   override def deleteByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
+    $(entity.name:Camel)DAO.deleteByPrimaryKey($(tx_output_key_as_value(entity, primaryKey, '')))
   }
 
   override def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey))): $(entity.name:Pascal)Vo = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectByPrimaryKey($(tx_output_key_as_value(entity, primaryKey)))
+    $(entity.name:Camel)DAO.selectByPrimaryKey($(tx_output_key_as_value(entity, primaryKey, '')))
   }
 
   override def selectByQueryCriteria(q: QueryCommand): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
@@ -46,7 +46,7 @@ class $(entity.name:Pascal)TxImpl @Inject() (@NamedDatabase("dcim_config") datab
 .  for foreignKey
 
   override def selectBy$(dao_output_key_as_var_name(foreignKey))($(dao_output_key_as_param_def(entity, foreignKey))): List[$(entity.name:Pascal)Vo] = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(foreignKey))($(tx_output_key_as_value(entity, foreignKey)))
+    $(entity.name:Camel)DAO.selectBy$(dao_output_key_as_var_name(foreignKey))($(tx_output_key_as_value(entity, foreignKey, '')))
   }
 .  endfor
 .
@@ -55,17 +55,17 @@ class $(entity.name:Pascal)TxImpl @Inject() (@NamedDatabase("dcim_config") datab
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 
   override def add$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.add$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+    $(entity.name:Camel)DAO.add$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey, '')), $(field.name:Camel))
   }
 
   override def remove$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.remove$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+    $(entity.name:Camel)DAO.remove$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey, '')), $(field.name:Camel))
   }
 
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
 
   override def change$(field.name:Pascal)($(dao_output_key_as_param_def(entity, primaryKey)), $(field.name:Camel): $(scala_output_type(field))): Int = database.withTransaction { implicit c =>
-    $(entity.name:Camel)DAO.change$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey)), $(field.name:Camel))
+    $(entity.name:Camel)DAO.change$(field.name:Pascal)($(tx_output_key_as_value(entity, primaryKey, '')), $(field.name:Camel))
   }
 .    else
 .    endif
