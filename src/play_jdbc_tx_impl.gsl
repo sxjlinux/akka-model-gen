@@ -22,7 +22,7 @@ import javax.inject._
 import play.api.db._
 
 @Singleton
-class $(entity.name:Pascal)TxImpl @Inject() (@NamedDatabase("dcim_config") database: Database, $(entity.name:Camel)DAO: $(entity.name:Pascal)DAO)
+class $(entity.name:Pascal)TxImpl @Inject() (@NamedDatabase("$(model.dbSchema)") database: Database, $(entity.name:Camel)DAO: $(entity.name:Pascal)DAO)
   extends $(entity.name:Pascal)Tx {
 
   override def createOrUpdate($(dao_out_aggregation_key_def_for(entity))$(entity.name:Camel): $(entity.name:Pascal)Vo): Int = database.withTransaction { implicit c =>

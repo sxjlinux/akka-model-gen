@@ -5,7 +5,7 @@
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 
-.  api="dcim-api"
+.  api="$(model.name)-api"
 window.WUI = window.WUI || {};
 window.WUI.apiUrl={
 .for entity
