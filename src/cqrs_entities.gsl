@@ -102,7 +102,7 @@
       endif
     endfor
   endfor
-  abort "E: no foreignKey field with name $(field.name) is defined on entity $(my.entity.name)."
+  abort "E: no foreignKey field with name $(my.fieldName) is defined on entity $(my.entity.name)."
 .endfunction
 
 .function exists_reference(entity, refKey, refFieldName)
