@@ -105,10 +105,10 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .  endfor
 .for aggregation
     case cmd: Update$(aggregation.name:Pascal)Cmd =>
-      $(scala_output_set_field_values(aggregation))
+      $(scala_output_set_field_values(aggregation, 'cmd.'))
     case cmd: Get$(aggregation.name:Pascal)Cmd =>
       if (isValid()) {
-        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_get_field_values(aggregation, 0, 'cmd.')))
+        sender() ! $(aggregation.name:Pascal)Vo($(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name_list(aggregation, 0, 'this.')))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
