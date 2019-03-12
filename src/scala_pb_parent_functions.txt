@@ -1,0 +1,46 @@
+.function scalapb_parent_key_fields(entity)
+  my.result = ""
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      my.fieldName = field.name
+      my.field = ""
+      if defined(my.entity->field(name = my.fieldName))
+        my.field = my.entity->field(name = my.fieldName)
+      else
+        my.field = extract_fk_field(my.entity, my.fieldName)
+      endif
+      if string.length(my.result) > 0
+        my.result = my.result + "\n  "
+      endif
+      my.result = my.result + "def $(field.name:Camel): $(scala_output_type(field))"
+    endfor
+  endif
+  return my.result
+.endfunction
+
+.function scalapb_parent_format_field(field)
+  if(my.field.type = "timestamp")
+    return "_\${formatTimestamp($(field.name:Camel).seconds * 1000 + $(field.name:Camel).nanos / 1000000)}"
+  else
+    return "_\${$(field.name:Camel)}"
+  endif
+.endfunction
+
+.function scalapb_parent_entity_id(entity)
+  my.result = "s\"$(entity.name:Camel)"
+  if defined(extract_pk(my.entity))
+    my.pk = extract_pk(my.entity)
+    for my.pk.field
+      my.fieldName = field.name
+      my.field = ""
+      if defined(my.entity->field(name = my.fieldName))
+        my.field = my.entity->field(name = my.fieldName)
+      else
+        my.field = extract_fk_field(my.entity, my.fieldName)
+      endif
+      my.result = my.result + "_\${$(field.name:Camel)}"
+    endfor
+  endif
+  return my.result + "\""
+.endfunction

@@ -1,0 +1,81 @@
+.template 1
+.class_package = "$(model.package).message"
+.pkgdir = "message/src/main/scala/$(string.replace(class_package, ".|/"))"
+.directory.create(pkgdir)
+
+.output "$(pkgdir)/ValueObject.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait ValueObject
+.close
+
+.output "$(pkgdir)/Event.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait Event extends scalapb.GeneratedMessage
+.close
+
+.output "$(pkgdir)/Command.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait Command {
+	def userId: Option[String]
+}
+
+.close
+
+.output "$(pkgdir)/ShardingEntityCommand.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait ShardingEntityCommand extends Command {
+	def entityId: String
+}
+
+.close
+
+.for entity
+.if defined(entity.aggregationRoot) & entity.aggregationRoot = "true" & !(defined(entity.generate) & entity.generate = "false")
+.output "$(pkgdir)/$(entity.name:Pascal)Command.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait $(entity.name:Pascal)Command extends $(class_package).ShardingEntityCommand {
+  $(scalapb_parent_key_fields(entity))
+  override def entityId: String = {
+    $(scalapb_parent_entity_id(entity))
+  }
+}
+
+.close
+
+.output "$(pkgdir)/$(entity.name:Pascal)Event.scala"
+/*****************************************************
+ ** This file is 100% ***GENERATED***, DO NOT EDIT! **
+ *****************************************************/
+package $(class_package)
+
+trait $(entity.name:Pascal)Event extends Event {
+  $(scalapb_parent_key_fields(entity))
+}
+
+.close
+.endif
+.endfor
+
+.endtemplate
+
+
