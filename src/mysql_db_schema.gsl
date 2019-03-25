@@ -17,7 +17,7 @@ GRANT ALL PRIVILEGES ON *.* TO '$(model.dbSchema:c)'@'0.0.0.0' WITH GRANT OPTION
 USE $(model.dbSchema:c);
 
 .for entity
-.if !(defined(transient) & transient = "true")
+.if (!(defined(entity.generate) & entity.generate = "false") & !(defined(entity.transient) & entity.transient = "true"))
 CREATE TABLE $(model.dbSchema:c).$(entity.name:c) (
 .result = "$(db_output_keys(entity))"
 .for field
