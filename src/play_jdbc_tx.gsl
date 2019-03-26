@@ -3,7 +3,7 @@
 .pkgdir = "dao-mysql/src/main/scala/$(string.replace(class_package, ".|/"))"
 .directory.create(pkgdir)
 .for entity
-.if (!(defined(entity.generate) & entity.generate = "false") & !(defined(entity.transient) & entity.transient = "true"))
+.if !(defined(entity.generate) & entity.generate = "false") & !(defined(entity.transient) & entity.transient = "true")
 .output "$(pkgdir)/$(entity.name:Pascal)Tx.scala"
 /*****************************************************
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
