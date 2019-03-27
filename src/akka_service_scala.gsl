@@ -11,6 +11,7 @@
 package $(class_package)
 
 import akka.actor._
+import com.github.apuex.springbootsolution.runtime._
 import $(model.package).config._
 import $(model.package).tx._
 import $(model.package).message._

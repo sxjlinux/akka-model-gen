@@ -11,6 +11,7 @@
 package $(class_package)
 
 import $(model.package).message._
+import com.github.apuex.springbootsolution.runtime._
 import com.google.protobuf.timestamp.Timestamp
 
 trait $(entity.name:Pascal)Tx {

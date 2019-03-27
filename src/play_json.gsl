@@ -10,6 +10,7 @@
  *****************************************************/
 package $(class_package)
 
+import com.github.apuex.springbootsolution.runtime._
 import $(model.package).message._
 import play.api.libs.json._
 

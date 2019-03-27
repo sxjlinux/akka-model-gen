@@ -15,6 +15,7 @@ import javax.inject._
 import akka.actor._
 import akka.pattern._
 import akka.util._
+import com.github.apuex.springbootsolution.runtime._
 import $(model.package).json._
 import $(model.package).message.ResponseType._
 import $(model.package).message._

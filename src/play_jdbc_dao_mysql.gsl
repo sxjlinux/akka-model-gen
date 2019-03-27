@@ -11,18 +11,18 @@
 package $(class_package)
 
 import $(model.package).message._
-import $(model.package).util._
+import com.wincom.dcim.util.CollectionCoverter._
 import $(model.package).util.DateFormat._
 import $(model.package).util.EnumConvert._
-import $(model.package).util.SymbolConverter._
 import $(model.package).util.Parser._
+import com.github.apuex.springbootsolution.runtime._
+import com.github.apuex.springbootsolution.runtime.SymbolConverters._
 import com.google.protobuf.any.Any
 import com.google.protobuf.timestamp.Timestamp
 import java.sql.Connection
 import java.util.Date
 import javax.inject._
 import play._
-import play.api.db._
 import anorm.SqlParser._
 import anorm.ParameterValue._
 import anorm._
@@ -31,7 +31,7 @@ import anorm._
 class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity, 1))) {
   val sql = """$(dao_output_select_sql(entity))"""
 
-  val fieldConverter: Converter = {
+  val fieldConverter: SymbolConverter = {
 .for entity.field
 .  if defined(field.refField)
     case "$(field.name:Camel)" => "$(field.refField:c)"
@@ -42,14 +42,14 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
     case x: String => camelToC(x)
   }
 
-  val whereClause = SqlWhereClause(fieldConverter)
+  val whereClause = WhereClauseWithNamedParams(fieldConverter)
 
   def parseParam(fieldName: String, paramName:String, paramValue: String): NamedParameter = $(dao_output_param_parser(entity))
 
   private def rowParser(implicit c: Connection): RowParser[$(entity.name:Pascal)Vo] = $(dao_output_result_parser(entity))
 
   private def namedParams(q: QueryCommand): Seq[NamedParameter] = {
-    whereClause.toNamedParams(q.predicate, q.params)
+    whereClause.toNamedParams(q.getPredicate, toImmutableScalaMap(q.getParamsMap))
       .map(x => parseParam(x._1, x._2, x._3))
       .asInstanceOf[Seq[NamedParameter]]
   }
@@ -65,7 +65,7 @@ class $(entity.name:Pascal)DAO @Inject() ($(dao_output_depended_dao_defs(entity,
   def selectByPrimaryKey($(dao_output_key_as_param_def(entity, primaryKey)))(implicit c: Connection): $(entity.name:Pascal)Vo = $(dao_output_select_by_key_single(entity, primaryKey))
 
   def selectByQueryCriteria(q: QueryCommand)(implicit c: Connection): List[$(entity.name:Pascal)Vo] = {
-    val sqlStr = s"""${sql}\n${whereClause.toWhereClause(q.predicate, 4)}"""
+    val sqlStr = s"""${sql}\n${whereClause.toWhereClause(q, 4)}"""
     val stmt = SQL(sqlStr)
     val params = namedParams(q)
     Logger.info(s"""

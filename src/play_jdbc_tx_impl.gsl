@@ -11,6 +11,7 @@
 package $(class_package)
 
 import $(model.package).message._
+import com.github.apuex.springbootsolution.runtime._
 import $(model.package).dao._
 import $(model.package).util.DateFormat._
 import $(model.package).util.EnumConvert._
