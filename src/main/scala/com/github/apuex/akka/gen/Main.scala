@@ -1,7 +1,5 @@
 package com.github.apuex.akka.gen
 
-import com.github.apuex.akka.gen.util.Dependency
-
 import scala.xml.{Node, Text}
 
 object Main extends App {
@@ -14,11 +12,11 @@ object Main extends App {
 
   xml.child.filter(x => x.label == "entity")
     .foreach(x => {
-      println(s"${x.label} ${x.attribute("name")}")
+      println(s"${x.label} ${x.\@("name")}")
       x.child.filter(x => x.label == "field")
         .foreach(x => {
           println("  " + x.label)
-          println("    " + x.attribute("name"))
+          println("    " + x.\@("name"))
         })
     })
 
@@ -26,7 +24,7 @@ object Main extends App {
     .foreach(x => {
       x.child.filter(x => x.label == "field")
         .foreach(x => {
-          println(x.attribute("name") == Some(Text("product_id")))
+          println(x.\@("name") == "product_id")
         })
     })
 }

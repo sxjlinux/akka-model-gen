@@ -1,20 +1,20 @@
-package com.github.apuex.akka.gen
+package com.github.apuex.akka.gen.contex.mapping
 
 import com.github.apuex.springbootsolution.runtime.SymbolConverters.cToShell
 
 import _root_.scala.xml.parsing._
 import scala.xml._
 
-object ModelLoader {
-  def apply(fileName: String): ModelLoader = {
+object MappingLoader {
+  def apply(fileName: String): MappingLoader = {
     val factory = new NoBindingFactoryAdapter
-    new ModelLoader(factory.load(fileName))
+    new MappingLoader(factory.load(fileName))
   }
 
-  def apply(xml: Node): ModelLoader = new ModelLoader(xml)
+  def apply(xml: Node): MappingLoader = new MappingLoader(xml)
 }
 
-class ModelLoader(val xml: Node) {
+class MappingLoader(val xml: Node) {
   val modelName = xml.\@("name")
   val modelPackage = xml.\@("package")
   val projectRoot = s"${System.getProperty("project.root", "target/generated")}"

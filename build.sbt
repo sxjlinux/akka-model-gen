@@ -1,14 +1,14 @@
 name := "akka-model-gen"
 organization := "com.github.apuex"
 version := "1.0.0"
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.8"
 
 publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 libraryDependencies ++= {
-  val playVersion = "2.6.5"
   val jodaTimeVersion = "2.9.9"
   Seq(
+    "com.github.apuex.springbootsolution" %% "runtime"     % "1.0.7",
     "org.scala-lang.modules" %% "scala-xml"                % "1.0.6",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
     "org.scala-lang.modules" %% "scala-swing"              % "2.0.0-M2",
