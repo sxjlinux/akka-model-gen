@@ -6,7 +6,7 @@ import com.github.apuex.akka.gen.contex.mapping.MappingLoader._
 
 class MappingLoaderSpec extends FlatSpec with Matchers {
   "A MappingLoader" should "load mapping project settings from xml" in {
-    val m = MappingLoader("src/test/resources/com/github/apuex/akka/gen/contex/mapping/mappings.xml", "mapping")
+    val m = MappingLoader("src/test/resources/com/github/apuex/akka/gen/contex/mapping/mappings.xml")
     import m._
 
     modelName should be("bc1_to_bc2")
@@ -15,9 +15,9 @@ class MappingLoaderSpec extends FlatSpec with Matchers {
     outputDir should be(s"${System.getProperty("output.dir", "target/generated")}")
     rootProjectName should be("bc1-to-bc2")
     rootProjectDir should be(s"${outputDir}/bc1-to-bc2")
-    projectName should be("bc1-to-bc2-mapping")
-    projectDir should be(s"${outputDir}/bc1-to-bc2/bc1-to-bc2-mapping")
-    srcDir should be(s"${projectDir}/src/main/scala/com/apuex/sales/mapping/bc1ToBc2")
+    mappingProjectName should be("bc1-to-bc2-mapping")
+    mappingProjectDir should be(s"${outputDir}/bc1-to-bc2/bc1-to-bc2-mapping")
+    srcDir should be(s"${mappingProjectDir}/src/main/scala/com/apuex/sales/mapping/bc1ToBc2")
     srcPackage should be("com.apuex.sales.mapping.bc1ToBc2")
     symboConverter should be(if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}")
       "new IdentityConverter()" else "new CamelToCConverter()")

@@ -9,19 +9,73 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   import mappingLoader._
 
   def generate(): Unit = {
-    rootProjectSettings
-    projectSettings
+    rootProjectSettings()
+    applicationProjectSettings()
+    mappingProjectSettings()
   }
 
-  def projectSettings: Unit = {
+  def applicationProjectSettings(): Unit = {
+    if (new File(s"${appProjectDir}/build.sbt").exists()) return
     new File(srcDir).mkdirs()
-    val printWriter = new PrintWriter(s"${projectDir}/build.sbt", "utf-8")
+    val printWriter = new PrintWriter(s"${appProjectDir}/build.sbt", "utf-8")
     printWriter.println(
       s"""
          |import Dependencies._
          |import sbtassembly.MergeStrategy
          |
-         |name         := "${projectName}"
+         |name         := "${appProjectName}"
+         |scalaVersion := scalaVersionNumber
+         |organization := artifactGroupName
+         |version      := artifactVersionNumber
+         |maintainer   := "xtwxy@hotmail.com"
+         |
+         |libraryDependencies ++= {
+         |  Seq(
+         |    guice,
+         |    scalapbCompiler,
+         |    scalapbRuntime % "protobuf",
+         |    scalaTest      % Test
+         |  )
+         |}
+         |
+         |PB.targets in Compile := Seq(
+         |  scalapb.gen() -> (sourceManaged in Compile).value
+         |)
+         |
+         |assemblyJarName in assembly := s"$${name.value}-assembly-$${version.value}.jar"
+         |mainClass in assembly := Some("play.core.server.ProdServerStart")
+         |fullClasspath in assembly += Attributed.blank(PlayKeys.playPackageAssets.value)
+         |
+         |assemblyMergeStrategy in assembly := {
+         |  case manifest if manifest.contains("MANIFEST.MF") =>
+         |    // We don't need manifest files since sbt-assembly will create
+         |    // one with the given settings
+         |    MergeStrategy.discard
+         |  case PathList("META-INF", "io.netty.versions.properties") =>
+         |    MergeStrategy.rename
+         |  case referenceOverrides if referenceOverrides.contains("reference-overrides.conf") =>
+         |    // Keep the content for all reference-overrides.conf files
+         |    MergeStrategy.concat
+         |  case x =>
+         |    // For all the other files, use the default sbt-assembly merge strategy
+         |    val oldStrategy = (assemblyMergeStrategy in assembly).value
+         |    oldStrategy(x)
+         |}
+       """.stripMargin
+    )
+    printWriter.close()
+  }
+
+  def mappingProjectSettings(): Unit = {
+    if (new File(s"${mappingProjectDir}/build.sbt").exists()) return
+    new File(srcDir).mkdirs()
+    val printWriter = new PrintWriter(s"${mappingProjectDir}/build.sbt", "utf-8")
+    printWriter.println(
+      s"""
+         |import Dependencies._
+         |import sbtassembly.MergeStrategy
+         |
+         |name         := "${mappingProjectName}"
          |scalaVersion := scalaVersionNumber
          |organization := artifactGroupName
          |version      := artifactVersionNumber
@@ -34,43 +88,31 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |    akkaPersistence,
          |    akkaPersistenceCassandra,
          |    googleGuice,
-         |    slf4jApi,
-         |    slf4jSimple,
          |    scalaTest      % Test
          |  )
          |}
-         |
-         |assemblyMergeStrategy in assembly := {
-         |  case PathList("META-INF", "io.netty.versions.properties") => MergeStrategy.rename
-         |  case x =>
-         |    val oldStrategy = (assemblyMergeStrategy in assembly).value
-         |    oldStrategy(x)
-         |}
-         |
-         |mainClass in assembly := Some("${srcPackage}.Main")
-         |assemblyJarName in assembly := s"$${name.value}-assembly-$${version.value}.jar"
        """.stripMargin
     )
     printWriter.close()
   }
 
 
-  def rootProjectSettings: Unit = {
+  def rootProjectSettings(): Unit = {
     if (new File(s"${rootProjectDir}/build.sbt").exists()) return
     // build.sbt
-    rootProjectBuildSbt
+    rootProjectBuildSbt()
     if (new File(s"${rootProjectDir}/project/build.properties").exists()) return
-    rootProjectBuildProperties
+    rootProjectBuildProperties()
     if (new File(s"${rootProjectDir}/project/plugin.sbt").exists()) return
-    rootProjectPluginSbt
+    rootProjectPluginSbt()
     if (new File(s"${rootProjectDir}/project/Dependencies.scala").exists()) return
     rootProjectDependencies
   }
 
-  def makeRootProjectDir = new File(s"${rootProjectDir}/project/").mkdirs()
+  def makeRootProjectDir(): Boolean = new File(s"${rootProjectDir}/project/").mkdirs()
 
-  def rootProjectDependencies: Unit = {
-    makeRootProjectDir
+  def rootProjectDependencies(): Unit = {
+    makeRootProjectDir()
     val printWriter = new PrintWriter(s"${rootProjectDir}/project/Dependencies.scala", "utf-8")
     printWriter.println(
       s"""
@@ -141,8 +183,8 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
     printWriter.close()
   }
 
-  def rootProjectPluginSbt: Unit = {
-    makeRootProjectDir
+  def rootProjectPluginSbt(): Unit = {
+    makeRootProjectDir()
     val printWriter = new PrintWriter(s"${rootProjectDir}/project/plugin.sbt", "utf-8")
     printWriter.println(
       s"""
@@ -159,14 +201,15 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
     printWriter.close()
   }
 
-  def rootProjectBuildProperties: Unit = {
-    makeRootProjectDir
+  def rootProjectBuildProperties(): Unit = {
+    makeRootProjectDir()
     val printWriter = new PrintWriter(s"${rootProjectDir}/project/build.properties", "utf-8")
     printWriter.println("sbt.version=1.2.8")
     printWriter.close()
   }
 
-  def rootProjectBuildSbt: Unit = {
+  def rootProjectBuildSbt(): Unit = {
+    makeRootProjectDir()
     val printWriter = new PrintWriter(s"${rootProjectDir}/build.sbt", "utf-8")
     printWriter.println(
       s"""
@@ -180,10 +223,14 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |
          |lazy val root = (project in file("."))
          |  .aggregate(
-         |    `${projectName}`
+         |    `${mappingProjectName}`,
+         |    `${appProjectName}`
          |  )
          |
-         |lazy val `${projectName}` = (project in file("${projectName}"))
+         |lazy val `${mappingProjectName}` = (project in file("${mappingProjectName}"))
+         |lazy val `${appProjectName}` = (project in file("${appProjectName}"))
+         |  .dependsOn(`${mappingProjectName}`)
+         |  .enablePlugins(PlayScala)
          |
          |resolvers += "Local Maven" at Path.userHome.asFile.toURI.toURL + ".m2/repository"
          |publishTo := localRepo

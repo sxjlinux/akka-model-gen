@@ -13,7 +13,6 @@
          package="com.apuex.sales.mapping"
          version="1.0.0">
   <imports>
-    <import>com.apuex.sales.message._</import>
     <import>javax.inject._</import>
   </imports>
   <!--

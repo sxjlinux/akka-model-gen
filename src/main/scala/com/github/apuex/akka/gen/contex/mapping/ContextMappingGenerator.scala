@@ -8,16 +8,18 @@ import com.github.apuex.springbootsolution.runtime.TextUtils._
 
 import scala.xml.Node
 
-object ContextMapping extends App {
-  val model = MappingLoader(args(0), "mapping")
+class ContextMappingGenerator(mappingFile: String) {
+  val model = MappingLoader(mappingFile)
 
   import model._
 
-  new ProjectGenerator(model).generate()
+  def generate() : Unit = {
+    new ProjectGenerator(model).generate()
+    new ApplicationConfGenerator(model).generate()
+    generateServiceMappings()
+  }
 
-  serviceMappings
-
-  private def serviceMappings: Unit = {
+  private def generateServiceMappings(): Unit = {
     model.xml.child.filter(x => x.label == "service")
       .foreach(x => serviceMapping(x))
   }
@@ -25,7 +27,7 @@ object ContextMapping extends App {
   private def serviceMapping(service: Node): Unit = {
     val from = service.\@("from")
     val to = service.\@("to")
-    val mappingName = cToPascal(s"${from}_${to}_${project}")
+    val mappingName = cToPascal(s"${from}_${to}_${mapping}")
     val printWriter = new PrintWriter(s"${srcDir}/${mappingName}.scala", "utf-8")
     // package definition
     printWriter.println(s"package ${srcPackage}\n")
