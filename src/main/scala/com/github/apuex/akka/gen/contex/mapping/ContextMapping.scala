@@ -1,6 +1,6 @@
 package com.github.apuex.akka.gen.contex.mapping
 
-import java.io.{File, PrintWriter}
+import java.io.PrintWriter
 
 import com.github.apuex.akka.gen.contex.mapping.MappingLoader._
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
@@ -10,13 +10,10 @@ import scala.xml.Node
 
 object ContextMapping extends App {
   val model = MappingLoader(args(0), "mapping")
-  new ProjectGenerator(model).generate()
 
   import model._
 
-  new File(srcDir).mkdirs()
-
-
+  new ProjectGenerator(model).generate()
 
   serviceMappings
 
@@ -24,7 +21,6 @@ object ContextMapping extends App {
     model.xml.child.filter(x => x.label == "service")
       .foreach(x => serviceMapping(x))
   }
-
 
   private def serviceMapping(service: Node): Unit = {
     val from = service.\@("from")

@@ -5,6 +5,7 @@ import java.io.{File, PrintWriter}
 import com.github.apuex.springbootsolution.runtime.SymbolConverters.cToShell
 
 class ProjectGenerator(mappingLoader: MappingLoader) {
+
   import mappingLoader._
 
   def generate(): Unit = {
@@ -13,6 +14,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
   }
 
   def projectSettings: Unit = {
+    new File(srcDir).mkdirs()
     val printWriter = new PrintWriter(s"${projectDir}/build.sbt", "utf-8")
     printWriter.println(
       s"""
