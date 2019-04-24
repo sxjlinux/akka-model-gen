@@ -37,7 +37,7 @@ object ContextMapping extends App {
     // companion object declaration
     printWriter.println(
       s"""
-         |object ${mappingName}{
+         |object ${mappingName} {
          |  def name = "${mappingName}"
          |}
        """.stripMargin)
@@ -48,16 +48,16 @@ object ContextMapping extends App {
          |    with ActorLogging {
          |  implicit val executionContext = context.system.dispatcher
          |  implicit val materializer = ActorMaterializer()
+         |
          |  override def persistenceId: String = ${mappingName}.name
          |
          |  // state
          |  var lastEvent: Option[EventEnvelope] = None
-         |
          """.stripMargin)
 
-    printWriter.println(indent(receiveRecover(service), 2, true))
-    printWriter.println(indent(receiveCommand(service), 2, true))
-    printWriter.println(indent(updateState(service), 2, true))
+    printWriter.println(s"${indent(receiveRecover(service), 2, true)}\n")
+    printWriter.println(s"${indent(receiveCommand(service), 2, true)}\n")
+    printWriter.println(s"${indent(updateState(service), 2, true)}\n")
 
     // end class declaration
     printWriter.println("}")
@@ -70,6 +70,7 @@ object ContextMapping extends App {
        |  case SnapshotOffer(metadata: SnapshotMetadata, snapshot: EventEnvelope) =>
        |    lastEvent = Some(snapshot)
        |  case _: RecoveryCompleted =>
+       |    // TODO: connect to source service and start event subscription.
        |  case x =>
        |    updateState(x)
        |}
@@ -86,6 +87,7 @@ object ContextMapping extends App {
        |    log.info("unhandled command: {}", x)
        |}
      """.stripMargin
+      .trim
   }
   private def updateState(service: Node): String = {
     s"""
