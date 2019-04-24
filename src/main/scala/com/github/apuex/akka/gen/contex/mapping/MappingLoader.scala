@@ -6,9 +6,9 @@ import _root_.scala.xml.parsing._
 import scala.xml._
 
 object MappingLoader {
-  def apply(fileName: String, projectName: String): MappingLoader = {
+  def apply(fileName: String, project: String): MappingLoader = {
     val factory = new NoBindingFactoryAdapter
-    new MappingLoader(factory.load(fileName), projectName)
+    new MappingLoader(factory.load(fileName), project)
   }
 
   def apply(xml: Node, projectName: String): MappingLoader = new MappingLoader(xml, projectName)
@@ -32,16 +32,20 @@ object MappingLoader {
   }
 }
 
-class MappingLoader(val xml: Node, val projectName: String) {
+class MappingLoader(val xml: Node, val project: String) {
   val modelName = xml.\@("name")
   val modelPackage = xml.\@("package")
-  val projectRoot = s"${System.getProperty("project.root", "target/generated")}"
-  val projectDir = s"${projectRoot}/${cToShell(modelName)}/${cToShell(modelName)}-${cToShell(projectName)}"
+  val modelVersion = xml.\@("version")
+  val outputDir = s"${System.getProperty("output.dir", "target/generated")}"
+  val rootProjectName = s"${cToShell(modelName)}"
+  val rootProjectDir = s"${outputDir}/${rootProjectName}"
+  val projectName = s"${cToShell(modelName)}-${cToShell(project)}"
+  val projectDir = s"${rootProjectDir}/${projectName}"
   val srcPackage = s"${modelPackage}.${cToCamel(modelName)}"
   val srcDir = s"${projectDir}/src/main/scala/${srcPackage.replace('.', '/')}"
   val symboConverter = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}")
     "new IdentityConverter()" else "new CamelToCConverter()"
-  val docsDir = s"${projectRoot}/${cToShell(modelName)}/docs"
-  val classNamePostfix = s"${cToPascal(projectName)}"
+  val docsDir = s"${rootProjectDir}/docs"
+  val classNamePostfix = s"${cToPascal(project)}"
   val hyphen = if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-"
 }

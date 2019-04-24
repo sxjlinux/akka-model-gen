@@ -10,12 +10,13 @@ import scala.xml.Node
 
 object ContextMapping extends App {
   val model = MappingLoader(args(0), "mapping")
+  new ProjectGenerator(model).generate()
 
   import model._
 
   new File(srcDir).mkdirs()
 
-  project
+
 
   serviceMappings
 
@@ -28,7 +29,7 @@ object ContextMapping extends App {
   private def serviceMapping(service: Node): Unit = {
     val from = service.\@("from")
     val to = service.\@("to")
-    val mappingName = cToPascal(s"${from}_${to}_${projectName}")
+    val mappingName = cToPascal(s"${from}_${to}_${project}")
     val printWriter = new PrintWriter(s"${srcDir}/${mappingName}.scala", "utf-8")
     // package definition
     printWriter.println(s"package ${srcPackage}\n")
@@ -77,6 +78,7 @@ object ContextMapping extends App {
      """.stripMargin
       .trim
   }
+
   private def receiveCommand(service: Node): String = {
     s"""
        |override def receiveCommand: Receive = {
@@ -89,6 +91,7 @@ object ContextMapping extends App {
      """.stripMargin
       .trim
   }
+
   private def updateState(service: Node): String = {
     s"""
        |private def updateState: (Any => Unit) = {
@@ -98,8 +101,5 @@ object ContextMapping extends App {
        |}
      """.stripMargin
       .trim
-  }
-  private def project : Unit = {
-
   }
 }

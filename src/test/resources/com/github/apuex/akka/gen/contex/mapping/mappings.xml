@@ -1,15 +1,29 @@
 <?xml version="1.0"?>
+<!--
+  All service mappings in a specific mapping project
+
+  @name    - project and package name
+  @from    - project dependencies
+  @to      - project dependencies
+  @package - base package name
+-->
 <mapping name="bc1_to_bc2"
          from="sales"
          to="inventory"
-         package="com.apuex.sales.mapping">
+         package="com.apuex.sales.mapping"
+         version="1.0.0">
   <imports>
-    <import>com.apuex.sales.message.*</import>
+    <import>com.apuex.sales.message._</import>
+    <import>akka.persistence.query._</import>
+    <import>javax.inject._</import>
   </imports>
   <!--
     message flow from order to inventory
     - subscribe events from order,
     - and then map to service calls to inventory.
+
+    @from - from service, used as event source subscription
+    @to   - to service, used as destination
   -->
   <service from="order" to="inventory">
     <imports>
@@ -17,6 +31,8 @@
     </imports>
     <!--
       mapping rules for each type of message
+
+      @message - imput message
     -->
     <map message="pay_order_evt">
       <and-then>

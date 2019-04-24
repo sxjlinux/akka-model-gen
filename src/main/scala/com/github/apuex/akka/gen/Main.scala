@@ -3,7 +3,7 @@ package com.github.apuex.akka.gen
 import com.github.apuex.akka.gen.contex.mapping.ContextMapping
 
 object Main extends App {
-  if(args.length == 0) {
+  if (args.length == 0) {
     println("Usage:\n" +
       "\tjava -jar <this jar> <arg list>")
   } else {
