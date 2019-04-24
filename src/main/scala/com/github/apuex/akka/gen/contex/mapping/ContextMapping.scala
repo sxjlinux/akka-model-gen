@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 
 import com.github.apuex.akka.gen.contex.mapping.MappingLoader._
 import com.github.apuex.springbootsolution.runtime.SymbolConverters._
+import com.github.apuex.springbootsolution.runtime.TextUtils._
 
 import scala.xml.Node
 
@@ -30,7 +31,7 @@ object ContextMapping extends App {
     val mappingName = cToPascal(s"${from}_${to}_${projectName}")
     val printWriter = new PrintWriter(s"${srcDir}/${mappingName}.scala", "utf-8")
     // package definition
-    printWriter.println(s"package ${srcPackage}")
+    printWriter.println(s"package ${srcPackage}\n")
     // imports
     printWriter.println(s"${importPackagesForService(model.xml, service)}")
     // companion object declaration
@@ -54,11 +55,48 @@ object ContextMapping extends App {
          |
          """.stripMargin)
 
+    printWriter.println(indent(receiveRecover(service), 2, true))
+    printWriter.println(indent(receiveCommand(service), 2, true))
+    printWriter.println(indent(updateState(service), 2, true))
+
     // end class declaration
     printWriter.println("}")
     printWriter.close()
   }
 
+  private def receiveRecover(service: Node): String = {
+    s"""
+       |override def receiveRecover: Receive = {
+       |  case SnapshotOffer(metadata: SnapshotMetadata, snapshot: EventEnvelope) =>
+       |    lastEvent = Some(snapshot)
+       |  case _: RecoveryCompleted =>
+       |  case x =>
+       |    updateState(x)
+       |}
+     """.stripMargin
+      .trim
+  }
+  private def receiveCommand(service: Node): String = {
+    s"""
+       |override def receiveCommand: Receive = {
+       |  case x: EventEnvelope =>
+       |    // TODO: process event
+       |    persist(x)(updateState)
+       |  case x =>
+       |    log.info("unhandled command: {}", x)
+       |}
+     """.stripMargin
+  }
+  private def updateState(service: Node): String = {
+    s"""
+       |private def updateState: (Any => Unit) = {
+       |  case x: EventEnvelope =>
+       |    lastEvent = Some(x)
+       |    log.info("unhandled update state: {}", x)
+       |}
+     """.stripMargin
+      .trim
+  }
   private def project : Unit = {
 
   }

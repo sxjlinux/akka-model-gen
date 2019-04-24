@@ -18,6 +18,7 @@ object MappingLoader {
        |${importPackages(service)}
        |${importPackages(model)}
      """.stripMargin
+      .trim
   }
 
   def importPackages(node: Node): String = {
