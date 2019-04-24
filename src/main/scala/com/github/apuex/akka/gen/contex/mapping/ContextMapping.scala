@@ -14,22 +14,52 @@ object ContextMapping extends App {
 
   new File(srcDir).mkdirs()
 
+  project
+
   serviceMappings
 
-  private def serviceMappings = {
+  private def serviceMappings: Unit = {
     model.xml.child.filter(x => x.label == "service")
       .foreach(x => serviceMapping(x))
   }
 
 
   private def serviceMapping(service: Node): Unit = {
-    val mappingName = cToPascal(s"${service.\@("from")}_${service.\@("to")}_${projectName}")
-    val printWriter = new PrintWriter(s"${docsDir}/${mappingName}.scala", "utf-8")
+    val from = service.\@("from")
+    val to = service.\@("to")
+    val mappingName = cToPascal(s"${from}_${to}_${projectName}")
+    val printWriter = new PrintWriter(s"${srcDir}/${mappingName}.scala", "utf-8")
     // package definition
     printWriter.println(s"package ${srcPackage}")
     // imports
-    printWriter.println(s"package ${importPackagesForService(model.xml, service)}")
+    printWriter.println(s"${importPackagesForService(model.xml, service)}")
+    // companion object declaration
+    printWriter.println(
+      s"""
+         |object ${mappingName}{
+         |  def name = "${mappingName}"
+         |}
+       """.stripMargin)
+    // begin class declaration
+    printWriter.println(
+      s"""class ${mappingName} @Inject()(@Named("${cToCamel(from)}") ${cToCamel(from)}: ActorRef, @Named("${cToCamel(to)}") ${cToCamel(to)}: ActorRef)
+         |  extends PersistentActor
+         |    with ActorLogging {
+         |  implicit val executionContext = context.system.dispatcher
+         |  implicit val materializer = ActorMaterializer()
+         |  override def persistenceId: String = ${mappingName}.name
+         |
+         |  // state
+         |  var lastEvent: Option[EventEnvelope] = None
+         |
+         """.stripMargin)
+
+    // end class declaration
+    printWriter.println("}")
     printWriter.close()
   }
 
+  private def project : Unit = {
+
+  }
 }

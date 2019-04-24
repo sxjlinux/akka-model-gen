@@ -21,12 +21,12 @@ class MappingLoaderSpec extends FlatSpec with Matchers {
     classNamePostfix should be(s"Mapping")
     hyphen should be(if ("microsoft" == s"${System.getProperty("symbol.naming", "microsoft")}") "" else "-")
 
-    importPackages(xml) should be("com.apuex.sales.message._")
+    importPackages(xml) should be("import com.apuex.sales.message._")
 
     val expectedImports =
       s"""
-         |com.google.protobuf.timestamp.Timestamp
-         |com.apuex.sales.message._
+         |import com.google.protobuf.timestamp.Timestamp
+         |import com.apuex.sales.message._
      """.stripMargin
           .trim
     xml.child.filter(x => x.label == "service")
