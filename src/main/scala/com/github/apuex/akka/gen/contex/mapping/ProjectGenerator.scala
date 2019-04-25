@@ -16,7 +16,7 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
 
   def applicationProjectSettings(): Unit = {
     if (new File(s"${appProjectDir}/build.sbt").exists()) return
-    new File(srcDir).mkdirs()
+    new File(appProjectDir).mkdirs()
     val printWriter = new PrintWriter(s"${appProjectDir}/build.sbt", "utf-8")
     printWriter.println(
       s"""
@@ -85,9 +85,10 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
          |  Seq(
          |    ${cToShell(xml.\@("from"))},
          |    ${cToShell(xml.\@("to"))},
+         |    ws,
          |    akkaPersistence,
          |    akkaPersistenceCassandra,
-         |    googleGuice,
+         |    playGuice,
          |    scalaTest      % Test
          |  )
          |}
@@ -98,14 +99,14 @@ class ProjectGenerator(mappingLoader: MappingLoader) {
 
 
   def rootProjectSettings(): Unit = {
-    if (new File(s"${rootProjectDir}/build.sbt").exists()) return
+    if (!new File(s"${rootProjectDir}/build.sbt").exists())
     // build.sbt
     rootProjectBuildSbt()
-    if (new File(s"${rootProjectDir}/project/build.properties").exists()) return
+    if (!new File(s"${rootProjectDir}/project/build.properties").exists())
     rootProjectBuildProperties()
-    if (new File(s"${rootProjectDir}/project/plugin.sbt").exists()) return
+    if (!new File(s"${rootProjectDir}/project/plugin.sbt").exists())
     rootProjectPluginSbt()
-    if (new File(s"${rootProjectDir}/project/Dependencies.scala").exists()) return
+    if (!new File(s"${rootProjectDir}/project/Dependencies.scala").exists())
     rootProjectDependencies
   }
 

@@ -16,6 +16,7 @@ class ContextMappingGenerator(mappingFile: String) {
   def generate() : Unit = {
     new ProjectGenerator(model).generate()
     new ApplicationConfGenerator(model).generate()
+    new ServiceGenerator(model).generate()
     generateServiceMappings()
   }
 
@@ -42,7 +43,7 @@ class ContextMappingGenerator(mappingFile: String) {
        """.stripMargin)
     // begin class declaration
     printWriter.println(
-      s"""class ${mappingName} @Inject()(@Named("${cToCamel(from)}") ${cToCamel(from)}: ActorRef, @Named("${cToCamel(to)}") ${cToCamel(to)}: ActorRef)
+      s"""class ${mappingName} @Inject()(${cToCamel(from)}: ActorRef, @Named("${cToCamel(to)}") ${cToCamel(to)}: ActorRef)
          |  extends PersistentActor
          |    with ActorLogging {
          |  implicit val executionContext = context.system.dispatcher

@@ -6,14 +6,14 @@ scalaVersion := "2.12.8"
 publishTo := Some(Resolver.file("file",  new File(Path.userHome.absolutePath+"/.m2/repository")))
 
 libraryDependencies ++= {
-  val jodaTimeVersion = "2.9.9"
+  val jodaTimeVersion = "2.10.1"
   Seq(
     "com.github.apuex.springbootsolution" %% "runtime"     % "1.0.7",
-    "org.scala-lang.modules" %% "scala-xml"                % "1.0.6",
-    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4",
-    "org.scala-lang.modules" %% "scala-swing"              % "2.0.0-M2",
+    "org.scala-lang.modules" %% "scala-xml"                % "1.2.0",
+    "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+    "org.scala-lang.modules" %% "scala-swing"              % "2.1.1",
     "joda-time"              %  "joda-time"                % jodaTimeVersion,
-    "org.scalatest"          %% "scalatest"                % "3.0.1"           % "test"
+    "org.scalatest"          %% "scalatest"                % "3.0.7"           % "test"
   )
 }
 
