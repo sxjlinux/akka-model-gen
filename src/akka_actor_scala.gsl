@@ -22,6 +22,7 @@ import akka.actor._
 import akka.event._
 import akka.pattern._
 import akka.persistence._
+import akka.persistence.journal.Tagged
 import akka.util._
 import akka.util.Timeout._
 
@@ -40,17 +41,17 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
   override def persistenceId: String = s"${self.path.name}"
   implicit def requestTimeout: Timeout = FiniteDuration(20, SECONDS)
   implicit def executionContext: ExecutionContext = context.dispatcher
+  val tag = Set(context.system.name)
 
   $(scala_output_define_fields(entity))
 
   override def receiveRecover: Receive = {
-    case evt: Event =>
-      updateState(evt)
     case SnapshotOffer(_, x: $(entity.name:Pascal)Vo) =>
       $(scala_output_set_pk_values(entity, 'x.'))
       $(scala_output_set_field_values(entity, 'x.'))
     case x: RecoveryCompleted =>
-    case x => log.info("RECOVER: {} {}", this, x)
+    case x =>
+      updateStateWithTag(x)
   }
 
   override def receiveCommand: Receive = {
@@ -58,19 +59,19 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
       if(isValid()) {
         sender() ! ResponseVo(ALREADY_EXISTS, Some("$(entity.name:Pascal) already exists."))
       } else {
-        persist(Create$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.')))) (updateState)
+        persistWithTag(Create$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.'))))
       }
     case cmd: Update$(entity.name:Pascal)Cmd =>
       if(!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        persist(Update$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.')))) (updateState)
+        persistWithTag(Update$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_field_name_list(entity, 0, 'cmd.'))))
       }
     case cmd: Delete$(entity.name:Pascal)Cmd =>
       if(!isValid()) {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       } else {
-        persist(Delete$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')))) (updateState)
+        persistWithTag(Delete$(entity.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.'))))
       }
     case _: Retrieve$(entity.name:Pascal)Cmd =>
       if (!isValid()) {
@@ -83,20 +84,20 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .    if (field.type = "array" | field.type = "map") & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case cmd: Add$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Add$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
+        persistWithTag(Add$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
     case cmd: Remove$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Remove$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
+        persistWithTag(Remove$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
 .    elsif !defined(pk->field(name = theField.name)) & !(defined(field.transient) & field.transient="true") & (defined(field.aggregation) & field.aggregation = "true")
     case cmd: Change$(field.name:Pascal)Cmd =>
       if (isValid()) {
-        persist(Change$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))(updateState)
+        persistWithTag(Change$(field.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.')), $(scala_output_field_name(field, 'cmd.'))))
       } else {
         sender() ! ResponseVo(NOT_EXIST, Some("$(entity.name:Pascal) not exists."))
       }
@@ -122,7 +123,7 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
     case cmd: $(message.name:Pascal)Cmd =>
       // TODO: Un-implemented.
 .  if !(defined(message.transient) & transient = "true")
-      persist($(message.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.'))$(extra_fields:no)))(updateState)
+      persistWithTag($(message.name:Pascal)Evt(cmd.userId, $(scala_output_key_name_list(entity, 'cmd.'))$(extra_fields:no)))
 .  endif
 .  if defined(message->request)
 .    request = message->request
@@ -140,7 +141,16 @@ class $(entity.name:Pascal)($(entity.name:Camel)Tx: $(entity.name:Pascal)Tx$(tx_
 .endfor
   }
 
-  private def updateState: (Event => Unit) = {
+  private def persistWithTag(e: Any): Unit = persist(Tagged(e, tag))(updateStateWithTag)
+
+  private def updateStateWithTag: (Any => Unit) = {
+    case Tagged(e, _) =>
+      updateState(e)
+    case e =>
+      updateState(e)
+  }
+
+  private def updateState: (Any => Unit) = {
     case evt: Create$(entity.name:Pascal)Evt =>
       $(scala_output_set_pk_values(entity, 'evt.'))
       $(scala_output_set_field_values(entity, 'evt.'))
