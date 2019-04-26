@@ -19,6 +19,7 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
 
 
   def generate(): Unit = {
+    generateRequestUtil()
     collectServiceCalls(xml, serviceCalls)
     serviceCalls.foreach(x => generateService(x))
   }
