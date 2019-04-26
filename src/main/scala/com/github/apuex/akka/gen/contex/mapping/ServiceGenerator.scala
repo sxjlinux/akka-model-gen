@@ -8,13 +8,13 @@ import com.github.apuex.springbootsolution.runtime.TextUtils.indent
 
 import scala.collection.mutable
 import scala.xml._
-import _root_.scala.xml.parsing._
 
 class ServiceGenerator(mappingLoader: MappingLoader) {
 
   import mappingLoader._
 
   case class OperationDescription(name: String, req: String, resp: String)
+
   val serviceCalls: mutable.Map[String, mutable.Set[OperationDescription]] = mutable.Map()
 
 
@@ -54,20 +54,30 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
     // companion object declaration
     printWriter.println(
       s"""
+         |import com.apuex.sales.mapping.bc1ToBc2.${serviceName}._
+         |import javax.inject._
+         |import play.api.Configuration
          |import play.api.libs.json.Json
          |import play.api.libs.ws._
          |
-         |import scala.concurrent.Future
          |import scala.concurrent.duration._
+         |import scala.concurrent._
          |
          |object ${serviceName} {
          |  def name = "${serviceName}"
+         |  // TODO: implement case classes.
          |}
        """.stripMargin)
     // begin class declaration
     printWriter.println(
-      s"""class ${serviceName} @Inject()(baseUrl: String, ws: WSClient)
+      s"""class ${serviceName} @Inject()(config: Configuration, ws: WSClient, implicit val ec: ExecutionContext)
          |  extends ${jsonSupportName} {
+         |  val baseUrl: String = config.underlying.getString("order-service.base-url")
+         |  val timeout: Duration = config.underlying.getDuration("order-service.request-timeout").asInstanceOf
+         |  val requestUtil = new RequestUtil(baseUrl, timeout, ws)
+         |  import requestUtil._
+         |  // TODO: implement json format for case classes.
+         |
          """.stripMargin)
 
     service._2.foreach(m => {
@@ -79,11 +89,57 @@ class ServiceGenerator(mappingLoader: MappingLoader) {
   }
 
   def generateServiceOperation(service: String, operation: OperationDescription): String = {
-    val req = if(operation.req.isEmpty) s"${cToPascal(s"${operation.name}_${service}_cmd")}" else cToPascal(operation.req)
-    val resp = if(operation.resp.isEmpty) "Unit" else cToPascal(operation.resp)
-    s"""
-       |def ${cToCamel(operation.name)}(cmd: ${req}): ${resp} = ???
+    val req = if (operation.req.isEmpty) s"${cToPascal(s"${operation.name}_${service}_cmd")}" else cToPascal(s"${operation.req}_cmd")
+    val resp = if (operation.resp.isEmpty) "Unit" else cToPascal(s"${operation.resp}_vo")
+    if ("Unit" == resp)
+      s"""
+         |def ${cToCamel(operation.name)}(cmd: ${req}): ${resp} = {
+         |  Await.result(
+         |    request("${cToCamel(operation.name)}", "application/json")
+         |      .post(Json.toJson(cmd)),
+         |    timeout)
+         |}
      """.stripMargin
-      .trim
+        .trim
+    else
+      s"""
+         |def ${cToCamel(operation.name)}(cmd: ${req}): ${resp} = {
+         |  Await.result(
+         |    request("${cToCamel(operation.name)}", "application/json")
+         |      .post(Json.toJson(cmd))
+         |      .map({ response =>
+         |        response.json.validate[ProductVo]
+         |          .fold(
+         |            errors => throw new RuntimeException(errors.toString()),
+         |            x => x
+         |          )
+         |      }),
+         |    timeout)
+         |}
+     """.stripMargin
+        .trim
+  }
+
+  def generateRequestUtil(): Unit = {
+    val printWriter = new PrintWriter(s"${srcDir}/RequestUtil.scala", "utf-8")
+    // class declaration
+    printWriter.println(
+      s"""package ${srcPackage}
+         |
+         |import play.api.libs.ws.{WSClient, WSRequest}
+         |
+         |import scala.concurrent.duration.Duration
+         |
+         |class RequestUtil(val baseUrl: String, timeout: Duration, ws: WSClient) {
+         |
+         |  def request(uri: String, accept: String): WSRequest = {
+         |    ws.url(s"$${baseUrl}/$${uri}")
+         |      .addHttpHeaders("Accept" -> accept)
+         |      .withFollowRedirects(true)
+         |      .withRequestTimeout(timeout)
+         |  }
+         |}
+         """.stripMargin)
+    printWriter.close()
   }
 }
