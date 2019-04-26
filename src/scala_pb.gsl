@@ -14,7 +14,9 @@ option (scalapb.options) = {
 };
 .message_package = "$(model.package).message"
 package $(message_package);
-
+option java_package = "$(message_package)";
+option java_outer_classname = "$(model_name:Pascal)Proto";
+option java_multiple_files = true;
 
 .for entity
 .if (!defined(transient) | !(transient = "true"))
