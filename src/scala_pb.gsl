@@ -19,7 +19,6 @@ option java_outer_classname = "$(model.name:Pascal)Proto";
 option java_multiple_files = true;
 
 .for entity
-.if (!defined(transient) | !(transient = "true"))
 . default_extends_class = "$(message_package).ValueObject"
 . extends_class = default_extends_class
 .  if defined(entity.extendsClass)
@@ -446,7 +445,6 @@ message $(message.name:Pascal)Evt {
 
 .endif
 .endfor
-.endif
 .endfor
 
 .include "$(pkgdir)/include-messages.txt"
