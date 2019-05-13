@@ -1,32 +1,16 @@
 package com.github.apuex.akka.gen
 
-import com.github.apuex.akka.gen.util.Dependency
-
-import scala.xml.{Node, Text}
+import com.github.apuex.akka.gen.contex.mapping.ContextMappingGenerator
 
 object Main extends App {
   if (args.length == 0) {
-    println("Usage:\n <cmd> <xml file>")
-    System.exit(-1)
+    println("Usage:\n" +
+      "\tjava -jar <this jar> <arg list>")
+  } else {
+    args(0) match {
+      case "generate-context-mapping" => new ContextMappingGenerator(args.drop(1)(0)).generate()
+      case c =>
+        println(s"unknown command '${c}'")
+    }
   }
-
-  val xml: Node = ModelLoader(args(0)).xml
-
-  xml.child.filter(x => x.label == "entity")
-    .foreach(x => {
-      println(s"${x.label} ${x.attribute("name")}")
-      x.child.filter(x => x.label == "field")
-        .foreach(x => {
-          println("  " + x.label)
-          println("    " + x.attribute("name"))
-        })
-    })
-
-  xml.child.filter(x => x.label == "entity")
-    .foreach(x => {
-      x.child.filter(x => x.label == "field")
-        .foreach(x => {
-          println(x.attribute("name") == Some(Text("product_id")))
-        })
-    })
 }
