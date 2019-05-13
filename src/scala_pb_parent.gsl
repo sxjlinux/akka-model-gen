@@ -52,6 +52,7 @@ trait ShardingEntityCommand extends Command {
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 package $(class_package)
+import com.google.protobuf.timestamp.Timestamp
 
 trait $(entity.name:Pascal)Command extends $(class_package).ShardingEntityCommand {
   $(scalapb_parent_key_fields(entity))
@@ -67,6 +68,7 @@ trait $(entity.name:Pascal)Command extends $(class_package).ShardingEntityComman
  ** This file is 100% ***GENERATED***, DO NOT EDIT! **
  *****************************************************/
 package $(class_package)
+import com.google.protobuf.timestamp.Timestamp
 
 trait $(entity.name:Pascal)Event extends Event {
   $(scalapb_parent_key_fields(entity))
