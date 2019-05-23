@@ -11,7 +11,7 @@
 package $(class_package)
 
 import $(model.package).message._
-import com.wincom.dcim.util.CollectionCoverter._
+import $(model.package).util.CollectionCoverter._
 import $(model.package).util.DateFormat._
 import $(model.package).util.EnumConvert._
 import $(model.package).util.Parser._
