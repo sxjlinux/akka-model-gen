@@ -8,10 +8,10 @@
 ######################################################
 
 .for entity
-.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "true")
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "false")
 .api_path = "$(entity.name:cobol)"
 ->      /api/$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
-.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "true")
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "false")
 .endfor
 .close
 .output "$(resdir)/rest.routes"
@@ -20,10 +20,10 @@
 ######################################################
 
 .for entity
-.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "true")
+.if !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "false")
 .api_path = "$(entity.name:cobol)"
 ->      /$(api_path:lower)           $(class_package).$(entity.name:Pascal)Router
-.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "true")
+.endif # !(defined(entity.enum) & entity.enum = "true") & !defined(entity.aggregationTo) & !(defined(entity.generate) & entity.generate = "false")
 .endfor
 .close
 .endtemplate
